@@ -1,0 +1,20 @@
+{
+  "dependencies": {
+    "express": "^4.21.2",
+    "morgan": "^1.10.0",
+    "nodemon": "^3.1.9",
+    "pug": "^3.0.3"
+  },
+  "name": "hospital",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node src/server.js",
+    "dev": "npx nodemon src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
+}
