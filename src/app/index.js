@@ -4,7 +4,7 @@ const router = require("./router/router");
 const morgan = require("morgan");
 const publicPath = __dirname.replace("app", "public");
 
-app.set("port", process.env.PORT || 4040);
+app.set("port", process.env.PORT || 3030);
 app.set("views", `${publicPath}/templates`);
 app.set("view engine", "pug");
 
