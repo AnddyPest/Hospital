@@ -2,27 +2,40 @@ body,
 html {
   height: 100%;
   margin: 0;
+  display: flex;
 }
 .top-navbar {
   height: 10%;
   width: 100%;
+  position: fixed;
 }
 .left-navbar {
   height: calc(90% - 10%);
   width: 15%;
+  min-width: 200px;
   position: fixed;
   top: 10%;
   overflow-y: auto;
 }
 .workspace {
-  margin-left: 20%;
-  margin-top: 10%;
+  position: absolute;
+  left: 16%;
+  top: 10%;
   height: calc(90% - 10%);
-  overflow-y: auto;
 }
 .footer {
   height: 10%;
   width: 100%;
   position: fixed;
   bottom: 0;
+}
+
+@media (max-width: 1400px) {
+  .left-navbar {
+    width: 200px;
+  }
+  .workspace {
+    left: 220px;
+    top: 10%;
+  }
 }

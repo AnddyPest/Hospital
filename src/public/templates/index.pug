@@ -63,25 +63,56 @@ html(lang="en")
           div.collapse.show#collapsePersonal(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
-                li.list-group-item Medicos
-                li.list-group-item Enfermeros
-                li.list-group-item Administrativos
-                li.list-group-item Mantenimiento 
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Medicos
+                  i.fas.fa-solid.fa-stethoscope
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Enfermeros
+                  i.fas.fa-solid.fa-user-nurse
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Administrativos
+                  i.fas.fa-solid.fa-briefcase
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Mantenimiento
+                  i.fas.fa-solid.fa-tools
 
         // Sección Gestión
         div.accordion-item
           h2.accordion-header
-            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion") Gestion
-              Gestion
+            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion")
+              | Gestion
+              i.fas.fa-solid.fa-cogs.ms-3
           div.collapse#collapseGestion(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
-                li.list-group-item Camas
-                li.list-group-item Diagnosis
-                li.list-group-item Tratamientos
-                li.list-group-item Cirugías
-                li.list-group-item Equipos
-                li.list-group-item Medicamentos
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Camas
+                  i.fas.fa-solid.fa-bed
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Diagnosis
+                  i.fas.fa-solid.fa-clipboard-list
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Tratamiento
+                  i.fas.fa-solid.fa-syringe
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Cirugias
+                  i.fas.fa-solid.fa-file
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Equipos
+                  i.fas.fa-solid.fa-notes-medical
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Farmacia
+                  i.fas.fa-solid.fa-capsules
                 li.list-group-item Proveedores
         // Sección Pacientes
         div.accordion-item
