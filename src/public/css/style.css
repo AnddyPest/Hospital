@@ -1,0 +1,28 @@
+body,
+html {
+  height: 100%;
+  margin: 0;
+}
+.top-navbar {
+  height: 10%;
+  width: 100%;
+}
+.left-navbar {
+  height: calc(90% - 10%);
+  width: 20%;
+  position: fixed;
+  top: 10%;
+  overflow-y: auto;
+}
+.workspace {
+  margin-left: 20%;
+  margin-top: 10%;
+  height: calc(90% - 10%);
+  overflow-y: auto;
+}
+.footer {
+  height: 10%;
+  width: 100%;
+  position: fixed;
+  bottom: 0;
+}

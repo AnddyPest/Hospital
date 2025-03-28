@@ -1,1 +1,59 @@
-h1 Hola PUG
+doctype html
+html(lang="en")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport", content="width=device-width, initial-scale=1.0")
+    title Hospital Dashboard
+    link(rel="stylesheet", href="/css/bootstrap.min.css")
+    script(src="/js/bootstrap.bundle.min.js")
+    link(rel="stylesheet", href="/css/style.css")
+   
+  body
+    // Barra de navegación superior
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light.top-navbar
+      a.navbar-brand(href="#") Hospital
+      button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
+        span.navbar-toggler-icon
+      div.collapse.navbar-collapse#navbarNav
+        ul.navbar-nav
+          li.nav-item
+            a.nav-link.active(href="#") Home
+          li.nav-item
+            a.nav-link(href="#") Acerca del Hospital
+          li.nav-item
+            a.nav-link(href="#") Usuario
+
+    // Barra de navegación lateral
+    div.bg-light.left-navbar
+      h5 Sidebar
+      div.accordion#accordionSidebar
+        // Sección Personal
+        div.accordion-item
+          h2.accordion-header
+            button.accordion-button(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="true", aria-controls="collapsePersonal")
+              Personal
+          div.collapse.show#collapsePersonal(data-bs-parent="#accordionSidebar")
+            div.accordion-body
+              ul.list-group
+                li.list-group-item Personal Item 1
+                li.list-group-item Personal Item 2...
+        // Sección Gestión
+        div.accordion-item
+          h2.accordion-header
+            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion")
+              Gestion
+          div.collapse#collapseGestion(data-bs-parent="#accordionSidebar")
+            div.accordion-body
+              ul.list-group
+                li.list-group-item Gestion Item 1
+                li.list-group-item Gestion Item 2...
+
+    // Área de trabajo
+    div.workspace
+      div.p-4
+        h1 Contenido del workspace
+        p Area de trabajo principal
+
+    // Pie de página
+    footer.bg-light.text-center.py-3.footer
+      p.mb-0 Footer Content
