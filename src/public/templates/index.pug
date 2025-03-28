@@ -5,48 +5,97 @@ html(lang="en")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
     title Hospital Dashboard
     link(rel="stylesheet", href="/css/bootstrap.min.css")
-    script(src="/js/bootstrap.bundle.min.js")
+    link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
     link(rel="stylesheet", href="/css/style.css")
+    script(src="/js/bootstrap.bundle.min.js")
    
   body
     // Barra de navegación superior
-    nav.navbar.navbar-expand-lg.navbar-light.bg-light.top-navbar
-      a.navbar-brand(href="#") Hospital
+    nav.navbar.navbar-expand-lg.navbar-light.bg-light.fixed-top.top-navbar
+      // Logo y título "Hospital" alineados a la izquierda
+      div.d-flex.align-items-center
+        i.fas.fa-solid.fa-hospital.ms-4.me-3.fs-1 
+        a.navbar-brand.fs-1(href="#") Hospital
+
+      // Botón de colapso para dispositivos pequeños
       button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
         span.navbar-toggler-icon
+
+      // Contenido del navbar
       div.collapse.navbar-collapse#navbarNav
-        ul.navbar-nav
+        ul.navbar-nav.ms-auto
+          // Icono de mensajería
           li.nav-item
-            a.nav-link.active(href="#") Home
+            a.nav-link(href="#")
+              i.fas.fa-envelope
+              span.ms-1 Buzon de Correo
+
+          // Foto y nombre del usuario logueado
+          li.nav-item.dropdown
+            a.nav-link.dropdown-toggle(href="#", id="userDropdown", role="button", data-bs-toggle="dropdown", aria-expanded="false")
+              i.fas.fa-solid.fa-user  Usuario
+            ul.dropdown-menu.dropdown-menu-end(aria-labelledby="userDropdown")
+              li
+                a.dropdown-item(href="#") Perfil
+              li
+                a.dropdown-item(href="#") Configuración
+              li
+                hr.dropdown-divider
+              li
+                a.dropdown-item(href="#") Cerrar sesión
+
+          // Icono de Home
           li.nav-item
-            a.nav-link(href="#") Acerca del Hospital
-          li.nav-item
-            a.nav-link(href="#") Usuario
+            a.nav-link(href="#")
+              i.fas.fa-home  Inicio
 
     // Barra de navegación lateral
     div.bg-light.left-navbar
-      h5 Sidebar
+      h5.text-center Menu
       div.accordion#accordionSidebar
         // Sección Personal
         div.accordion-item
           h2.accordion-header
-            button.accordion-button(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="true", aria-controls="collapsePersonal")
-              Personal
+            button.accordion-button(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="true", aria-controls="collapsePersonal") 
+              | Personal 
+              i.fas.fa-solid.fa-users.ms-2
+              
           div.collapse.show#collapsePersonal(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
-                li.list-group-item Personal Item 1
-                li.list-group-item Personal Item 2...
+                li.list-group-item Medicos
+                li.list-group-item Enfermeros
+                li.list-group-item Administrativos
+                li.list-group-item Mantenimiento 
+
         // Sección Gestión
         div.accordion-item
           h2.accordion-header
-            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion")
+            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion") Gestion
               Gestion
           div.collapse#collapseGestion(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
-                li.list-group-item Gestion Item 1
-                li.list-group-item Gestion Item 2...
+                li.list-group-item Camas
+                li.list-group-item Diagnosis
+                li.list-group-item Tratamientos
+                li.list-group-item Cirugías
+                li.list-group-item Equipos
+                li.list-group-item Medicamentos
+                li.list-group-item Proveedores
+        // Sección Pacientes
+        div.accordion-item
+          h2.accordion-header
+            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePacientes", aria-expanded="false", aria-controls="collapsePacientes") Pacientes
+              Pacientes
+          div.collapse#collapsePacientes(data-bs-parent="#accordionSidebar")
+            div.accordion-body
+              ul.list-group
+                li.list-group-item Carga
+                li.list-group-item Historia Clinica
+                li.list-group-item Turnos
+                li.list-group-item Prescripciones
+             
 
     // Área de trabajo
     div.workspace

@@ -9,7 +9,7 @@ html {
 }
 .left-navbar {
   height: calc(90% - 10%);
-  width: 20%;
+  width: 15%;
   position: fixed;
   top: 10%;
   overflow-y: auto;
