@@ -27,13 +27,14 @@ html(lang="en")
           // Icono de mensajería
           li.nav-item.me-2.ms3
             a.nav-link(href="#")
-              i.fas.fa-envelope
-              span.ms-1 Buzon de Correo
+              img(src="/icons/envelope-solid.svg", alt="Prescripciones", class="ms-4", style="width: 20px; height: 20px;")
+              span.ms-2 Buzon de Correo
 
           // Foto y nombre del usuario logueado
           li.nav-item.dropdown.me-2.ms-3
             a.nav-link.dropdown-toggle(href="#", id="userDropdown", role="button", data-bs-toggle="dropdown", aria-expanded="false")
-              i.fas.fa-solid.fa-user  Usuario
+              img(src="/icons/user-solid.svg", alt="Prescripciones", class="ms-4", style="width: 20px; height: 20px;")
+              span.ms-2.me-2 Usuario
             ul.dropdown-menu.dropdown-menu-end(aria-labelledby="userDropdown")
               li
                 a.dropdown-item(href="#") Perfil
@@ -47,7 +48,8 @@ html(lang="en")
           // Icono de Home
           li.nav-item.ms-3.me-5
             a.nav-link(href="#")
-              i.fas.fa-home  Inicio
+              img(src="/icons/house-solid.svg", alt="Prescripciones", class="ms-4", style="width: 20px; height: 20px;")
+              span.ms-2 Inicio
 
     // Barra de navegación lateral
     div.bg-light.left-navbar
