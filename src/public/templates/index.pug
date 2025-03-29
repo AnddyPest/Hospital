@@ -14,8 +14,8 @@ html(lang="en")
     nav.navbar.navbar-expand-lg.navbar-light.bg-light.fixed-top.top-navbar
       // Logo y título "Hospital" alineados a la izquierda
       div.d-flex.align-items-center
-        i.fas.fa-solid.fa-hospital.ms-4.me-3.fs-1 
-        a.navbar-brand.fs-1(href="#") Hospital
+        img(src="/icons/staff-snake-solid.svg", alt="Prescripciones", class="ms-4", style="width: 3vw; height: 10vh;")
+        a.navbar-brand.fs-1.ms-3(href="#") Hospital
 
       // Botón de colapso para dispositivos pequeños
       button.navbar-toggler(type="button", data-bs-toggle="collapse", data-bs-target="#navbarNav", aria-controls="navbarNav", aria-expanded="false", aria-label="Toggle navigation")
@@ -25,13 +25,13 @@ html(lang="en")
       div.collapse.navbar-collapse#navbarNav
         ul.navbar-nav.ms-auto
           // Icono de mensajería
-          li.nav-item
+          li.nav-item.me-2.ms3
             a.nav-link(href="#")
               i.fas.fa-envelope
               span.ms-1 Buzon de Correo
 
           // Foto y nombre del usuario logueado
-          li.nav-item.dropdown
+          li.nav-item.dropdown.me-2.ms-3
             a.nav-link.dropdown-toggle(href="#", id="userDropdown", role="button", data-bs-toggle="dropdown", aria-expanded="false")
               i.fas.fa-solid.fa-user  Usuario
             ul.dropdown-menu.dropdown-menu-end(aria-labelledby="userDropdown")
@@ -45,7 +45,7 @@ html(lang="en")
                 a.dropdown-item(href="#") Cerrar sesión
 
           // Icono de Home
-          li.nav-item
+          li.nav-item.ms-3.me-5
             a.nav-link(href="#")
               i.fas.fa-home  Inicio
 
@@ -58,7 +58,7 @@ html(lang="en")
           h2.accordion-header
             button.accordion-button(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="true", aria-controls="collapsePersonal") 
               | Personal 
-              i.fas.fa-solid.fa-users.ms-2
+              img(src="/icons/users-solid.svg", alt="Prescripciones", class="ms-4", style="width: 25px; height: 25px;")
               
           div.collapse.show#collapsePersonal(data-bs-parent="#accordionSidebar")
             div.accordion-body
@@ -66,66 +66,82 @@ html(lang="en")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Medicos
-                  i.fas.fa-solid.fa-stethoscope
+                  img(src="/icons/user-doctor-solid.svg", alt="Medicos", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Enfermeros
-                  i.fas.fa-solid.fa-user-nurse
+                  img(src="/icons/user-nurse-solid.svg", alt="Enfermeros", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Administrativos
-                  i.fas.fa-solid.fa-briefcase
+                  img(src="/icons/user-tie-solid.svg", alt="Admins", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Mantenimiento
-                  i.fas.fa-solid.fa-tools
+                  img(src="/icons/screwdriver-wrench-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
 
         // Sección Gestión
         div.accordion-item
           h2.accordion-header
             button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion")
               | Gestion
-              i.fas.fa-solid.fa-cogs.ms-3
+              img(src="/icons/users-gear-solid.svg", alt="Prescripciones", class="ms-4", style="width: 25px; height: 25px;")
           div.collapse#collapseGestion(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Camas
-                  i.fas.fa-solid.fa-bed
+                  img(src="/icons/bed-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Diagnosis
-                  i.fas.fa-solid.fa-clipboard-list
+                  img(src="/icons/stethoscope-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Tratamiento
-                  i.fas.fa-solid.fa-syringe
+                  img(src="/icons/syringe-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Cirugias
-                  i.fas.fa-solid.fa-file
+                  img(src="/icons/bed-pulse-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Equipos
-                  i.fas.fa-solid.fa-notes-medical
+                  img(src="/icons/people-group-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Farmacia
-                  i.fas.fa-solid.fa-capsules
-                li.list-group-item Proveedores
+                  img(src="/icons/pills-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Proveedores
+                  img(src="/icons/building-user-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
         // Sección Pacientes
         div.accordion-item
           h2.accordion-header
-            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePacientes", aria-expanded="false", aria-controls="collapsePacientes") Pacientes
-              Pacientes
+            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePacientes", aria-expanded="false", aria-controls="collapsePacientes")
+              | Pacientes
+              img(src="/icons/user-injured-solid.svg", alt="Prescripciones", class="ms-3", style="width: 25px; height: 25px;")
           div.collapse#collapsePacientes(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
-                li.list-group-item Carga
-                li.list-group-item Historia Clinica
-                li.list-group-item Turnos
-                li.list-group-item Prescripciones
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Carga
+                  img(src="/icons/user-plus-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Historia Clinica
+                  img(src="/icons/file-waveform-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Turnos
+                  img(src="/icons/user-clock-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Prescripciones
+                  img(src="/icons/prescription-bottle-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
              
 
     // Área de trabajo

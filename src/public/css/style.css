@@ -1,31 +1,31 @@
 body,
 html {
-  height: 100%;
+  height: 100vh;
   margin: 0;
   display: flex;
 }
 .top-navbar {
-  height: 10%;
-  width: 100%;
+  height: 10vh;
+  width: 100vw;
   position: fixed;
 }
 .left-navbar {
   height: calc(90% - 10%);
-  width: 15%;
+  width: 15vw;
   min-width: 200px;
   position: fixed;
-  top: 10%;
+  top: 10vh;
   overflow-y: auto;
 }
 .workspace {
   position: absolute;
-  left: 16%;
-  top: 10%;
-  height: calc(90% - 10%);
+  left: 16vw;
+  top: 10vh;
+  height: calc(90vh - 10vh);
 }
 .footer {
-  height: 10%;
-  width: 100%;
+  height: 10vh;
+  width: 100vw;
   position: fixed;
   bottom: 0;
 }
@@ -36,6 +36,6 @@ html {
   }
   .workspace {
     left: 220px;
-    top: 10%;
+    top: 10vh;
   }
 }
