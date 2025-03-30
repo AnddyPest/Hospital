@@ -12,16 +12,21 @@ html {
 .left-navbar {
   height: calc(90% - 10%);
   width: 15vw;
-  min-width: 200px;
+
   position: fixed;
   top: 10vh;
   overflow-y: auto;
 }
 .workspace {
-  position: absolute;
-  left: 16vw;
+  position: fixed;
+  left: 15.5vw;
   top: 10vh;
-  height: calc(90vh - 10vh);
+  width: calc(99vw - 15vw);
+  height: calc(88vh - 10vh);
+  border-radius: 10px;
+  border: 2px solid #7d7eae;
+  background-color: aliceblue;
+  box-shadow: 0 4px 10px black;
 }
 .footer {
   height: 10vh;
@@ -30,12 +35,16 @@ html {
   bottom: 0;
 }
 
+.bg-azul-claro {
+  background-color: #9eccd2;
+}
+
 @media (max-width: 1400px) {
   .left-navbar {
     width: 200px;
   }
   .workspace {
-    left: 220px;
+    left: 200px;
     top: 10vh;
   }
 }

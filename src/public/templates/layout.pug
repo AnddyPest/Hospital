@@ -3,15 +3,15 @@ html(lang="en")
   head
     meta(charset="UTF-8")
     meta(name="viewport", content="width=device-width, initial-scale=1.0")
-    title Hospital Dashboard
+    title Hospital
     link(rel="stylesheet", href="/css/bootstrap.min.css")
     link(rel="stylesheet", href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css")
     link(rel="stylesheet", href="/css/style.css")
     script(src="/js/bootstrap.bundle.min.js")
    
-  body
+  body.bg-azul-claro
     // Barra de navegación superior
-    nav.navbar.navbar-expand-lg.navbar-light.bg-light.fixed-top.top-navbar
+    nav.navbar.navbar-expand-lg.navbar-light.bg-azul-claro.fixed-top.top-navbar
       // Logo y título "Hospital" alineados a la izquierda
       div.d-flex.align-items-center
         img(src="/icons/staff-snake-solid.svg", alt="Prescripciones", class="ms-4", style="width: 3vw; height: 10vh;")
@@ -52,11 +52,11 @@ html(lang="en")
               span.ms-2 Inicio
 
     // Barra de navegación lateral
-    div.bg-light.left-navbar
+    div.bg-azul-claro.left-navbar
       h5.text-center Menu
       div.accordion#accordionSidebar
         // Sección Personal
-        div.accordion-item
+        div.accordion-item.bg-azul-claro
           h2.accordion-header
             button.accordion-button(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="true", aria-controls="collapsePersonal") 
               | Personal 
@@ -83,7 +83,7 @@ html(lang="en")
                   img(src="/icons/screwdriver-wrench-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
 
         // Sección Gestión
-        div.accordion-item
+        div.accordion-item.bg-azul-claro
           h2.accordion-header
             button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapseGestion", aria-expanded="false", aria-controls="collapseGestion")
               | Gestion
@@ -120,7 +120,7 @@ html(lang="en")
                     | Proveedores
                   img(src="/icons/building-user-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
         // Sección Pacientes
-        div.accordion-item
+        div.accordion-item.bg-azul-claro
           h2.accordion-header
             button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePacientes", aria-expanded="false", aria-controls="collapsePacientes")
               | Pacientes
@@ -149,9 +149,8 @@ html(lang="en")
     // Área de trabajo
     div.workspace
       div.p-4
-        h1 Contenido del workspace
-        p Area de trabajo principal
+        block content
 
     // Pie de página
-    footer.bg-light.text-center.py-3.footer
+    footer.bg-azul-claro.text-center.py-3.footer
       p.mb-0 Footer Content
