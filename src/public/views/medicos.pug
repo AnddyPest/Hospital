@@ -8,12 +8,18 @@ block content
             h1(style="padding: 20px; background-color: rgba(0, 0, 0, 0.5); border-radius: 10px;")
                 span(id="cabecera" style="font-size: 2.5rem;") Sistema de Gestión de Médicos
                 img(src="/icons/user-doctor-solid.svg", alt="Medicos", class="ms-4", style="width: 60px; height: 60px;")
+        
+        //-botones de navegacion de la vista principal de medicos
         div.position-absolute.top-50.start-50.translate-middle.text-center
             div.d-flex.justify-content-center
-                a(href="#" id="botonNuevo" class="btn btn-info btn-lg px-5 me-5 custom-button") Administrar Médicos
-                a(href="#" id="botonListar" class="btn btn-info btn-lg px-5 ms-5 custom-button") Listar / Buscar
+                a(href="#" id="botonNuevo" class="btn btn-info btn-lg px-5 me-5 custom-button") 
+                    span() Administrar Médicos
+                    img(src="/icons/users-gear-solid.svg", alt="Medicos", class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+                a(href="#" id="botonListar" class="btn btn-info btn-lg px-5 ms-5 custom-button")
+                    span() Listar / Buscar
+                    img(src="/icons/rectangle-list-solid.svg", alt="Medicos", class="ms-5", style="width: 40px; height: 40px; opacity: 0.8;")
     
-        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-3(style="width: 80%; display: none;" id="tablaMedicos")
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%; display: none;" id="tablaMedicos")
             div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
                 table.table.table-hover.table-dark.table-bordered.border-info.table-striped
                     thead(style="position: sticky; top: 0;")
@@ -88,8 +94,11 @@ block content
             
             div.mt-3(id="filtros")
                 button.btn.btn-info.me-4(type="button", id="especialidad" class="custom-button2") Filtrar por Especialidad
-                button.btn.btn-info.ms-4(type="button", id="nombre" class="custom-button2") Buscar por Apellido
-            
+                button.btn.btn-info.ms-4.me-4(type="button", id="nombre" class="custom-button2") Buscar por Apellido
+                button.btn.btn-danger.ms-4(type="button", id="back" class="custom-button2" style="width: 50px; padding:5px;") 
+                    img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
+
+
             //-Mixin de botones de filtros e inputs de busqueda
             //-para que no se repita el mismo codigo para ambos tipos de filtro
             mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
@@ -99,9 +108,10 @@ block content
                         button.btn.btn-info(type="button" class="custom-button2")= btnFiltrarText
                         button.btn.btn-warning.ms-2(type="button" class="custom-button2")= btnLimpiarText
                         button.btn.btn-danger.ms-2(type="button" id="volver" class="volver custom-button2")= btnVolverText
-
+            //--Inputs de busqueda y botones de filtro
             +inputGroup("inputEspecialidad", "Ingrese la especialidad", "Filtrar", "Limpiar", "Volver")
             +inputGroup("inputApe", "Ingrese el Apellido", "Filtrar", "Limpiar", "Volver")
+            //-*******************************************************************************************************************************
 
             
     script. 
