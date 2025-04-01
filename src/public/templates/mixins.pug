@@ -1,0 +1,7 @@
+mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
+                div.mt-3(id=id, style="display: none;")
+                    div.d-flex.align-items-center.justify-content-center
+                        input.form-control.me-4(type="text", placeholder=placeholder, aria-label=placeholder, style="width: 400px; padding: 15px 30px;")
+                        button.btn.btn-info(type="button" class="custom-button2")= btnFiltrarText
+                        button.btn.btn-warning.ms-2(type="button" class="custom-button2")= btnLimpiarText
+                        button.btn.btn-danger.ms-2(type="button" id="volver" class="volver custom-button2")= btnVolverText
