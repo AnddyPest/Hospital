@@ -90,13 +90,15 @@ block content
                 button.btn.btn-info.me-4(type="button", id="especialidad" class="custom-button2") Filtrar por Especialidad
                 button.btn.btn-info.ms-4(type="button", id="nombre" class="custom-button2") Buscar por Apellido
             
+            //-Mixin de botones de filtros e inputs de busqueda
+            //-para que no se repita el mismo codigo para ambos tipos de filtro
             mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
                 div.mt-3(id=id, style="display: none;")
                     div.d-flex.align-items-center.justify-content-center
                         input.form-control.me-4(type="text", placeholder=placeholder, aria-label=placeholder, style="width: 400px; padding: 15px 30px;")
                         button.btn.btn-info(type="button" class="custom-button2")= btnFiltrarText
                         button.btn.btn-warning.ms-2(type="button" class="custom-button2")= btnLimpiarText
-                        button.btn.btn-danger.ms-2(type="button" class="custom-button2")= btnVolverText
+                        button.btn.btn-danger.ms-2(type="button" id="volver" class="volver custom-button2")= btnVolverText
 
             +inputGroup("inputEspecialidad", "Ingrese la especialidad", "Filtrar", "Limpiar", "Volver")
             +inputGroup("inputApe", "Ingrese el Apellido", "Filtrar", "Limpiar", "Volver")
@@ -104,15 +106,29 @@ block content
             
     script. 
         document.addEventListener("DOMContentLoaded", ()=>{
+            //Botones de la vista primaria de medicos (Administrar Medicos y Listar/Buscar)
             const btnNuevo = document.getElementById("botonNuevo");
             const btnListar = document.getElementById("botonListar");
+            
+            //Tabla de medicos
             const tablaMedicos = document.getElementById("tablaMedicos");
+            
+            //Cabecera de pagina, para cambiar el texto segun el boton que se presione
             const cabecera = document.getElementById("cabecera");
+            
+            //botones de filtro por appelido y especialidad
             const btnEspecialidad = document.getElementById("especialidad");
             const btnNombre = document.getElementById("nombre");
+            
+            //Contenedor de filtros
             const containerFiltros = document.getElementById("filtros");
+            
+            //inputs de especialidad y apellido
             const inputEspecialidad = document.getElementById("inputEspecialidad");
             const inputApe = document.getElementById("inputApe");
+            
+            //botones de volver para ambos tipos de filtro
+            const btnVolver = document.querySelectorAll(".volver");
 
             btnListar.addEventListener("click", (e)=>{
                 e.preventDefault();
@@ -136,7 +152,15 @@ block content
                 inputApe.style.display = "block";
                 inputApe.querySelector("input").focus();
             })
-
+            //Agregar un listener por cada boton de la clase volver!!!
+            btnVolver.forEach((btn)=>{
+                btn.addEventListener("click", (e)=>{
+                    e.preventDefault();
+                    inputEspecialidad.style.display = "none";
+                    inputApe.style.display = "none";
+                    containerFiltros.style.display = "block";
+                })
+            })
 
         })
                         
