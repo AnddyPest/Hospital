@@ -2,14 +2,13 @@ extends ../templates/layout
 
 block content
   
-  // Carrusel de imágenes
+  // Carrusel de imagenes
   div#carouselExampleIndicators.carousel.slide(data-bs-ride="carousel")
-    // Contenedor de imágenes
+    // Contenedor
     div.carousel-inner
       div.carousel-item.active
         img(src="../images/fachada.jpeg" class="d-block w-100" alt="Imagen 1" style="height: calc(83vh - 10vh); object-fit: cover; border-radius: 10px; opacity: 0.8;")
       div.carousel-item
         img(src="../images/lobby.jpeg" class="d-block w-100" alt="Imagen 2" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.8;")
-      
       div.carousel-item
         img(src="/images/trabajadores.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.8;")

@@ -5,7 +5,8 @@
     "morgan": "^1.10.0",
     "mysql2": "^3.14.0",
     "nodemon": "^3.1.9",
-    "pug": "^3.0.3"
+    "pug": "^3.0.3",
+    "sequelize": "^6.37.7"
   },
   "name": "hospital",
   "version": "1.0.0",
