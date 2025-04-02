@@ -124,23 +124,25 @@ block content
                 button.btn.btn-danger.ms-4(type="button", id="back" class="back custom-button2" style="width: 50px; padding:5px;") 
                     img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
 
-            //-formulario para cargar/editar/borrar medicos
-            div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%; display: none;" id="formularioMedico")
-                form(id="formMedico", method="POST", action="/medicos/guardar")
-                    div.form-group.mb-3
-                        label(for="nombre") Nombre:
-                        input.form-control(type="text", id="nombre" name="nombre" required)
-                    div.form-group.mb-3
-                        label(for="apellido") Apellido:
-                        input.form-control(type="text", id="apellido" name="apellido" required)
-                    div.form-group.mb-3
-                        label(for="telefono") Telefono:
-                        input.form-control(type="text", id="telefono" name="telefono" required)
-                    div.form-group.mb-3
-                        label(for="especialidad") Especialidad:
-                        input.form-control(type="text", id="especialidad" name="especialidad" required)
-                    button.btn.btn-primary(type="submit") Guardar Médico
-                    button.btn.btn-danger.ms-2(type="button", id="cancelar") Cancelar
+        //-formulario para cargar/editar/borrar medicos
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%; display: none;" id="formularioMedico")
+            div.d-flex.justify-content-center
+                form.w-75(id="formMedico", method="POST", action="/medicos/guardar")
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="nombre", name="nombre", placeholder="Nombre" required)
+                        label(for="nombre") Nombre
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="apellido", name="apellido", placeholder="Apellido" required)
+                        label(for="apellido") Apellido
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="telefono", name="telefono", placeholder="Teléfono" required)
+                        label(for="telefono") Teléfono
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="especialidad", name="especialidad", placeholder="Especialidad" required)
+                        label(for="especialidad") Especialidad
+                    div.d-flex.justify-content-center.mt-4
+                        button.btn.btn-primary(type="submit") Guardar Médico
+                        button.btn.btn-danger.ms-2(type="button", id="cancelar") Cancelar
 
             
     script. 
@@ -234,6 +236,15 @@ block content
                 btnListar.style.display = "none";
                 containerAdmin.style.display = "block";
                 cabecera.innerHTML = "Administrar Médicos";
+            })
+
+            //boton para ingresar al formulario de agregar medicos
+            const btnAgregar = document.getElementById("agregar");
+            btnAgregar.addEventListener("click", (e)=>{
+                e.preventDefault();
+                containerAdmin.style.display = "none";
+                formularioMedico.style.display = "block";
+                formularioMedico.querySelector("input").focus();
             })
 
 
