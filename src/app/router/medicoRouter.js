@@ -1,25 +1,48 @@
 const express = require("express");
 const router = express.Router();
-const {
-  obtenerMedicos,
-  crearMedico,
-  listarMedicosPorEspecialidad,
-  buscarMedicoPorId,
-  actualizarMedicoPorId,
-  eliminarMedicoPorId,
-} = require("../controller/medicoController");
+const medicoController = require("../controller/medicoController");
 
+//renders
 router.get("/", (req, res) => {
-  res.render("../../public/views/medicos", {
+  res.render("vistasMedicos/portadaMedicos", {
     title: "Medicos",
   });
 });
 
-router.get("/medicos", obtenerMedicos);
-router.post("/medicos", crearMedico);
-router.get("/medicos/:especialidad", listarMedicosPorEspecialidad);
-router.get("/medicos/:id", buscarMedicoPorId);
-router.put("/medicos/:id", actualizarMedicoPorId);
-router.delete("/medicos/:id", eliminarMedicoPorId);
+router.get("/listar", (req, res) => {
+  res.render("vistasMedicos/listarMedicos", {
+    title: "Listar Medicos",
+  });
+});
+
+router.get("/admin", (req, res) => {
+  res.render("vistasMedicos/administrarMedicos", {
+    title: "Administrar Medicos",
+  });
+});
+
+router.get("/admin/new", (req, res) => {
+  res.render("vistasMedicos/nuevoMedico", {
+    title: "Nuevo Medico",
+  });
+});
+
+router.get("/borrar", (req, res) => {
+  res.render("vistasMedicos/borrarMedico", {
+    title: "Borrar Medico",
+  });
+});
+
+router.get("/editar", (req, res) => {
+  res.render("vistasMedicos/editarMedico", {
+    title: "Editar Medico",
+  });
+});
+
+//api
+router.get("/listado", medicoController.getAllMedicos);
+router.post("/admin/new", medicoController.crearMedico);
+router.put("/editar/:apellido", medicoController.editarMedico); // <---- PROBAR!!!!
+router.delete("/borrar/:apellido", medicoController.borrarMedico); // <---- PROBAR!!!!
 
 module.exports = router;

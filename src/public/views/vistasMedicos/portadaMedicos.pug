@@ -1,0 +1,23 @@
+extends ../templates/layout
+
+include ../templates/mixins.pug
+
+block content
+   
+
+    div
+        img(src="/images/trabajadores.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Sistema de Gestión de Médicos", "/icons/user-doctor-solid.svg")
+              
+        div.position-absolute.top-50.start-50.translate-middle.text-center
+            div.d-flex.justify-content-center
+                a(href="/medicos/admin" id="botonAdmin" class="btn btn-info btn-lg px-5 me-5 custom-button") 
+                    span() Administrar Médicos
+                    img(src="/icons/users-gear-solid.svg", alt="Medicos", class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+                a(href="/medicos/listar" id="botonListar" class="btn btn-info btn-lg px-5 ms-5 custom-button")
+                    span() Listar / Buscar
+                    img(src="/icons/rectangle-list-solid.svg", alt="Medicos", class="ms-5", style="width: 40px; height: 40px; opacity: 0.8;")
+
+        
+        

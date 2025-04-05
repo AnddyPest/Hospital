@@ -1,111 +1,73 @@
-const conexion = require("../database-connection");
-const medico = require("../model/medicoModel");
+const Medico = require("../model/medico");
 
-// ABML de Medicos
+//dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
+const medicoController = {
 
-//traer listado de medicos, intento hacerlo como es en spring, a ver que pasa
-const obtenerMedicos = async (req, res) => {
-  try {
-    const medicos = await medico.findAll();
-    res.status(200).json(medicos);
-  } catch (error) {
-    console.error("Error al obtener medicos:", error);
-    res.status(500).json({ error: "Error al obtener medicos" });
-  }
-};
-
-//crear un medico
-const crearMedico = async (req, res) => {
-  const { nombre, apellidos, telefono, especialidad } = req.body;
-  try {
-    const nuevoMedico = await medico.create({
-      nombre,
-      apellidos,
-      telefono,
-      especialidad,
-    });
-    res.status(201).json(nuevoMedico);
-  } catch (error) {
-    console.error("Error al crear medico:", error);
-    res.status(500).json({ error: "Error al crear medico" });
-  }
-};
-
-//listar medicos por especialidad
-const listarMedicosPorEspecialidad = async (req, res) => {
-  const especialidad = req.params.especialidad;
-  try {
-    const medicos = await medico.findAll({
-      where: { especialidad },
-    });
-    res.status(200).json(medicos);
-  } catch (error) {
-    console.error("Error al obtener medicos por especialidad:", error);
-    res
-      .status(500)
-      .json({ error: "Error al obtener medicos por especialidad" });
-  }
-};
-
-//buscar medico por id
-const buscarMedicoPorId = async (req, res) => {
-  const id = req.params.id;
-  try {
-    const medico = await medico.findByPk(id);
-    if (!medico) {
-      return res.status(404).json({ error: "Medico no encontrado" });
+  // metodo para obtener todos los medicos
+  getAllMedicos: async (req, res) => {
+    try {
+      const medicos = await Medico.findAll();
+      res.status(200).json(medicos);
+    } catch (error) {
+      console.error("Error al obtener los medicos:", error);
+      res.status(500).json({ error: "Error al obtener los medicos" });
     }
-    res.status(200).json(medico);
-  } catch (error) {
-    console.error("Error al buscar medico por id:", error);
-    res.status(500).json({ error: "Error al buscar medico por id" });
-  }
-};
-
-//actualizar medico por id
-const actualizarMedicoPorId = async (req, res) => {
-  const id = req.params.id;
-  const { nombre, apellidos, telefono, especialidad } = req.body;
-  try {
-    const medico = await medico.findByPk(id);
-    if (!medico) {
-      return res.status(404).json({ error: "Medico no encontrado" });
+  },
+  
+  // metodo para agregar un nuevo medico
+  crearMedico: async (req, res) => {
+    try {
+      console.log("Creando nuevo medico:", req.body);
+      const { nombre, apellido, especialidad, telefono } = req.body;
+      const nuevoMedico = await Medico.create({
+        nombre,
+        apellido,
+        especialidad,
+        telefono,
+      });
+      res.status(201).json(nuevoMedico);
+    } catch (error) {
+      console.error("Error al crear el medico:", error);
+      res.status(500).json({ error: "Error al crear el medico" });
     }
-    await medico.update({
-      nombre,
-      apellidos,
-      telefono,
-      especialidad,
-    });
-    res.status(200).json(medico);
-  } catch (error) {
-    console.error("Error al actualizar medico por id:", error);
-    res.status(500).json({ error: "Error al actualizar medico por id" });
-  }
-};
-
-//eliminar medico por id
-const eliminarMedicoPorId = async (req, res) => {
-  const id = req.params.id;
-  try {
-    const medico = await medico.findByPk(id);
-    if (!medico) {
-      return res.status(404).json({ error: "Medico no encontrado" });
+  },
+  
+  // metodo para editar un medico buscando por apellido <---- PROBAR!!!!
+  editarMedico: async (req, res) => {
+    try {
+      const { apellido } = req.params;
+      const { nombre, especialidad, telefono } = req.body;
+      const [updated] = await Medico.update(
+        { nombre, especialidad, telefono },
+        { where: { apellido } }
+      );
+      if (updated) {
+        const updatedMedico = await Medico.findOne({ where: { apellido } });
+        res.status(200).json(updatedMedico);
+      } else {
+        res.status(404).json({ error: "Medico no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al editar el medico:", error);
+      res.status(500).json({ error: "Error al editar el medico" });
     }
-    await medico.destroy();
-    res.status(204).send();
-  } catch (error) {
-    console.error("Error al eliminar medico por id:", error);
-    res.status(500).json({ error: "Error al eliminar medico por id" });
-  }
+  },
+  
+  // metodo para borrar un medico buscando por apellido <---- PROBAR!!!!
+  borrarMedico: async (req, res) => {
+    try {
+      const { apellido } = req.params;
+      const deleted = await Medico.destroy({ where: { apellido } });
+      if (deleted) {
+        res.status(204).send();
+      } else {
+        res.status(404).json({ error: "Medico no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al borrar el medico:", error);
+      res.status(500).json({ error: "Error al borrar el medico" });
+    }
+  },
 };
 
-//exportar funciones
-module.exports = {
-  obtenerMedicos,
-  crearMedico,
-  listarMedicosPorEspecialidad,
-  buscarMedicoPorId,
-  actualizarMedicoPorId,
-  eliminarMedicoPorId,
-};
+module.exports = medicoController;
