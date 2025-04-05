@@ -27,14 +27,14 @@ router.get("/admin/new", (req, res) => {
   });
 });
 
-router.get("/borrar", (req, res) => {
+router.get("/admin/borrar", (req, res) => {
   res.render("vistasMedicos/borrarMedico", {
     title: "Borrar Medico",
   });
 });
 
-router.get("/editar", (req, res) => {
-  res.render("vistasMedicos/editarMedico", {
+router.get("/admin/editar", (req, res) => {
+  res.render("vistasMedicos/editarMedicos", {
     title: "Editar Medico",
   });
 });
