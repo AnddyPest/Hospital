@@ -2,7 +2,6 @@ const Medico = require("../model/medico");
 
 //dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
 const medicoController = {
-
   // metodo para obtener todos los medicos
   getAllMedicos: async (req, res) => {
     try {
@@ -13,7 +12,7 @@ const medicoController = {
       res.status(500).json({ error: "Error al obtener los medicos" });
     }
   },
-  
+
   // metodo para agregar un nuevo medico
   crearMedico: async (req, res) => {
     try {
@@ -31,18 +30,18 @@ const medicoController = {
       res.status(500).json({ error: "Error al crear el medico" });
     }
   },
-  
-  // metodo para editar un medico buscando por apellido <---- PROBAR!!!!
+
+  // metodo para editar un medico buscando por id
   editarMedico: async (req, res) => {
     try {
-      const { apellido } = req.params;
-      const { nombre, especialidad, telefono } = req.body;
+      const { id } = req.params;
+      const { nombre, apellido, especialidad, telefono } = req.body;
       const [updated] = await Medico.update(
-        { nombre, especialidad, telefono },
-        { where: { apellido } }
+        { nombre, apellido, especialidad, telefono },
+        { where: { id } }
       );
       if (updated) {
-        const updatedMedico = await Medico.findOne({ where: { apellido } });
+        const updatedMedico = await Medico.findOne({ where: { id } });
         res.status(200).json(updatedMedico);
       } else {
         res.status(404).json({ error: "Medico no encontrado" });
@@ -52,12 +51,12 @@ const medicoController = {
       res.status(500).json({ error: "Error al editar el medico" });
     }
   },
-  
-  // metodo para borrar un medico buscando por apellido <---- PROBAR!!!!
+
+  // metodo para borrar un medico buscando por su id
   borrarMedico: async (req, res) => {
     try {
-      const { apellido } = req.params;
-      const deleted = await Medico.destroy({ where: { apellido } });
+      const { id } = req.params;
+      const deleted = await Medico.destroy({ where: { id } });
       if (deleted) {
         res.status(204).send();
       } else {

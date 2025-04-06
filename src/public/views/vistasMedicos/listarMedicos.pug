@@ -40,6 +40,7 @@ block content
         async function cargarMedicos() {
             try {
                 const response = await fetch("/medicos/listado");
+                console.log(response);
                 if(!response.ok) {
                     throw new error("Error al obtener medicos de la DB");
                 }

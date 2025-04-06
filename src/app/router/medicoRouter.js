@@ -42,7 +42,7 @@ router.get("/admin/editar", (req, res) => {
 //api
 router.get("/listado", medicoController.getAllMedicos);
 router.post("/admin/new", medicoController.crearMedico);
-router.put("/editar/:apellido", medicoController.editarMedico); // <---- PROBAR!!!!
-router.delete("/borrar/:apellido", medicoController.borrarMedico); // <---- PROBAR!!!!
+router.put("/editar/:id", medicoController.editarMedico); // <---- PROBAR!!!!
+router.delete("/borrar/:id", medicoController.borrarMedico); // <---- PROBAR!!!!
 
 module.exports = router;
