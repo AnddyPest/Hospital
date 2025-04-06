@@ -39,6 +39,12 @@ router.get("/admin/editar", (req, res) => {
   });
 });
 
+router.get("/admin/seleccionar", (req, res) => {
+  res.render("vistasMedicos/seleccionarMedico", {
+    title: "Seleccionar Medico",
+  });
+});
+
 //api
 router.get("/listado", medicoController.getAllMedicos);
 router.post("/admin/new", medicoController.crearMedico);

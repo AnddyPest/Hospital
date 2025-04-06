@@ -48,9 +48,9 @@ block content
                             <td>${medico.telefono}</td>
                             <td>${medico.especialidad}</td>
                             <td>
-                                <a href="/medicos/borrar/${medico.id}" class="btn btn-danger" style="width: 100%; padding:5px;">
-                                    <img src="/icons/user-slash-solid.svg" alt="Editar" style="width: 25px; height: 25px;">
-                                </a>
+                                <button type="button" class="btn btn-danger" style="width: 100%; padding:5px;" onclick="borrarMedico(${medico.id}, '${medico.nombre}', '${medico.apellido}')">
+                                    <img src="/icons/user-slash-solid.svg" alt="Borrar" style="width: 25px; height: 25px;">
+                                </button>
                             </td>
                             
                         </tr>
@@ -63,3 +63,27 @@ block content
             }};
 
         cargarMedicos();
+
+        async function borrarMedico(id, nombre, apellido) {
+            const confirmacion = confirm(`¿Estás seguro de que deseas borrar al médico ${nombre} ${apellido}?`);
+            if (!confirmacion) {
+                return;
+            }
+            try {
+                const response = await fetch(`/medicos/borrar/${id}`, {
+                    method: "DELETE",
+                });
+
+                if (!response.ok) {
+                    throw new Error("Error al borrar el médico");
+                }
+
+                alert(`Médico ID: ${id}, Nombre y Apellido: ${nombre} ${apellido} borrado con éxito`);
+                location.reload(); // Recarga la página para actualizar la tabla
+            } catch (error) {
+                console.error("Error al borrar el médico:", error);
+                alert("No se pudo borrar el médico");
+            }
+        }
+
+        
