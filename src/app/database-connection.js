@@ -1,20 +1,78 @@
 const { Sequelize } = require("sequelize");
+const mysql2 = require("mysql2/promise"); //importamos asi para poder usar async y await
 
-// Configura la conexión a la base de datos
-const sequelize = new Sequelize("hospital_db", "root", "", {
-  host: "localhost",
+// estos son los datos de la base de datos, no estoy seguro de que sea correcto
+// colocarlos aqui por temas de seguridad, pero para poder desarrollar la app
+// los pongo aca, mas adelante veremos para hacer la app mas segura
+const databaseName = "hospital_db";
+const userName = "root";
+const password = "";
+const host = "localhost";
+
+// aseguramos que la bd existe, si no existe la creamos
+async function asegurarBdExiste() {
+  try {
+    // conexion standard a mysql sin especificar la bd... si especificaramos la bd
+    // tendriamos un error de conexion, entonces debemos conectarnos asi para poder
+    // crearla si no existiera
+    const connection = await mysql2.createConnection({
+      host,
+      user: userName,
+      password,
+    });
+
+    // aca verificamos si esta la bd
+    const [rows] = await connection.query(
+      `SHOW DATABASES LIKE '${databaseName}'`
+    );
+
+    if (rows.length === 0) {
+      // si no está la base de datos, la creamos
+      await connection.query(`CREATE DATABASE ${databaseName}`);
+      console.log(`Base de datos '${databaseName}' creada.`);
+    } else {
+      console.log(`Base de datos '${databaseName}' ya existe.`);
+    }
+
+    await connection.end();
+  } catch (error) {
+    console.error(
+      "Error al verificar o crear la base de datos:",
+      error.message
+    );
+    process.exit(1); // si hay error de coneccion dropeamos la app
+  }
+}
+
+// ahora si conectamos a la base de datos con sequelize
+// creamos una nueva instancia de Sequelize para conectarse a la base de datos
+const sequelize = new Sequelize(databaseName, userName, password, {
+  host,
   dialect: "mysql",
   logging: false,
 });
 
-// Verifica la conexión
-sequelize
-  .authenticate()
-  .then(() => {
-    console.log("Conexión a la base de datos establecida correctamente.");
-  })
-  .catch((error) => {
-    console.error("Error al conectar a la base de datos:", error.message);
-  });
+// arrancamos sequelize y sincronizamos los modelos, si no lo hacemos asi no se crean las tablas
+// y no se pueden usar los modelos
+async function iniciarSequelize() {
+  await asegurarBdExiste(); // verificamos que exista la base de datos antes de conectarnos
 
+  try {
+    //ahora si nos conectamos y autenticamos
+    await sequelize.authenticate();
+    console.log("Conexión a la base de datos establecida correctamente.");
+
+    // una vez autenticados, sincronizamos los modelos
+    await sequelize.sync({ force: false });
+    console.log("Modelos sincronizados con la base de datos.");
+  } catch (error) {
+    console.error(
+      "Error al conectar o sincronizar la base de datos:",
+      error.message
+    );
+    process.exit(1); // se vuelve a dropear la app si no se puede conectar
+  }
+}
+
+iniciarSequelize();
 module.exports = sequelize;

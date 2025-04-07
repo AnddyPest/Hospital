@@ -10,7 +10,7 @@ block content
 
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%;" id="formularioMedico")
             div.d-flex.justify-content-center
-            form(id="formEditarMedico", action="preventDefault()")
+            form(id="formEditarMedico", onsubmit="event.preventDefault(); guardarCambios();")
                 div.form-floating.mb-3
                     input.form-control(type="text", id="idMedico" name="id" readonly placeholder="ID")
                     label(for="idMedico") ID
@@ -27,7 +27,7 @@ block content
                     input.form-control(type="text", id="especialidadMedico" name="especialidad" placeholder="Especialidad" required)
                     label(for="especialidadMedico") Especialidad
                 div.d-flex.justify-content-center.mt-4
-                    button.btn.btn-primary.me-5.w-25(onclick="guardarCambios()") Guardar Cambios
+                    button.btn.btn-primary.me-5.w-25(type="submit") Guardar Cambios
                     a.btn.btn-danger.ms-5.w-25(type="button" href="/medicos/admin/seleccionar") Cancelar
 
     script.
@@ -45,22 +45,22 @@ block content
         // cargamos los datos traidos en el form
         function cargarFormulario() {
             const { id, nombre, apellido, telefono, especialidad } = getQueryParams();
-            document.getElementById("idMedico").value = id;
-            document.getElementById("nombreMedico").value = nombre;
-            document.getElementById("apellidoMedico").value = apellido;
-            document.getElementById("telefonoMedico").value = telefono;
-            document.getElementById("especialidadMedico").value = especialidad;
+            document.getElementById("idMedico").value = id.trim();
+            document.getElementById("nombreMedico").value = nombre.trim();
+            document.getElementById("apellidoMedico").value = apellido.trim();
+            document.getElementById("telefonoMedico").value = telefono.trim();
+            document.getElementById("especialidadMedico").value = especialidad.trim();
         }
 
        
         cargarFormulario();
 
         async function guardarCambios() {
-            const id = document.getElementById("idMedico").value;
-            const nombre = document.getElementById("nombreMedico").value;
-            const apellido = document.getElementById("apellidoMedico").value;
-            const telefono = document.getElementById("telefonoMedico").value;
-            const especialidad = document.getElementById("especialidadMedico").value;
+            const id = document.getElementById("idMedico").value.trim();
+            const nombre = document.getElementById("nombreMedico").value.trim();
+            const apellido = document.getElementById("apellidoMedico").value.trim();
+            const telefono = document.getElementById("telefonoMedico").value.trim();
+            const especialidad = document.getElementById("especialidadMedico").value.trim();
 
             try {
                 const response = await fetch(`/medicos/editar/${id}`, {
