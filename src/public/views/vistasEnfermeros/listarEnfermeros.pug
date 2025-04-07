@@ -7,11 +7,11 @@ block content
         
         
     div
-        img(src="/images/trabajadores.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        img(src="/images/enfermeras.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
         
-        +header("Listado de Médicos", "/icons/user-doctor-solid.svg")
+        +header("Listado de Enfermeros", "/icons/user-nurse-solid.svg")
         
-        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id="tablaMedicos")
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id="tablaEnfermeros")
             div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
                 table.table.table-hover.table-dark.table-bordered.border-info.table-striped
                     thead(style="position: sticky; top: 0;")
@@ -20,75 +20,75 @@ block content
                             th.col(style="width: 22.5%") Nombre
                             th.col(style="width: 22.5%") Apellido
                             th.col(style="width: 22.5%") Telefono
-                            th.col(style="width: 22.5%") Especialidad
+                            th.col(style="width: 22.5%") Area
                     
                     tbody
                         
             
             //-botones de ingreso a filtros y volver a la vista principal
             div.mt-3(id="filtros")
-                button.btn.btn-info.me-4(type="button", id="especialidad" class="custom-button2") Filtrar por Especialidad
+                button.btn.btn-info.me-4(type="button", id="area" class="custom-button2") Filtrar por Area
                 button.btn.btn-info.ms-4.me-4(type="button", id="nombre" class="custom-button2") Buscar por Apellido
-                a.btn.btn-danger.ms-4(href="/medicos" type="button", class="custom-button2" style="width: 50px; padding:5px;") 
+                a.btn.btn-danger.ms-4(href="/enfermeros" type="button", class="custom-button2" style="width: 50px; padding:5px;") 
                     img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
             //--Inputs importados de mixins.pug de busqueda y botones de filtro
-            +inputGroup("inputEspecialidad", "Ingrese la especialidad", "Filtrar", "Limpiar", "Volver")
+            +inputGroup("inputArea", "Ingrese el Area", "Filtrar", "Limpiar", "Volver")
             +inputGroup("inputApe", "Ingrese el Apellido", "Filtrar", "Limpiar", "Volver")
             
     script.
         //carga de medicos en tabla
-        async function cargarMedicos() {
+        async function cargarEnfermeros() {
             try {
-                const response = await fetch("/medicos/listado");
+                const response = await fetch("/enfermeros/listado");
                 console.log(response);
                 if(!response.ok) {
-                    throw new error("Error al obtener medicos de la DB");
+                    throw new error("Error al obtener enfermeros de la DB");
                 }
-                const medicos = await response.json();
+                const enfermeros = await response.json();
 
-                const tbody = document.querySelector("#tablaMedicos tbody");
+                const tbody = document.querySelector("#tablaEnfermeros tbody");
                 tbody.innerHTML = ""; //Limpia la tabla si se hizo una modificacion o busqueda.
 
-                medicos.forEach((medico) => {
+                enfermeros.forEach((enfermero) => {
                     const fila = `
                         <tr>
-                            <td>${medico.id}</td>
-                            <td>${medico.nombre}</td>
-                            <td>${medico.apellido}</td>
-                            <td>${medico.telefono}</td>
-                            <td>${medico.especialidad}</td>
+                            <td>${enfermero.id}</td>
+                            <td>${enfermero.nombre}</td>
+                            <td>${enfermero.apellido}</td>
+                            <td>${enfermero.telefono}</td>
+                            <td>${enfermero.area}</td>
                         </tr>
                     `;
                     tbody.innerHTML += fila;
                 });
             } catch (error) {
-                console.error("Error al cargar los medicos:", error);
-                alert("No se pudieron cargar los medicos.")
+                console.error("Error al cargar los enfermeros:", error);
+                alert("No se pudieron cargar los enfermeros.")
             }};
 
-        cargarMedicos();
+        cargarEnfermeros();
         
 
 
          document.addEventListener("DOMContentLoaded", () => {
-            const tablaMedicos = document.getElementById("tablaMedicos");
+            const tablaEnfermeros = document.getElementById("tablaEnfermeros");
 
-            const btnEspecialidad = document.getElementById("especialidad");
+            const btnArea = document.getElementById("area");
             const btnNombre = document.getElementById("nombre");
 
             const containerFiltros = document.getElementById("filtros");
 
-            const inputEspecialidad = document.getElementById("inputEspecialidad");
+            const inputArea = document.getElementById("inputArea");
             const inputApe = document.getElementById("inputApe");
 
             const btnVolver = document.querySelectorAll(".volver");
         
             //boton para filtrar por especialidad
-            btnEspecialidad.addEventListener("click", (e) => {
+            btnArea.addEventListener("click", (e) => {
                 e.preventDefault();
                 containerFiltros.style.display = "none";
-                inputEspecialidad.style.display = "block";
-                inputEspecialidad.querySelector("input").focus();
+                inputArea.style.display = "block";
+                inputArea.querySelector("input").focus();
             });
 
             //boton para filtrar por apellido
@@ -102,7 +102,7 @@ block content
             btnVolver.forEach((btn) => {
                 btn.addEventListener("click", (e) => {
                 e.preventDefault();
-                inputEspecialidad.style.display = "none";
+                inputArea.style.display = "none";
                 inputApe.style.display = "none";
                 containerFiltros.style.display = "block";
                 });

@@ -54,7 +54,7 @@ html {
   border-radius: 25px;
   font-size: 1.2rem;
   padding: 15px 30px;
-  width: 20vw;
+  width: 22vw;
   box-shadow: 0px 8px 15px black;
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }

@@ -7,11 +7,11 @@ block content
         
         
     div
-        img(src="/images/trabajadores.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        img(src="/images/enfermeras.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
         
-        +header("Editar Médicos", "/icons/user-pen-solid.svg")
+        +header("Editar Enfermeros", "/icons/user-pen-solid.svg")
 
-        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id="tablaMedicos")
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id="tablaEnfermeros")
             div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
                 table.table.table-hover.table-dark.table-bordered.border-info.table-striped
                     thead(style="position: sticky; top: 0;")
@@ -20,36 +20,36 @@ block content
                             th.col(style="width: 22.5%") Nombre
                             th.col(style="width: 22.5%") Apellido
                             th.col(style="width: 22.5%") Telefono
-                            th.col(style="width: 22.5%") Especialidad
+                            th.col(style="width: 22.5%") Area
                             th.col(style="width: 10%") Editar
                     
                     tbody
 
         script.
             //carga de medicos en tabla
-            async function cargarMedicos() {
+            async function cargarEnfermeros() {
                 try {
-                    const response = await fetch("/medicos/listado");
+                    const response = await fetch("/enfermeros/listado");
                     console.log(response);
                     if(!response.ok) {
                         throw new Error("Error al obtener medicos de la DB");
                     }
-                    const medicos = await response.json();
+                    const enfermeros = await response.json();
 
-                    const tbody = document.querySelector("#tablaMedicos tbody");
+                    const tbody = document.querySelector("#tablaEnfermeros tbody");
                     tbody.innerHTML = ""; //Limpia la tabla si se hizo una modificacion o busqueda.
 
-                    medicos.forEach((medico) => {
+                    enfermeros.forEach((enfermero) => {
                         const fila = `
                             <tr>
-                                <td>${medico.id}</td>
-                                <td>${medico.nombre}</td>
-                                <td>${medico.apellido}</td>
-                                <td>${medico.telefono}</td>
-                                <td>${medico.especialidad}</td>
+                                <td>${enfermero.id}</td>
+                                <td>${enfermero.nombre}</td>
+                                <td>${enfermero.apellido}</td>
+                                <td>${enfermero.telefono}</td>
+                                <td>${enfermero.area}</td>
                                 <td>
-                                    <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarMedico
-                                    (${medico.id}, '${medico.nombre}', '${medico.apellido}', '${medico.telefono}', '${medico.especialidad}')">
+                                    <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarEnfermero
+                                    (${enfermero.id}, '${enfermero.nombre}', '${enfermero.apellido}', '${enfermero.telefono}', '${enfermero.area}')">
                                         <img src="/icons/user-pen-solid.svg" alt="Borrar" style="width: 25px; height: 25px;">
                                     </button>
                                 </td>
@@ -59,23 +59,23 @@ block content
                         tbody.innerHTML += fila;
                     });
                 } catch (error) {
-                    console.error("Error al cargar los medicos:", error);
-                    alert("No se pudieron cargar los medicos.")
+                    console.error("Error al cargar los enfermeros:", error);
+                    alert("No se pudieron cargar los enfermeros.")
                 }};
 
-            cargarMedicos();
+            cargarEnfermeros();
 
-            async function editarMedico(id, nombre, apellido, telefono, especialidad) {
+            async function editarEnfermero(id, nombre, apellido, telefono, area) {
                 
                 const nombreLimpio = nombre.trim();
                 const apellidoLimpio = apellido.trim();
                 const telefonoLimpio = telefono.trim();
-                const especialidadLimpia = especialidad.trim();
+                const areaLimpia = area.trim();
                 
                 window.location.href = 
-                `/medicos/admin/editar?id=${id}
+                `/enfermeros/admin/editar?id=${id}
                 &nombre=${encodeURIComponent(nombreLimpio)}
                 &apellido=${encodeURIComponent(apellidoLimpio)}
                 &telefono=${encodeURIComponent(telefonoLimpio)}
-                &especialidad=${encodeURIComponent(especialidadLimpia)}`; 
+                &area=${encodeURIComponent(areaLimpia)}`; 
             }
