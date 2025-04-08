@@ -24,8 +24,8 @@ block content
                     input.form-control(type="text", id="telefonoMedico" name="telefono" placeholder="Teléfono" required)
                     label(for="telefonoMedico") Teléfono
                 div.form-floating.mb-3
-                    input.form-control(type="text", id="especialidadMedico" name="especialidad" placeholder="Especialidad" required)
-                    label(for="especialidadMedico") Especialidad
+                    input.form-control(type="text", id="attr" name="attr" placeholder="Especialidad" required)
+                    label(for="attr") Especialidad
                 div.d-flex.justify-content-center.mt-4
                     button.btn.btn-primary.me-5.w-25(type="submit") Guardar Cambios
                     a.btn.btn-danger.ms-5.w-25(type="button" href="/medicos/admin/seleccionar") Cancelar
@@ -38,18 +38,18 @@ block content
                 nombre: params.get("nombre"),
                 apellido: params.get("apellido"),
                 telefono: params.get("telefono"),
-                especialidad: params.get("especialidad"),
+                attr: params.get("attr"),
             };
         }
 
         // cargamos los datos traidos en el form
         function cargarFormulario() {
-            const { id, nombre, apellido, telefono, especialidad } = getQueryParams();
+            const { id, nombre, apellido, telefono, attr } = getQueryParams();
             document.getElementById("idMedico").value = id.trim();
             document.getElementById("nombreMedico").value = nombre.trim();
             document.getElementById("apellidoMedico").value = apellido.trim();
             document.getElementById("telefonoMedico").value = telefono.trim();
-            document.getElementById("especialidadMedico").value = especialidad.trim();
+            document.getElementById("attr").value = attr.trim();
         }
 
        
@@ -60,7 +60,7 @@ block content
             const nombre = document.getElementById("nombreMedico").value.trim();
             const apellido = document.getElementById("apellidoMedico").value.trim();
             const telefono = document.getElementById("telefonoMedico").value.trim();
-            const especialidad = document.getElementById("especialidadMedico").value.trim();
+            const especialidad = document.getElementById("attr").value.trim();
 
             try {
                 const response = await fetch(`/medicos/editar/${id}`, {

@@ -24,8 +24,8 @@ block content
                     input.form-control(type="text", id="telefonoEnfermero" name="telefono" placeholder="Teléfono" required)
                     label(for="telefonoEnfermero") Teléfono
                 div.form-floating.mb-3
-                    input.form-control(type="text", id="areaEnfermero" name="area" placeholder="Area" required)
-                    label(for="areaEnfermero") Area
+                    input.form-control(type="text", id="attr" name="attr" placeholder="Area" required)
+                    label(for="attr") Area
                 div.d-flex.justify-content-center.mt-4
                     button.btn.btn-primary.me-5.w-25(type="submit") Guardar Cambios
                     a.btn.btn-danger.ms-5.w-25(type="button" href="/enfermeros/admin/seleccionar") Cancelar
@@ -38,18 +38,18 @@ block content
                 nombre: params.get("nombre"),
                 apellido: params.get("apellido"),
                 telefono: params.get("telefono"),
-                area: params.get("area"),
+                attr: params.get("attr"),
             };
         }
 
         // cargamos los datos traidos en el form
         function cargarFormulario() {
-            const { id, nombre, apellido, telefono, area } = getQueryParams();
+            const { id, nombre, apellido, telefono, attr } = getQueryParams();
             document.getElementById("idEnfermero").value = id.trim();
             document.getElementById("nombreEnfermero").value = nombre.trim();
             document.getElementById("apellidoEnfermero").value = apellido.trim();
             document.getElementById("telefonoEnfermero").value = telefono.trim();
-            document.getElementById("areaEnfermero").value = area.trim();
+            document.getElementById("attr").value = attr.trim();
         }
 
        
@@ -60,7 +60,7 @@ block content
             const nombre = document.getElementById("nombreEnfermero").value.trim();
             const apellido = document.getElementById("apellidoEnfermero").value.trim();
             const telefono = document.getElementById("telefonoEnfermero").value.trim();
-            const area = document.getElementById("areaEnfermero").value.trim();
+            const area = document.getElementById("attr").value.trim();
 
             try {
                 const response = await fetch(`/enfermeros/editar/${id}`, {

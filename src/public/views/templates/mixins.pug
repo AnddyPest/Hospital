@@ -1,3 +1,5 @@
+//-Botones y campos de texto para filtrar y limpiar
+
 mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
                 div.mt-3(id=id, style="display: none;")
                     div.d-flex.align-items-center.justify-content-center
@@ -6,6 +8,7 @@ mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
                         button.btn.btn-warning.ms-2(type="button" class="custom-button2")= btnLimpiarText
                         button.btn.btn-danger.ms-2(type="button" id="volver" class="volver custom-button2")= btnVolverText
 
+//-Header de la pag con título e icono
 
 mixin header(title, iconSrc)
     div.position-absolute.start-50.translate-middle-x.text-center.text-white(style="top: 10%; opacity: 0.8;")
@@ -13,6 +16,7 @@ mixin header(title, iconSrc)
             span(id="cabecera" style="font-size: 2.5rem;")= title
             img(src=iconSrc, alt="Medicos", class="ms-4", style="width: 60px; height: 60px;")
 
+//-Botones de admin de entidades
 
 mixin adminGeneral(entityURL, entityName)
     div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.w-75(id="adminControl")
@@ -28,6 +32,8 @@ mixin adminGeneral(entityURL, entityName)
                 img(src="/icons/user-slash-solid.svg", alt=`Borrar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
             a.btn.btn-danger.ms-4(href=`/${entityURL}` type="button", class="custom-button2" style="width: 50px; padding:5px;") 
                 img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
+
+//-Tablas de entidades con busqueda y filtros para las paginas de listar
 
 mixin tablaConBuscador(entityURL, entityName, singleEntityAttr)
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${entityName}`)
@@ -125,3 +131,108 @@ mixin tablaConBuscador(entityURL, entityName, singleEntityAttr)
                     });
                 }
             });
+
+//-Tablas para las vistas de editar y borrar con botobn de volvler
+
+mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${entityName}`)
+            div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
+                table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+                    thead(style="position: sticky; top: 0;")
+                        tr.table-info
+                            th.col(style="width: 10%") ID
+                            th.col(style="width: 22.5%") Nombre
+                            th.col(style="width: 22.5%") Apellido
+                            th.col(style="width: 22.5%") Telefono
+                            th.col(style="width: 22.5%") #{singleEntityAttr}
+                            th.col(style="width: 10%") #{context.charAt(0).toUpperCase() + context.slice(1)}
+                            
+                    
+                    tbody
+            a.btn.btn-danger.ms-2.mt-5(href=`/${entityURL}/admin` type="button" id="volver" class="volver custom-button2") Volver
+
+        script.
+            //carga de medicos en tabla
+            async function cargarEntidad(entityURL, entityName, singleEntityAttr, context) {
+                try {
+                    const response = await fetch(`/${entityURL}/listado`);
+                    console.log(response);
+                    if(!response.ok) {
+                        throw new Error(`Error al obtener ${entityURL}  de la DB`);
+                    }
+                    const entidades = await response.json();
+
+                    const tbody = document.querySelector(`#tabla${entityName} tbody`);
+                    tbody.innerHTML = ""; //Limpia la tabla si se hizo una modificacion o busqueda.
+
+                    entidades.forEach((entidad) => {
+                        const fila = `
+                            <tr>
+                                <td>${entidad.id}</td>
+                                <td>${entidad.nombre}</td>
+                                <td>${entidad.apellido}</td>
+                                <td>${entidad.telefono}</td>
+                                <td>${entidad[singleEntityAttr.toLowerCase()]}</td>
+                                ${
+                                    context === "Editar"
+                                        ? `<td>
+                                            <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarEntidad(${entidad.id}, '${entidad.nombre}', '${entidad.apellido}', '${entidad.telefono}', '${entidad[singleEntityAttr.toLowerCase()]}', '${context}')">
+                                                <img src="/icons/user-pen-solid.svg" alt="Editar" style="width: 25px; height: 25px;">
+                                            </button>
+                                        </td>`
+                                        : context === "Borrar"
+                                        ? `<td>
+                                            <button type="button" class="btn btn-danger" style="width: 100%; padding:5px;" onclick="borrarEntidad(${entidad.id}, '${entidad.nombre}', '${entidad.apellido}')">
+                                                <img src="/icons/user-slash-solid.svg" alt="Borrar" style="width: 25px; height: 25px;">
+                                            </button>
+                                        </td>`
+                                        : ""
+                                }
+                            </tr>
+                        `;
+                        tbody.innerHTML += fila;
+                    });
+                } catch (error) {
+                    console.error(`Error al cargar los ${entityURL}:`, error);
+                    alert(`No se pudieron cargar los ${entityURL}.`)
+                }};
+
+            cargarEntidad("#{entityURL}", "#{entityName}", "#{singleEntityAttr}", "#{context}");
+
+            async function editarEntidad(id, nombre, apellido, telefono, singleEntityAttr, context) {
+                
+                const nombreLimpio = nombre.trim();
+                const apellidoLimpio = apellido.trim();
+                const telefonoLimpio = telefono.trim();
+                const attrLimpio = singleEntityAttr.trim();
+                const contextLimpio = context.toLowerCase().trim();
+                
+                window.location.href = 
+                `/#{entityURL}/admin/${contextLimpio }?id=${id}
+                &nombre=${encodeURIComponent(nombreLimpio)}
+                &apellido=${encodeURIComponent(apellidoLimpio)}
+                &telefono=${encodeURIComponent(telefonoLimpio)}
+                &attr=${encodeURIComponent(attrLimpio)}`; 
+            }
+
+            async function borrarEntidad(id, nombre, apellido) {
+            const confirmacion = confirm(`¿Estás seguro de que deseas borrar al médico ${nombre} ${apellido}?`);
+            if (!confirmacion) {
+                return;
+            }
+            try {
+                const response = await fetch(`/#{entityURL}/borrar/${id}`, {
+                    method: "DELETE",
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error al borrar el ${entityName}`);
+                }
+
+                alert(`#{entityName} ID: ${id}, Nombre y Apellido: ${nombre} ${apellido} borrado con éxito`);
+                location.reload(); // Recarga la página para actualizar la tabla
+            } catch (error) {
+                console.error(`Error al borrar el #{entityName}:`, error);
+                alert(`No se pudo borrar el #{entityName}`);
+            }
+            }
