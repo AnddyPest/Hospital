@@ -12,3 +12,20 @@ mixin header(title, iconSrc)
         h1(style="padding: 20px; background-color: rgba(0, 0, 0, 0.5); border-radius: 10px;")
             span(id="cabecera" style="font-size: 2.5rem;")= title
             img(src=iconSrc, alt="Medicos", class="ms-4", style="width: 60px; height: 60px;")
+
+
+mixin adminGeneral(entityURL, entityName)
+    div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(id="adminControl")
+        div.d-flex.justify-content-center.align-items-center.gap-4
+            a.btn.btn-success.ms-4(href=`/${entityURL}/admin/new` type="button", id="agregar" class="custom-button2" style="width: 350px;") 
+                span() Agregar "#{entityName}"
+                img(src="/icons/user-plus-solid.svg", alt=`Agregar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+            a.btn.btn-warning(href=`/${entityURL}/admin/seleccionar`, type="button", id="editar" class="custom-button2" style="width: 350px;") 
+                span() Editar "#{entityName}"
+                img(src="/icons/user-pen-solid.svg", alt=`Editar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+            a.btn.btn-danger.me-4(href=`/${entityURL}/admin/borrar`, type="button", id="borrar" class="custom-button2" style="width: 350px;") 
+                span() Borrar "#{entityName}"
+                img(src="/icons/user-slash-solid.svg", alt=`Borrar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+            a.btn.btn-danger.ms-4(href=`/${entityURL}` type="button", class="custom-button2" style="width: 50px; padding:5px;") 
+                img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
+
