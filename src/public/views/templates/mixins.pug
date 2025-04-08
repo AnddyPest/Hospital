@@ -15,8 +15,8 @@ mixin header(title, iconSrc)
 
 
 mixin adminGeneral(entityURL, entityName)
-    div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(id="adminControl")
-        div.d-flex.justify-content-center.align-items-center.gap-4
+    div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.w-75(id="adminControl")
+        div.d-flex.justify-content-center.align-items-center.gap-4.mt-5
             a.btn.btn-success.ms-4(href=`/${entityURL}/admin/new` type="button", id="agregar" class="custom-button2" style="width: 350px;") 
                 span() Agregar "#{entityName}"
                 img(src="/icons/user-plus-solid.svg", alt=`Agregar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
