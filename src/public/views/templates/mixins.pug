@@ -236,3 +236,61 @@ mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
                 alert(`No se pudo borrar el #{entityName}`);
             }
             }
+
+//- Crear nueva entidad
+
+mixin nuevaEntidad(entityURL, entityName, singleEntityAttr)
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%;" id=`formulario${entityName}`)
+            div.d-flex.justify-content-center
+                form.w-75(id=`form${entityName}`, method="POST", action=`/${entityURL}/admin/new`)
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="nombre", name="nombre", placeholder="Nombre" required)
+                        label(for="nombre") Nombre
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="apellido", name="apellido", placeholder="Apellido" required)
+                        label(for="apellido") Apellido
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id=`${singleEntityAttr.toLowerCase()}`, name=`${singleEntityAttr.toLowerCase()}` placeholder="Area" required)
+                        label(for=`${singleEntityAttr}`) #{singleEntityAttr}
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="telefono", name="telefono", placeholder="Teléfono" required)
+                        label(for="telefono") Teléfono
+                    div.d-flex.justify-content-center.mt-4
+                        button.btn.btn-primary.me-5.w-25(type="submit") Guardar #{entityName}
+                        a.btn.btn-danger.ms-5.w-25(href=`/${entityURL}/admin` type="button", id="cancelar") Cancelar
+
+        script.
+            
+            document.getElementById(`form#{entityName}`).addEventListener("submit", async function(event) {
+                event.preventDefault();
+
+                const form = document.getElementById(`form#{entityName}`);
+                
+                const formData = new FormData(form);
+
+                const datos = Object.fromEntries(formData.entries());
+
+                try {
+                    const response = await fetch(`/#{entityURL}/admin/new`, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify(datos),
+                    });
+
+                    const result = await response.json();
+                    console.log(result);
+                    console.log(response);
+                    if (response.ok) {
+                        alert(`#{entityName}: ${result.nombre} ${result.apellido} agregado con exito.`); //si ok
+                        form.reset(); // limpia
+                    } else {
+                        alert(result.error); // si no ok
+                    }
+                } catch (error) {
+                    console.error("Error al enviar el formulario:", error);
+                    alert("Ha ocurrido un error inesperado");
+                }
+                
+            })
