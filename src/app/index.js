@@ -3,6 +3,7 @@ const sequelize = require("./database-connection"); //importacion de sequelize
 const router = require("./router/router"); // Router
 const medicoRouter = require("./router/medicoRouter"); // Medicos Router
 const enfermeroRouter = require("./router/enfermeroRouter"); // Enfermeros Router
+const administrativoRouter = require("./router/administrativoRouter"); // Administrativos Router
 const path = require("path");
 const morgan = require("morgan");
 
@@ -22,6 +23,7 @@ app.use(morgan("dev"));
 app.use("/", router);
 app.use("/medicos", medicoRouter);
 app.use("/enfermeros", enfermeroRouter);
+app.use("/administrativos", administrativoRouter);
 // Conexión y sincronización con la base de datos
 sequelize
   .authenticate()

@@ -1,6 +1,5 @@
 const express = require("express");
 const router = express.Router();
-const medicoController = require("../controller/enfermeroController");
 const enfermeroController = require("../controller/enfermeroController");
 
 //renders
@@ -41,7 +40,7 @@ router.get("/admin/editar", (req, res) => {
 });
 
 router.get("/admin/seleccionar", (req, res) => {
-  res.render("vistasEnfermeros/seleccionarenfermero", {
+  res.render("vistasEnfermeros/seleccionarEnfermero", {
     title: "Seleccionar Enfermero",
   });
 });
