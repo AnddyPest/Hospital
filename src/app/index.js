@@ -5,7 +5,8 @@ const medicoRouter = require("./router/medicoRouter"); // Medicos Router
 const enfermeroRouter = require("./router/enfermeroRouter"); // Enfermeros Router
 const administrativoRouter = require("./router/administrativoRouter"); // Administrativos Router
 const maestranzaRouter = require("./router/maestranzaRouter"); // Maestranzas Router
-const pacienteRouter = require("./router/pacienteRouter");
+const pacienteRouter = require("./router/pacienteRouter"); // Pacientes Router
+const turnoRouter = require("./router/turnoRouter"); // Turnos Router
 const path = require("path");
 const morgan = require("morgan");
 
@@ -28,6 +29,7 @@ app.use("/enfermeros", enfermeroRouter);
 app.use("/administrativos", administrativoRouter);
 app.use("/maestranzas", maestranzaRouter);
 app.use("/pacientes", pacienteRouter);
+app.use("/turnos", turnoRouter);
 // Conexión y sincronización con la base de datos
 sequelize
   .authenticate()
