@@ -1,0 +1,16 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+
+block content
+        
+        
+        
+    div
+        img(src="/images/maestranzas.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Borrar Maestranzas", "/icons/user-slash-solid.svg")
+
+        +tablaEditErase("maestranzas", "Maestranza", "Area","Borrar")
+
+        
