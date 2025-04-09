@@ -294,3 +294,87 @@ mixin nuevaEntidad(entityURL, entityName, singleEntityAttr)
                 }
                 
             })
+
+//-editar entidades
+
+mixin editEntidad(entityURL,entityName,singleEntityAttr)
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%;" id="formularioEnfermero")
+            div.d-flex.justify-content-center
+            form(id=`form${entityName}`, onsubmit="event.preventDefault(); guardarCambios();")
+                div.form-floating.mb-3
+                    input.form-control(type="text", id="id" name="id" readonly placeholder="ID")
+                    label(for="id") ID
+                div.form-floating.mb-3
+                    input.form-control(type="text", id="nombre" name="nombre" placeholder="Nombre" required)
+                    label(for="nombre") Nombre
+                div.form-floating.mb-3
+                    input.form-control(type="text", id="apellido" name="apellido" placeholder="Apellido" required)
+                    label(for="apellido") Apellido
+                div.form-floating.mb-3
+                    input.form-control(type="text", id="telefono" name="telefono" placeholder="Teléfono" required)
+                    label(for="telefono") Teléfono
+                div.form-floating.mb-3
+                    input.form-control(type="text", id=`${singleEntityAttr.toLowerCase()}` name=`${singleEntityAttr.toLowerCase()}` placeholder="Area" required)
+                    label(for=`${singleEntityAttr.toLowerCase()}`) #{singleEntityAttr}
+                div.d-flex.justify-content-center.mt-4
+                    button.btn.btn-primary.me-5.w-25(type="submit") Guardar Cambios
+                    a.btn.btn-danger.ms-5.w-25(type="button" href=`/${entityURL}/admin/seleccionar`) Cancelar
+
+        script.
+            function getQueryParams() { //traemos los parametros de la pagina de seleccion
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    id: params.get("id"),
+                    nombre: params.get("nombre"),
+                    apellido: params.get("apellido"),
+                    telefono: params.get("telefono"),
+                    #{singleEntityAttr.toLowerCase()}: params.get("attr"),
+                };
+            }
+
+            // cargamos los datos traidos en el form
+            function cargarFormulario() {
+                const { id, nombre, apellido, telefono, #{singleEntityAttr.toLowerCase()} } = getQueryParams();
+                document.getElementById("id").value = id.trim();
+                document.getElementById("nombre").value = nombre.trim();
+                document.getElementById("apellido").value = apellido.trim();
+                document.getElementById("telefono").value = telefono.trim();
+                document.getElementById(`#{singleEntityAttr.toLowerCase()}`).value = #{singleEntityAttr.toLowerCase()}.trim();
+            }
+
+        
+            cargarFormulario();
+
+            async function guardarCambios() {
+                const id = document.getElementById("id").value.trim();
+                const nombre = document.getElementById("nombre").value.trim();
+                const apellido = document.getElementById("apellido").value.trim();
+                const telefono = document.getElementById("telefono").value.trim();
+                const #{singleEntityAttr.toLowerCase()} = document.getElementById(`#{singleEntityAttr.toLowerCase()}`).value.trim();
+
+                try {
+                    const response = await fetch(`/#{entityURL}/editar/${id}`, {
+                        method: "PUT",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ nombre, apellido, telefono, #{singleEntityAttr.toLowerCase()}}),
+                    });
+
+                    if (!response.ok) {
+                        throw new Error("Error al guardar los cambios");
+                    }
+
+                    alert("Cambios guardados con éxito");
+                    window.location.href = `/#{entityURL}/admin/seleccionar`; // Redirige después de guardar
+                } catch (error) {
+                    console.error("Error al guardar los cambios:", error);
+                    alert("No se pudieron guardar los cambios");
+                }
+            }
+
+
+        
+
+
+
