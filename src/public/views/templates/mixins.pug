@@ -11,9 +11,9 @@ mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
 //-Header de la pag con título e icono
 
 mixin header(title, iconSrc)
-    div.position-absolute.start-50.translate-middle-x.text-center.text-white(style="top: 10%; opacity: 0.8;")
-        h1(style="padding: 20px; background-color: rgba(0, 0, 0, 0.5); border-radius: 10px;")
-            span(id="cabecera" style="font-size: 2.5rem;")= title
+    div.position-absolute.start-50.translate-middle-x.text-center.text-white.mb-5(style="top: 10%; opacity: 0.8;")
+        h1(style="padding: 15px; background-color: rgba(0, 0, 0, 0.5); border-radius: 10px;")
+            span(id="cabecera" style="font-size: 2.2rem;")= title
             img(src=iconSrc, alt="Medicos", class="ms-4", style="width: 60px; height: 60px;")
 
 //-Botones de admin de entidades
@@ -42,21 +42,28 @@ mixin tablaConBuscador(entityURL, entityName, singleEntityAttr)
                     table.table.table-hover.table-dark.table-bordered.border-info.table-striped
                         thead(style="position: sticky; top: 0;")
                             tr.table-info
-                                th.col(style="width: 10%") ID
-                                th.col(style="width: 22.5%") Nombre
-                                th.col(style="width: 22.5%") Apellido
-                                th.col(style="width: 22.5%") Telefono
-                                th.col(style="width: 22.5%") #{singleEntityAttr}
+                                th.col(style="width: 5%") ID
+                                th.col(style="width: 19%") DNI
+                                th.col(style="width: 19%") Nombre
+                                th.col(style="width: 19%") Apellido
+                                th.col(style="width: 19%") Telefono
+                                th.col(style="width: 19%") #{singleEntityAttr}
                         tbody
 
             div.mt-3(id="filtros")
-                button.btn.btn-info.me-4(type="button", id=`btn${singleEntityAttr}` class="custom-button2") Filtrar por #{singleEntityAttr}
-                button.btn.btn-info.ms-4.me-4(type="button", id="btnNombre" class="custom-button2") Buscar por Apellido
+                if entityName === "Paciente"
+                    button.btn.btn-info.me-4(type="button", id=`btnNombre` class="custom-button2") Filtrar por DNI
+                else
+                    button.btn.btn-info.me-4(type="button", id=`btn${singleEntityAttr}` class="custom-button2") Filtrar por #{singleEntityAttr}
+                    button.btn.btn-info.ms-4.me-4(type="button", id="btnNombre" class="custom-button2") Buscar por Apellido
                 a.btn.btn-danger.ms-4(href=`/${entityURL}` type="button", class="custom-button2" style="width: 50px; padding:5px;") 
                     img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
-
-            +inputGroup(`input${singleEntityAttr}`, `Ingrese ${singleEntityAttr}`, "Filtrar", "Limpiar", "Volver")
-            +inputGroup("inputApe", "Ingrese el Apellido", "Filtrar", "Limpiar", "Volver")
+            if entityName === "Paciente"
+                +inputGroup(`inputApe`, "Ingrese el DNI", "Filtrar", "Limpiar", "Volver")
+                
+            else    
+                +inputGroup(`input${singleEntityAttr}`, `Ingrese ${singleEntityAttr}`, "Filtrar", "Limpiar", "Volver")
+                +inputGroup("inputApe", "Ingrese el Apellido", "Filtrar", "Limpiar", "Volver")
 
         script.
             document.addEventListener("DOMContentLoaded", () => {
@@ -79,6 +86,7 @@ mixin tablaConBuscador(entityURL, entityName, singleEntityAttr)
                             const fila = `
                                 <tr>
                                     <td>${entidad.id || "N/A"}</td>
+                                    <td>${entidad.dni || "N/A"}</td>
                                     <td>${entidad.nombre || "N/A"}</td>
                                     <td>${entidad.apellido || "N/A"}</td>
                                     <td>${entidad.telefono || "N/A"}</td>
@@ -124,7 +132,10 @@ mixin tablaConBuscador(entityURL, entityName, singleEntityAttr)
                     btnVolver.forEach((btn) => {
                         btn.addEventListener("click", (e) => {
                             e.preventDefault();
-                            inputSingle.style.display = "none";
+                            if(inputSingle) {
+                                inputSingle.style.display = "none";
+                                };
+                            
                             inputApe.style.display = "none";
                             containerFiltros.style.display = "block";
                         });
@@ -140,11 +151,12 @@ mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
                 table.table.table-hover.table-dark.table-bordered.border-info.table-striped
                     thead(style="position: sticky; top: 0;")
                         tr.table-info
-                            th.col(style="width: 10%") ID
-                            th.col(style="width: 22.5%") Nombre
-                            th.col(style="width: 22.5%") Apellido
-                            th.col(style="width: 22.5%") Telefono
-                            th.col(style="width: 22.5%") #{singleEntityAttr}
+                            th.col(style="width: 5%") ID
+                            th.col(style="width: 17%") DNI
+                            th.col(style="width: 17%") Nombre
+                            th.col(style="width: 17%") Apellido
+                            th.col(style="width: 17%") Telefono
+                            th.col(style="width: 17%") #{singleEntityAttr}
                             th.col(style="width: 10%") #{context.charAt(0).toUpperCase() + context.slice(1)}
                             
                     
@@ -169,6 +181,7 @@ mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
                         const fila = `
                             <tr>
                                 <td>${entidad.id}</td>
+                                <td>${entidad.dni}</td>
                                 <td>${entidad.nombre}</td>
                                 <td>${entidad.apellido}</td>
                                 <td>${entidad.telefono}</td>
@@ -176,7 +189,7 @@ mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
                                 ${
                                     context === "Editar"
                                         ? `<td>
-                                            <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarEntidad(${entidad.id}, '${entidad.nombre}', '${entidad.apellido}', '${entidad.telefono}', '${entidad[singleEntityAttr.toLowerCase()]}', '${context}')">
+                                            <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarEntidad(${entidad.id}, '${entidad.dni}', '${entidad.nombre}', '${entidad.apellido}', '${entidad.telefono}', '${entidad[singleEntityAttr.toLowerCase()]}', '${context}')">
                                                 <img src="/icons/user-pen-solid.svg" alt="Editar" style="width: 25px; height: 25px;">
                                             </button>
                                         </td>`
@@ -199,8 +212,9 @@ mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
 
             cargarEntidad("#{entityURL}", "#{entityName}", "#{singleEntityAttr}", "#{context}");
 
-            async function editarEntidad(id, nombre, apellido, telefono, singleEntityAttr, context) {
+            async function editarEntidad(id, dni, nombre, apellido, telefono, singleEntityAttr, context) {
                 
+                const dniLimpio = dni.trim();
                 const nombreLimpio = nombre.trim();
                 const apellidoLimpio = apellido.trim();
                 const telefonoLimpio = telefono.trim();
@@ -209,6 +223,7 @@ mixin tablaEditErase(entityURL, entityName, singleEntityAttr, context)
                 
                 window.location.href = 
                 `/#{entityURL}/admin/${contextLimpio }?id=${id}
+                &dni=${encodeURIComponent(dniLimpio)}
                 &nombre=${encodeURIComponent(nombreLimpio)}
                 &apellido=${encodeURIComponent(apellidoLimpio)}
                 &telefono=${encodeURIComponent(telefonoLimpio)}
@@ -243,6 +258,9 @@ mixin nuevaEntidad(entityURL, entityName, singleEntityAttr)
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%;" id=`formulario${entityName}`)
             div.d-flex.justify-content-center
                 form.w-75(id=`form${entityName}`, method="POST", action=`/${entityURL}/admin/new`)
+                    div.form-floating.mb-3
+                        input.form-control(type="text", id="dni", name="dni", placeholder="DNI" required)
+                        label(for="dni") DNI
                     div.form-floating.mb-3
                         input.form-control(type="text", id="nombre", name="nombre", placeholder="Nombre" required)
                         label(for="nombre") Nombre
@@ -301,19 +319,22 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%;" id="formularioEnfermero")
             div.d-flex.justify-content-center
             form(id=`form${entityName}`, onsubmit="event.preventDefault(); guardarCambios();")
-                div.form-floating.mb-3
+                div.form-floating.mb-2
                     input.form-control(type="text", id="id" name="id" readonly placeholder="ID")
                     label(for="id") ID
-                div.form-floating.mb-3
+                div.form-floating.mb-2
+                    input.form-control(type="text", id="dni" name="dni" placeholder="DNI" required)
+                    label(for="dni") DNI
+                div.form-floating.mb-2
                     input.form-control(type="text", id="nombre" name="nombre" placeholder="Nombre" required)
                     label(for="nombre") Nombre
-                div.form-floating.mb-3
+                div.form-floating.mb-2
                     input.form-control(type="text", id="apellido" name="apellido" placeholder="Apellido" required)
                     label(for="apellido") Apellido
-                div.form-floating.mb-3
+                div.form-floating.mb-2
                     input.form-control(type="text", id="telefono" name="telefono" placeholder="Teléfono" required)
                     label(for="telefono") Teléfono
-                div.form-floating.mb-3
+                div.form-floating.mb-2
                     input.form-control(type="text", id=`${singleEntityAttr.toLowerCase()}` name=`${singleEntityAttr.toLowerCase()}` placeholder="Area" required)
                     label(for=`${singleEntityAttr.toLowerCase()}`) #{singleEntityAttr}
                 div.d-flex.justify-content-center.mt-4
@@ -325,6 +346,7 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
                 const params = new URLSearchParams(window.location.search);
                 return {
                     id: params.get("id"),
+                    dni: params.get("dni"),
                     nombre: params.get("nombre"),
                     apellido: params.get("apellido"),
                     telefono: params.get("telefono"),
@@ -334,8 +356,9 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
 
             // cargamos los datos traidos en el form
             function cargarFormulario() {
-                const { id, nombre, apellido, telefono, #{singleEntityAttr.toLowerCase()} } = getQueryParams();
+                const { id, dni, nombre, apellido, telefono, #{singleEntityAttr.toLowerCase()} } = getQueryParams();
                 document.getElementById("id").value = id.trim();
+                document.getElementById("dni").value = dni.trim();
                 document.getElementById("nombre").value = nombre.trim();
                 document.getElementById("apellido").value = apellido.trim();
                 document.getElementById("telefono").value = telefono.trim();
@@ -347,6 +370,7 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
 
             async function guardarCambios() {
                 const id = document.getElementById("id").value.trim();
+                const dni = document.getElementById("dni").value.trim();
                 const nombre = document.getElementById("nombre").value.trim();
                 const apellido = document.getElementById("apellido").value.trim();
                 const telefono = document.getElementById("telefono").value.trim();
@@ -358,7 +382,7 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
                         headers: {
                             "Content-Type": "application/json",
                         },
-                        body: JSON.stringify({ nombre, apellido, telefono, #{singleEntityAttr.toLowerCase()}}),
+                        body: JSON.stringify({ dni, nombre, apellido, telefono, #{singleEntityAttr.toLowerCase()}}),
                     });
 
                     if (!response.ok) {

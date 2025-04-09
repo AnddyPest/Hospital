@@ -17,8 +17,9 @@ const enfermeroController = {
   crearEnfermero: async (req, res) => {
     try {
       console.log("Creando nuevo enfermero:", req.body);
-      const { nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area, telefono } = req.body;
       const nuevoEnfermero = await Enfermero.create({
+        dni,
         nombre,
         apellido,
         area,
@@ -35,9 +36,9 @@ const enfermeroController = {
   editarEnfermero: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area, telefono } = req.body;
       const [updated] = await Enfermero.update(
-        { nombre, apellido, area, telefono },
+        { dni, nombre, apellido, area, telefono },
         { where: { id } }
       );
       if (updated) {

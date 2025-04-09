@@ -17,8 +17,9 @@ const administrativoController = {
   crearAdministrativo: async (req, res) => {
     try {
       console.log("Creando nuevo administrativo:", req.body);
-      const { nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area, telefono } = req.body;
       const nuevoAdministrativo = await Administrativo.create({
+        dni,
         nombre,
         apellido,
         area,
@@ -35,9 +36,9 @@ const administrativoController = {
   editarAdministrativo: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area, telefono } = req.body;
       const [updated] = await Administrativo.update(
-        { nombre, apellido, area, telefono },
+        { dni, nombre, apellido, area, telefono },
         { where: { id } }
       );
       if (updated) {

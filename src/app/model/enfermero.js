@@ -7,6 +7,11 @@ const Enfermero = sequelize.define("Enfermero", {
     primaryKey: true,
     autoIncrement: true,
   },
+  dni: {
+    type: DataTypes.DOUBLE,
+    unique: true,
+    allowNull: false,
+  },
   nombre: {
     type: DataTypes.STRING,
     allowNull: false,

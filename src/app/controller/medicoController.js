@@ -17,8 +17,9 @@ const medicoController = {
   crearMedico: async (req, res) => {
     try {
       console.log("Creando nuevo medico:", req.body);
-      const { nombre, apellido, especialidad, telefono } = req.body;
+      const { dni, nombre, apellido, especialidad, telefono } = req.body;
       const nuevoMedico = await Medico.create({
+        dni,
         nombre,
         apellido,
         especialidad,
@@ -35,9 +36,9 @@ const medicoController = {
   editarMedico: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nombre, apellido, especialidad, telefono } = req.body;
+      const { dni, nombre, apellido, especialidad, telefono } = req.body;
       const [updated] = await Medico.update(
-        { nombre, apellido, especialidad, telefono },
+        { dni, nombre, apellido, especialidad, telefono },
         { where: { id } }
       );
       if (updated) {

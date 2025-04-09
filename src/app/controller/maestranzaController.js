@@ -17,8 +17,9 @@ const maestranzaController = {
   crearMaestranza: async (req, res) => {
     try {
       console.log("Creando nuevo Maestranza:", req.body);
-      const { nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area, telefono } = req.body;
       const nuevoMaestranza = await Maestranza.create({
+        dni,
         nombre,
         apellido,
         area,
@@ -35,9 +36,9 @@ const maestranzaController = {
   editarMaestranza: async (req, res) => {
     try {
       const { id } = req.params;
-      const { nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area, telefono } = req.body;
       const [updated] = await Maestranza.update(
-        { nombre, apellido, area, telefono },
+        { dni, nombre, apellido, area, telefono },
         { where: { id } }
       );
       if (updated) {

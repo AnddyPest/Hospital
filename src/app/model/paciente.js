@@ -1,7 +1,7 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../database-connection");
 
-const Medico = sequelize.define("Medico", {
+const Paciente = sequelize.define("Paciente", {
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -20,7 +20,7 @@ const Medico = sequelize.define("Medico", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  especialidad: {
+  Obra_Social: {
     type: DataTypes.STRING,
     allowNull: false,
   },
@@ -30,4 +30,4 @@ const Medico = sequelize.define("Medico", {
   },
 });
 
-module.exports = Medico;
+module.exports = Paciente;
