@@ -36,11 +36,11 @@ const Turno = sequelize.define("Turno", {
 // Turno pertenece a un Medico
 // Enfermero tiene muchos Turnos
 // Turno pertenece a un Enfermero
-Paciente.belongsToMany(Turno, { through: "pacientesTurnos" });
-Turno.belongsToMany(Paciente, { through: "pacientesTurnos" });
-Medico.belongsToMany(Turno, { through: "medicosTurnos" });
-Turno.belongsToMany(Medico, { through: "medicosTurnos" });
-Enfermero.belongsToMany(Turno, { through: "enfermerosTurnos" });
-Turno.belongsToMany(Enfermero, { through: "enfermerosTurnos" });
+Paciente.hasMany(Turno, { foreignKey: "paciente_Id" });
+Turno.belongsTo(Paciente, { foreignKey: "paciente_Id" });
+Medico.hasMany(Turno, { foreignKey: "medico_Id" });
+Turno.belongsTo(Medico, { foreignKey: "medico_Id" });
+Enfermero.hasMany(Turno, { foreignKey: "enfermero_Id" });
+Turno.belongsTo(Enfermero, { foreignKey: "enfermero_Id" });
 
 module.exports = Turno;

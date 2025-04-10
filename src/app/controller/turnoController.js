@@ -8,11 +8,7 @@ const turnoController = {
   getAllTurnos: async (req, res) => {
     try {
       const turnos = await Turno.findAll({
-        include: [
-          { model: Paciente, through: { attributes: [] } }, // Incluye pacientes PROBAR TODO ESTO
-          { model: Medico, through: { attributes: [] } }, // Incluye médicos
-          { model: Enfermero, through: { attributes: [] } }, // Incluye enfermeros
-        ],
+        include: [Paciente, Medico, Enfermero], // Incluye las relaciones
       });
       res.status(200).json(turnos);
     } catch (error) {
@@ -21,46 +17,43 @@ const turnoController = {
     }
   },
 
-  // Crar un nuevo turno
+  // Crear un nuevo turno
   createTurno: async (req, res) => {
     try {
       const { fecha, hora, motivo, estado, pacienteId, medicoId, enfermeroId } =
-        req.body; //tengo dudas aca...
-
-      // Validar que solo se asigne un médico o un enfermero, pero no ambos
-      if (medicoId && enfermeroId) {
-        return res.status(400).json({
-          error:
-            "Un turno no puede tener asignado un médico y un enfermero al mismo tiempo",
-        });
+        req.body;
+      if (!pacienteId) {
+        // Validar que el id ha sido enviado asi la app explota
+        return res.status(400).json({ error: "Paciente ID es requerido" });
       }
-
-      // Validar que el paciente existe para q si de alguna manera la logre cagar no explote la app
       const paciente = await Paciente.findByPk(pacienteId);
       if (!paciente) {
         return res.status(404).json({ error: "Paciente no encontrado" });
       }
 
-      // Crear el turno
-      const turno = await Turno.create({ fecha, hora, motivo, estado });
-
-      // Asociar el turno con el paciente
-      await turno.addPaciente(paciente);
-
-      // Asociar el turno con un médico o un enfermero
+      // Validar que el médico o enfermero exista (si uno u otro se pone)
       if (medicoId) {
         const medico = await Medico.findByPk(medicoId);
         if (!medico) {
           return res.status(404).json({ error: "Médico no encontrado" });
         }
-        await turno.addMedico(medico);
       } else if (enfermeroId) {
         const enfermero = await Enfermero.findByPk(enfermeroId);
         if (!enfermero) {
           return res.status(404).json({ error: "Enfermero no encontrado" });
         }
-        await turno.addEnfermero(enfermero);
       }
+
+      // Crear el turno
+      const turno = await Turno.create({
+        fecha,
+        hora,
+        motivo,
+        estado,
+        pacienteId,
+        medicoId,
+        enfermeroId,
+      });
 
       res.status(201).json(turno);
     } catch (error) {
@@ -73,10 +66,9 @@ const turnoController = {
   updateTurno: async (req, res) => {
     try {
       const { id } = req.params;
-      const { fecha, hora, motivo, estado, medicoId, enfermeroId } = req.body; //tengo dudas aca... el paciente no deberia poder editarse, solo bajar el
-      // turno o cambiarlo de medico o enfermero o de fecha u hora
+      const { fecha, hora, motivo, estado, medicoId, enfermeroId } = req.body;
 
-      // Validar que solo se asigne un médico o un enfermero, pero no ambos, si puedo poner ambas... chau
+      // Validar que solo se asigne un médico o un enfermero, pero no ambos
       if (medicoId && enfermeroId) {
         return res.status(400).json({
           error:
@@ -89,25 +81,28 @@ const turnoController = {
         return res.status(404).json({ error: "Turno no encontrado" });
       }
 
-      // Actualizar los datos del turno -> sale por PUT
-      await turno.update({ fecha, hora, motivo, estado });
-
-      // Asociar el turno con un médico o un enfermero, aunque lo cambie debo eliminar el anterior o sobreescribir el mismo
+      // Validar que el médico o enfermero exista (si se proporciona)
       if (medicoId) {
         const medico = await Medico.findByPk(medicoId);
         if (!medico) {
           return res.status(404).json({ error: "Médico no encontrado" });
         }
-        await turno.setMedicos([medico]); // Reemplaza cualquier médico existente
-        await turno.setEnfermeros([]); // Elimina cualquier enfermero asociado
       } else if (enfermeroId) {
         const enfermero = await Enfermero.findByPk(enfermeroId);
         if (!enfermero) {
           return res.status(404).json({ error: "Enfermero no encontrado" });
         }
-        await turno.setEnfermeros([enfermero]); // Reemplaza cualquier enfermero existente
-        await turno.setMedicos([]); // Elimina cualquier médico asociado
       }
+
+      // Actualizar los datos del turno
+      await turno.update({
+        fecha,
+        hora,
+        motivo,
+        estado,
+        medicoId,
+        enfermeroId,
+      });
 
       res.status(200).json(turno);
     } catch (error) {
@@ -141,11 +136,7 @@ const turnoController = {
       const { id } = req.params;
 
       const turno = await Turno.findByPk(id, {
-        include: [
-          { model: Paciente, through: { attributes: [] } },
-          { model: Medico, through: { attributes: [] } },
-          { model: Enfermero, through: { attributes: [] } },
-        ],
+        include: [Paciente, Medico, Enfermero], // Incluye las relaciones
       });
 
       if (!turno) {
@@ -159,7 +150,7 @@ const turnoController = {
     }
   },
 
-  // obtener turnos por dni de paciente
+  // Obtener turnos por DNI del paciente
   getTurnosByPacienteDni: async (req, res) => {
     try {
       const { dni } = req.params;
@@ -169,11 +160,9 @@ const turnoController = {
         return res.status(404).json({ error: "Paciente no encontrado" });
       }
 
-      const turnos = await paciente.getTurnos({
-        include: [
-          { model: Medico, through: { attributes: [] } },
-          { model: Enfermero, through: { attributes: [] } },
-        ],
+      const turnos = await Turno.findAll({
+        where: { pacienteId: paciente.id },
+        include: [Medico, Enfermero], // Incluye médicos y enfermeros
       });
 
       res.status(200).json(turnos);
