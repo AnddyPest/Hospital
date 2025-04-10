@@ -3,9 +3,21 @@ const turnoController = require("../controller/turnoController");
 const router = express.Router();
 
 //renders FALTAN
+//portada
+router.get("/", (req, res) => {
+  res.render("vistasPacientes/turnos/portadaTurnos", {
+    title: "Turnos",
+  });
+});
+//vista admin
+router.get("/admin", (req, res) => {
+  res.render("vistasPacientes/turnos/administrarTurnos", {
+    title: "Administrar Turnos",
+  });
+});
 
 // api FALTA AGREGAR LAS RUTAS DE LOS METODOS QUE USO ACA
-router.get("/", turnoController.getAllTurnos); // Obtener todos los turnos
+router.get("/listado", turnoController.getAllTurnos); // Obtener todos los turnos
 router.post("/", turnoController.createTurno); // Crear un nuevo turno
 router.get("/:id", turnoController.getTurnoById); // Obtener un turno por ID
 router.put("/:id", turnoController.updateTurno); // Actualizar un turno por ID
