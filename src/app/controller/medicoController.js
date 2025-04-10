@@ -1,4 +1,5 @@
 const Medico = require("../model/medico");
+const sequelize = require("../database-connection");
 
 //dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
 const medicoController = {
@@ -66,6 +67,25 @@ const medicoController = {
     } catch (error) {
       console.error("Error al borrar el medico:", error);
       res.status(500).json({ error: "Error al borrar el medico" });
+    }
+  },
+
+  // metodos especificos para funcionalidades de otras vistas
+  // metodo para listar las especialidades sin repetir
+  getEspecialidades: async (req, res) => {
+    try {
+      const especialidades = await Medico.findAll({
+        attributes: [
+          [
+            sequelize.fn("DISTINCT", sequelize.col("especialidad")),
+            "especialidad",
+          ],
+        ],
+      });
+      res.status(200).json(especialidades.map((e) => e.especialidad));
+    } catch (error) {
+      console.error("Error al obtener las especialidades:", error);
+      res.status(500).json({ error: "Error al obtener las especialidades" });
     }
   },
 };

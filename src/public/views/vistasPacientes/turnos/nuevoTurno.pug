@@ -1,0 +1,59 @@
+extends ../../templates/layout.pug
+
+include ../../templates/mixins.pug
+
+block content
+
+    div
+        img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Nuevo Turno", "/icons/user-plus-solid.svg")
+
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%" id=`formularioNewTurn`)
+            div.row.justify-content-center.align-items-center.mb-5
+                div.col.w-25
+                    div.form-floating.w-100
+                        input.form-control(type="text" id="inputDNI" name="inputDNI" placeholder="Ingrese su DNI" aria-label="DNI" aria-describedby="basic-addon1")
+                        label(for="inputDNI") DNI Paciente
+                div.col.w-25
+                    button.btn.w-75.h-75.btn-info(class="custom-button2") Seleccionar DNI
+                div.col.w-25
+                    select.form-select.form-select-lg.w-100(id="selectTurno" name="selectTurno" aria-label=".form-select-lg example")
+                        option.selected Seleccione un Area
+                        option.value Triage de Ingreso
+            div.row.justify-content-center.align-items-center.mb-5
+                div.col-25
+
+                div.col-25
+                    button.btn.w-50.btn-secondary.disabled(class="custom-button2" id="botonNext") Siguiente
+                div.col-25
+            div.row.justify-content-center.align-items-center.mt-5
+                div.col-25
+                div.col-50
+                    button.btn.w-50.btn-secondary.disabled(class="custom-button2" id="botonNext") Siguiente
+                div.col-25
+            div.row.justify-content-center.align-items-center.mt-5
+                div.progress.w-100(role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="50")
+                    div.progress-bar.progress-bar-striped.progress-bar-animated(style="width: 50%;") 50%
+                h2 Proceso de Turno
+    script.
+        document.addEventListener("DOMContentLoaded", async () => {
+            const selectTurno = document.getElementById("selectTurno");
+            try {
+                const response = await fetch("/medicos/especialidades");
+                if (!response.ok) {
+                    throw new Error("Error al obtener las especialidades");
+                }
+                const especialidades = await response.json();
+                especialidades.forEach(especialidad => {
+                    const option = document.createElement("option");
+                    option.value = especialidad;
+                    option.textContent = especialidad;
+                    selectTurno.appendChild(option); // Aquí usamos 'option' correctamente
+                });
+            } catch (error) {
+                console.error("Error al cargar las especialidades:", error);
+            }
+        });
+                        
+       

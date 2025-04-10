@@ -21,10 +21,15 @@ router.get("/listar", (req, res) => {
     title: "Listar Turnos",
   });
 });
+router.get("/admin/new", (req, res) => {
+  res.render("vistasPacientes/turnos/nuevoTurno", {
+    title: "Nuevo Turno",
+  });
+});
 
 // api FALTA AGREGAR LAS RUTAS DE LOS METODOS QUE USO ACA
 router.get("/listado", turnoController.getAllTurnos); // Obtener todos los turnos
-router.post("/", turnoController.createTurno); // Crear un nuevo turno
+router.post("/admin/new", turnoController.createTurno); // Crear un nuevo turno
 router.get("/:id", turnoController.getTurnoById); // Obtener un turno por ID
 router.put("/:id", turnoController.updateTurno); // Actualizar un turno por ID
 router.delete("/:id", turnoController.deleteTurno); // Eliminar un turno por ID

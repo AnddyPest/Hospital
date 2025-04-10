@@ -50,5 +50,7 @@ router.get("/listado", medicoController.getAllMedicos);
 router.post("/admin/new", medicoController.crearMedico);
 router.put("/editar/:id", medicoController.editarMedico); // <---- PROBAR!!!!
 router.delete("/borrar/:id", medicoController.borrarMedico); // <---- PROBAR!!!!
+//metodos api usados en otras vistas
+router.get("/especialidades", medicoController.getEspecialidades); // <---- PROBAR!!!!
 
 module.exports = router;
