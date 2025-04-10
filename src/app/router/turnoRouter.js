@@ -15,6 +15,12 @@ router.get("/admin", (req, res) => {
     title: "Administrar Turnos",
   });
 });
+//listado con filtros <----- VER QUE FILTROS LE HARIAN FALTA
+router.get("/listar", (req, res) => {
+  res.render("vistasPacientes/turnos/listarTurnos", {
+    title: "Listar Turnos",
+  });
+});
 
 // api FALTA AGREGAR LAS RUTAS DE LOS METODOS QUE USO ACA
 router.get("/listado", turnoController.getAllTurnos); // Obtener todos los turnos
