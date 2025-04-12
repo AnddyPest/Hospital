@@ -20,7 +20,7 @@ const Paciente = sequelize.define("Paciente", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  Obra_Social: {
+  obra_social: {
     type: DataTypes.STRING,
     allowNull: false,
   },

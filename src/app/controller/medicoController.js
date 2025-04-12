@@ -1,5 +1,6 @@
 const Medico = require("../model/medico");
-const sequelize = require("../database-connection");
+
+const sequelize = require("sequelize");
 
 //dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
 const medicoController = {
@@ -86,6 +87,21 @@ const medicoController = {
     } catch (error) {
       console.error("Error al obtener las especialidades:", error);
       res.status(500).json({ error: "Error al obtener las especialidades" });
+    }
+  },
+  // metodo para listar los medicos por especialidad
+  getMedicosByEspecialidad: async (req, res) => {
+    try {
+      const { especialidad } = req.params;
+      const medicos = await Medico.findAll({
+        where: { especialidad },
+      });
+      res.status(200).json(medicos);
+    } catch (error) {
+      console.error("Error al obtener los medicos por especialidad:", error);
+      res.status(500).json({
+        error: "Error al obtener los medicos por especialidad",
+      });
     }
   },
 };

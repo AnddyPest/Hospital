@@ -50,5 +50,6 @@ router.get("/listado", pacienteController.getAllPacientes);
 router.post("/admin/new", pacienteController.crearPaciente);
 router.put("/editar/:id", pacienteController.editarPaciente); // <---- PROBAR!!!!
 router.delete("/borrar/:id", pacienteController.borrarPaciente); // <---- PROBAR!!!!
+router.get("/listado/:dni", pacienteController.buscarPacientePorDni); //<--- este lo vamos a llamar cuando creemos turnos
 
 module.exports = router;

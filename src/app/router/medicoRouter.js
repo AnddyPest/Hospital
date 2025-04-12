@@ -52,5 +52,9 @@ router.put("/editar/:id", medicoController.editarMedico); // <---- PROBAR!!!!
 router.delete("/borrar/:id", medicoController.borrarMedico); // <---- PROBAR!!!!
 //metodos api usados en otras vistas
 router.get("/especialidades", medicoController.getEspecialidades); // <---- PROBAR!!!!
+router.get(
+  "/especialidades/:especialidad",
+  medicoController.getMedicosByEspecialidad
+); // <---- PROBAR!!!!
 
 module.exports = router;

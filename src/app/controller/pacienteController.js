@@ -1,4 +1,5 @@
 const Paciente = require("../model/paciente");
+const sequelize = require("sequelize");
 
 //dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
 const pacienteController = {
@@ -17,12 +18,12 @@ const pacienteController = {
   crearPaciente: async (req, res) => {
     try {
       console.log("Creando nuevo paciente:", req.body);
-      const { dni, nombre, apellido, Obra_Social, telefono } = req.body;
+      const { dni, nombre, apellido, obra_social, telefono } = req.body;
       const nuevoPaciente = await Paciente.create({
         dni,
         nombre,
         apellido,
-        Obra_Social,
+        obra_social,
         telefono,
       });
       res.status(201).json(nuevoPaciente);
@@ -36,9 +37,9 @@ const pacienteController = {
   editarPaciente: async (req, res) => {
     try {
       const { id } = req.params;
-      const { dni, nombre, apellido, Obra_Social, telefono } = req.body;
+      const { dni, nombre, apellido, obra_social, telefono } = req.body;
       const [updated] = await Paciente.update(
-        { dni, nombre, apellido, Obra_Social, telefono },
+        { dni, nombre, apellido, obra_social, telefono },
         { where: { id } }
       );
       if (updated) {
@@ -66,6 +67,22 @@ const pacienteController = {
     } catch (error) {
       console.error("Error al borrar el paciente:", error);
       res.status(500).json({ error: "Error al borrar el paciente" });
+    }
+  },
+
+  //metodo para encontrar un paciente por su dni (este tipo de metodos requiere importar sequelize, sino se cae el servidor)
+  buscarPacientePorDni: async (req, res) => {
+    try {
+      const { dni } = req.params;
+      const paciente = await Paciente.findOne({ where: { dni } });
+      if (paciente) {
+        res.status(200).json(paciente);
+      } else {
+        res.status(404).json({ error: "paciente no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al buscar el paciente:", error);
+      res.status(500).json({ error: "Error al buscar el paciente" });
     }
   },
 };
