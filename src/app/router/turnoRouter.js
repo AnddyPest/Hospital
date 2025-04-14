@@ -37,6 +37,10 @@ router.get("/paciente/:dni", turnoController.getTurnosByPacienteDni); // Obtener
 router.get(
   "/listadohorarios/:medico_Id/:fecha",
   turnoController.getHorariosDisponibles
-); // Obtener horarios disponibles para un médico en una fecha específica
+);
+router.get(
+  "/listadohorariosenfermeros/:enfermero_Id/:fecha",
+  turnoController.getHorariosEnfermeros
+);
 
 module.exports = router;

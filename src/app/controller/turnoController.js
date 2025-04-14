@@ -208,6 +208,27 @@ const turnoController = {
       res.status(500).json({ error: "Error al obtener los horarios" });
     }
   },
+  getHorariosEnfermeros: async (req, res) => {
+    try {
+      const { enfermero_Id, fecha } = req.params;
+
+      if (!enfermero_Id || !fecha) {
+        return res
+          .status(400)
+          .json({ error: "enfermeroId y fecha son requeridos" });
+      }
+      const turnos = await Turno.findAll({
+        where: {
+          enfermero_Id,
+          fecha,
+        },
+      });
+      res.status(200).json(turnos);
+    } catch {
+      console.error("Error al obtener los horarios disponibles:", error);
+      res.status(500).json({ error: "Error al obtener los horarios" });
+    }
+  },
 };
 
 module.exports = turnoController;

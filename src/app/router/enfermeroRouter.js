@@ -50,5 +50,6 @@ router.get("/listado", enfermeroController.getAllEnfermeros);
 router.post("/admin/new", enfermeroController.crearEnfermero);
 router.put("/editar/:id", enfermeroController.editarEnfermero); // <---- PROBAR!!!!
 router.delete("/borrar/:id", enfermeroController.borrarEnfermero); // <---- PROBAR!!!!
+router.get("/areas/:area", enfermeroController.getEnfermerosByArea);
 
 module.exports = router;

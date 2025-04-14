@@ -25,7 +25,7 @@ block content
             div.row.align-items-center.mb-4
                 div.col.w-25
                     select.form-select.form-select-lg.w-100.h-100(id="selectMedico" name="selectMedico" aria-label=".form-select-lg example")
-                        option.selected Seleccione un Medico
+                        option.selected Seleccione un Profesional
                 div.col.w-25
                     button.btn.w-75.btn-info(id="medicoLock" onclick="event.preventDefault(); aceptarMedico();" class="custom-button2") Seleccionar Medico
                 div.col.w-25
@@ -82,25 +82,9 @@ block content
 
             });
         });
-        //aca generemos los horarios en el hourpicker
-       /** document.addEventListener("DOMContentLoaded", () =>{
-            const hourpicker = document.getElementById("hourpicker");
-            const startTime = new Date();
-            startTime.setHours(8, 0, 0); // entrada 8
-            const endTime = new Date();
-            endTime.setHours(16, 0, 0); // salida 16
+        
 
-            let currentTime = new Date(startTime);
-            while (currentTime <= endTime) {
-                const option = document.createElement("option");
-                option.value = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                option.textContent = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-                hourpicker.appendChild(option);
-                currentTime.setMinutes(currentTime.getMinutes() + 40); //los turnos son cada 40 minutos
-            }
-        });*/
-
-
+        //variables globales y elementos del DOM
         const dni = document.getElementById("inputDNI");//ok
         const dniLock = document.getElementById("dniLock");//ok
         const selectEsp = document.getElementById("selectEsp");//ok
@@ -113,11 +97,12 @@ block content
         const hourLock  = document.getElementById("hourLock");//ok
         const motivo = document.getElementById("motivo");//ok
         const btnNext = document.getElementById("botonNext");//ok
-        let idPaciente= ""; //definimos esta variable para poder enviar el id paciente
-        let idMedico= ""; //definimos esta variable para poder enviar el id medico
-        let fechaTurno = ""; //definimos esta variable para poder enviar la fecha del turno
-        let horaTurno = ""; //definimos esta variable para poder enviar la hora del turno
-        let motivoTurno = ""; //definimos esta variable para poder enviar el motivo del turno
+        let idPaciente= ""; 
+        let idMedico= null; 
+        let idEnfermero= null;
+        let fechaTurno = ""; 
+        let horaTurno = ""; 
+        let motivoTurno = ""; 
         
         //este metodo chequea que el dni exista y lo fija en el input
         //luego habria que cambiar todas las alert por modals
@@ -152,41 +137,105 @@ block content
             if(selectEsp.value === "Seleccione un Area") {
                 alert("Seleccione un Area");
             }
-            try {
-                const especialidad = selectEsp.value;
-                const response = await fetch(`/medicos/especialidades/${especialidad}`);
+            if (selectEsp.value === "Triage de Ingreso") {
+                const area = selectEsp.value;
+                const response = await fetch(`/enfermeros/areas/${area}`)
                 if (!response.ok) {
-                    throw new Error("Error al obtener los medicos");
+                    throw new Error("Error al obtener los enfermeros");
                 }
-                const medicos = await response.json();
-                console.log(medicos);
-                
-                selectMedico.innerHTML = ""; // Limpiar opciones anteriores
-                medicos.forEach(medico => {
+                const enfermeros = await response.json();
+                console.log(enfermeros);
+                selectMedico.innerHTML = "";
+                enfermeros.forEach(enfermero => {
                     const option = document.createElement("option");
-                    option.value = medico.id;
-                    option.textContent = `${medico.id} - ${medico.nombre} ${medico.apellido}`;
-                    selectMedico.appendChild(option); // Aquí usamos 'option' correctamente
+                    option.value = enfermero.id;
+                    option.textContent = `${enfermero.id} - ${enfermero.nombre} ${enfermero.apellido}`;
+                    selectMedico.appendChild(option);
                 });
-            }catch (error) {
-                console.error("Error al cargar los medicos:", error);
-            }
-        };
+
+            }else{
+                try {
+                    const especialidad = selectEsp.value;
+                    const response = await fetch(`/medicos/especialidades/${especialidad}`);
+                    if (!response.ok) {
+                        throw new Error("Error al obtener los medicos");
+                    }
+                    const medicos = await response.json();
+                    console.log(medicos);
+                    
+                    selectMedico.innerHTML = ""; // Limpiar opciones anteriores
+                    medicos.forEach(medico => {
+                        const option = document.createElement("option");
+                        option.value = medico.id;
+                        option.textContent = `${medico.id} - ${medico.nombre} ${medico.apellido}`;
+                        selectMedico.appendChild(option); // Aquí usamos 'option' correctamente
+                    });
+                }catch (error) {
+                    console.error("Error al cargar los medicos:", error);
+                }
+            };
+        };    
          //metodo para fijar el medico del turno y guardar su id
         async function aceptarMedico() {
-            if(selectMedico.value === "Seleccione un Medico") {
-                alert("Seleccione un Medico");
+            if(selectMedico.value === "Seleccione un Profesional") {
+                alert("Seleccione un Profesional");
+            }else if (selectEsp.value === "Triage de Ingreso") {
+                idEnfermero = selectMedico.value;
+                console.log(idEnfermero);
+                alert(`Enfermero seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
             }else{
                 idMedico = selectMedico.value;
                 console.log(idMedico);
                 alert(`Medico seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
-            }
+            };  
         };
 
         async function aceptarFecha() {
             const fecha = document.getElementById("inputFecha").value;
             if (fecha === "") {
                 alert("Seleccione una fecha");
+            }   
+            if (selectEsp.value === "Triage de Ingreso") {
+                alert (`Fecha seleccionada: ${fecha}`);
+                fechaTurno = fecha;
+                // Convertir la fecha al formato YYYY-MM-DD
+                const partesFecha = fecha.split("/");
+                const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
+                
+                console.log("fecha en el front "+fechaFormateada);
+                
+                console.log(idEnfermero);
+
+                const response = await fetch(`/turnos/listadohorariosenfermeros/${idEnfermero}/${fechaFormateada}`);
+                if(!response.ok) {
+                    throw new Error("Error al obtener los horarios disponibles");
+                }
+                const horarios = await response.json();
+                console.log("ARRAY DE HORARIOS: "+horarios);
+                hourpicker.innerHTML = "";
+                const startTime = new Date();
+                startTime.setHours(8, 0, 0); // entrada 8
+                const endTime = new Date();
+                endTime.setHours(16, 0, 0); // salida 16
+                let currentTime = new Date(startTime);
+                while (currentTime <= endTime) {
+                    const option = document.createElement("option");
+                    option.value = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    option.textContent = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    hourpicker.appendChild(option);
+                    currentTime.setMinutes(currentTime.getMinutes() + 15); //los turnos son cada 40 minutos
+                };
+                horarios.forEach(horario => {
+                    const horaOcupada = horario.hora.split(":")[0] + ":" + horario.hora.split(":")[1];
+                    const option = document.createElement("option");
+                    option.value = horaOcupada;
+                    option.textContent = horaOcupada;
+                    //buscamos la opcion en el select y la quitamos
+                    const optionSelect = hourpicker.querySelector(`option[value="${horaOcupada}"]`);
+                    if (optionSelect) {
+                        hourpicker.removeChild(optionSelect);
+                    }
+                });
             } else {
                 alert(`Fecha seleccionada: ${fecha}`);
                 fechaTurno = fecha;
@@ -195,7 +244,7 @@ block content
                 const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
                 
                 console.log("fecha en el front "+fechaFormateada);
-                //idMedico = selectMedico.value;
+                
                 console.log(idMedico);
                 //ahora cargamos el hourpicker con los horarios disponibles
                 const response = await fetch (`/turnos/listadohorarios/${idMedico}/${fechaFormateada}`);
@@ -235,8 +284,12 @@ block content
                         hourpicker.removeChild(optionSelect);
                     }
                 });
-            }
+            };
         };
+
+
+            
+        
         async function aceptarHorario() {
             const hora = hourpicker.value;
             if (hora === "Seleccione un horario") {
@@ -265,7 +318,7 @@ block content
         };
 
         async function enviarDatos() {
-            const idEnfermero = null;
+            
             const estado = "pendiente";
 
             

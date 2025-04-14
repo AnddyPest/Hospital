@@ -68,6 +68,18 @@ const enfermeroController = {
       res.status(500).json({ error: "Error al borrar el enfermero" });
     }
   },
+
+  //metodo para listar todos los enfermeros por area
+  getEnfermerosByArea: async (req, res) => {
+    try {
+      const { area } = req.params;
+      const enfermeros = await Enfermero.findAll({ where: { area } });
+      res.status(200).json(enfermeros);
+    } catch (error) {
+      console.error("Error al obtener los enfermeros por área:", error);
+      res.status(500).json({ error: "Error al obtener los enfermeros" });
+    }
+  },
 };
 
 module.exports = enfermeroController;
