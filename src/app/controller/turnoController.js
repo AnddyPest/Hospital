@@ -21,25 +21,32 @@ const turnoController = {
   // Crear un nuevo turno
   createTurno: async (req, res) => {
     try {
-      const { fecha, hora, motivo, estado, pacienteId, medicoId, enfermeroId } =
-        req.body;
-      if (!pacienteId) {
+      const {
+        fecha,
+        hora,
+        motivo,
+        estado,
+        paciente_Id,
+        medico_Id,
+        enfermero_Id,
+      } = req.body;
+      if (!paciente_Id) {
         // Validar que el id ha sido enviado asi la app explota
         return res.status(400).json({ error: "Paciente ID es requerido" });
       }
-      const paciente = await Paciente.findByPk(pacienteId);
+      const paciente = await Paciente.findByPk(paciente_Id);
       if (!paciente) {
         return res.status(404).json({ error: "Paciente no encontrado" });
       }
 
       // Validar que el médico o enfermero exista (si uno u otro se pone)
-      if (medicoId) {
-        const medico = await Medico.findByPk(medicoId);
+      if (medico_Id) {
+        const medico = await Medico.findByPk(medico_Id);
         if (!medico) {
           return res.status(404).json({ error: "Médico no encontrado" });
         }
-      } else if (enfermeroId) {
-        const enfermero = await Enfermero.findByPk(enfermeroId);
+      } else if (enfermero_Id) {
+        const enfermero = await Enfermero.findByPk(enfermero_Id);
         if (!enfermero) {
           return res.status(404).json({ error: "Enfermero no encontrado" });
         }
@@ -51,9 +58,9 @@ const turnoController = {
         hora,
         motivo,
         estado,
-        pacienteId,
-        medicoId,
-        enfermeroId,
+        paciente_Id,
+        medico_Id,
+        enfermero_Id,
       });
 
       res.status(201).json(turno);
@@ -194,7 +201,6 @@ const turnoController = {
           fecha,
         },
       });
-      //filtar solo los horarios ocupados
 
       res.status(200).json(turnos);
     } catch (error) {

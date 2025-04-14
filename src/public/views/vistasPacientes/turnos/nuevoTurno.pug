@@ -45,7 +45,7 @@ block content
                 div.col.w-25
                     input.form-control.form-control-lg.w-100(type="text" id="motivo" name="codigo" placeholder="Motivo" aria-label="ID Turno" aria-describedby="basic-addon1")
                 div.col.w-25
-                    button.btn.w-75.btn-info(class="btn-secondary custom-button2" id="botonNext" onclick="event.preventDefault(); enviarDatos();") Aceptar Datos
+                    button.btn.w-75.btn-info(class="btn-secondary custom-button2" id="botonNext" onclick="event.preventDefault(); aceptarDatos();") Aceptar Datos
                
             
                
@@ -109,12 +109,15 @@ block content
         const medicoLock = document.getElementById("medicoLock");//ok
         const dateLock = document.getElementById("datepicker");//ok
         const botonNext = document.getElementById("botonNext");//ok
-        const acceptBtn = document.getElementById("hourpicker");//ok
+        const hourpicker = document.getElementById("hourpicker");//ok
         const hourLock  = document.getElementById("hourLock");//ok
         const motivo = document.getElementById("motivo");//ok
         const btnNext = document.getElementById("botonNext");//ok
         let idPaciente= ""; //definimos esta variable para poder enviar el id paciente
         let idMedico= ""; //definimos esta variable para poder enviar el id medico
+        let fechaTurno = ""; //definimos esta variable para poder enviar la fecha del turno
+        let horaTurno = ""; //definimos esta variable para poder enviar la hora del turno
+        let motivoTurno = ""; //definimos esta variable para poder enviar el motivo del turno
         
         //este metodo chequea que el dni exista y lo fija en el input
         //luego habria que cambiar todas las alert por modals
@@ -168,9 +171,9 @@ block content
             }catch (error) {
                 console.error("Error al cargar los medicos:", error);
             }
-         };
+        };
          //metodo para fijar el medico del turno y guardar su id
-         async function aceptarMedico() {
+        async function aceptarMedico() {
             if(selectMedico.value === "Seleccione un Medico") {
                 alert("Seleccione un Medico");
             }else{
@@ -178,38 +181,136 @@ block content
                 console.log(idMedico);
                 alert(`Medico seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
             }
-         };
+        };
 
-         async function aceptarFecha() {
+        async function aceptarFecha() {
             const fecha = document.getElementById("inputFecha").value;
             if (fecha === "") {
                 alert("Seleccione una fecha");
             } else {
                 alert(`Fecha seleccionada: ${fecha}`);
+                fechaTurno = fecha;
                 // Convertir la fecha al formato YYYY-MM-DD
                 const partesFecha = fecha.split("/");
                 const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
                 
                 console.log("fecha en el front "+fechaFormateada);
-                idMedico = selectMedico.value;
+                //idMedico = selectMedico.value;
                 console.log(idMedico);
                 //ahora cargamos el hourpicker con los horarios disponibles
                 const response = await fetch (`/turnos/listadohorarios/${idMedico}/${fechaFormateada}`);
                 if (!response.ok) {
                     throw new Error("Error al obtener los horarios disponibles");
                 }
+                //si la respuesta es correcta, cargamos los horarios en el selectctamente
                 const horarios = await response.json();
                 console.log(horarios);
-                const hourpicker = document.getElementById("hourpicker");
-                hourpicker.innerHTML = ""; // Limpiar opciones anteriores
-                horarios.forEach(horario => {
+                //limpiamos el select de horarios
+                hourpicker.innerHTML = "";
+                //cargamos los horarios libres en el select y lugo quitamos los horarios ocupados
+                //los horarios disponibles son los que no tienen un id de turno
+                //entonces en el select cargamos todos los horarios y luego quitamos los ocupados
+                const startTime = new Date();
+                startTime.setHours(8, 0, 0); // entrada 8
+                const endTime = new Date();
+                endTime.setHours(16, 0, 0); // salida 16
+                let currentTime = new Date(startTime);
+                while (currentTime <= endTime) {
                     const option = document.createElement("option");
-                    option.value = horario.hora;
-                    option.textContent = horario.hora;
-                    hourpicker.appendChild(option); // Aquí usamos 'option' correctamente
+                    option.value = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    option.textContent = currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                    hourpicker.appendChild(option);
+                    currentTime.setMinutes(currentTime.getMinutes() + 40); //los turnos son cada 40 minutos
+                
+                };
+                //ahora quitamos los horarios ocupados quitando los segundos del recibido de la bd
+                horarios.forEach(horario => {
+                    const horaOcupada = horario.hora.split(":")[0] + ":" + horario.hora.split(":")[1];
+                    const option = document.createElement("option");
+                    option.value = horaOcupada;
+                    option.textContent = horaOcupada;
+                    //buscamos la opcion en el select y la quitamos
+                    const optionSelect = hourpicker.querySelector(`option[value="${horaOcupada}"]`);
+                    if (optionSelect) {
+                        hourpicker.removeChild(optionSelect);
+                    }
                 });
             }
-         };
+        };
+        async function aceptarHorario() {
+            const hora = hourpicker.value;
+            if (hora === "Seleccione un horario") {
+                alert("Seleccione un horario");
+            } else {
+                alert(`Horario seleccionado: ${hora}`);
+                horaTurno = hora;
+            }
+        };
+
+        async function aceptarDatos() {
+            
+            motivoTurno = motivo.value;
+            if (motivoTurno === "") {
+                alert("Ingrese un motivo");
+            } else {
+                alert(`Motivo seleccionado: ${motivoTurno}`);
+            }
+            if (idPaciente === "" || idMedico === "" || fechaTurno === "" || horaTurno === "" || motivoTurno === "") {
+                alert("Complete todos los campos");
+            } else {
+                alert(`Datos seleccionados: ${idPaciente} ${idMedico} ${fechaTurno} ${horaTurno} ${motivoTurno}`);
+                //aca llamamos al metodo para enviar los datos al servidor
+                enviarDatos();
+            }
+        };
+
+        async function enviarDatos() {
+            const idEnfermero = null;
+            const estado = "pendiente";
+
+            
+            // damos formato a la fecha para que sea YYYY-MM-DD
+            const partesFecha = fechaTurno.split("/");
+            const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
+            const horaFormateada = `${horaTurno}:00`;
+            
+             console.log("Datos Enviados: ",{
+                fechaFormateada,
+                horaFormateada,
+                motivoTurno,
+                estado,
+                idPaciente,
+                idMedico,
+                idEnfermero,
+            });
+            try {
+                const response = await fetch("/turnos/admin/new", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        estado: estado,
+                        fecha: fechaFormateada,
+                        hora: horaFormateada,
+                        motivo: motivoTurno,
+                        paciente_Id: idPaciente,
+                        medico_Id: idMedico,
+                        enfermero_Id: idEnfermero,
+                    })
+                });
+                if (!response.ok) {
+                    throw new Error("Error al enviar los datos del turno");
+                }
+                const data = await response.json();
+                console.log(data);
+                alert("Turno creado con exito");
+                window.location.href = "/turnos/listado";
+            } catch (error) {
+                console.error("Error al enviar los datos:", error);
+            }
+        };
+
        
                         
        
