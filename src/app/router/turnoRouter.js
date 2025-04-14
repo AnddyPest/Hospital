@@ -34,5 +34,9 @@ router.get("/:id", turnoController.getTurnoById); // Obtener un turno por ID
 router.put("/:id", turnoController.updateTurno); // Actualizar un turno por ID
 router.delete("/:id", turnoController.deleteTurno); // Eliminar un turno por ID
 router.get("/paciente/:dni", turnoController.getTurnosByPacienteDni); // Obtener turnos por DNI del paciente
+router.get(
+  "/listadohorarios/:medico_Id/:fecha",
+  turnoController.getHorariosDisponibles
+); // Obtener horarios disponibles para un médico en una fecha específica
 
 module.exports = router;

@@ -11,7 +11,7 @@ const Turno = sequelize.define("Turno", {
     autoIncrement: true,
   },
   fecha: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   hora: {

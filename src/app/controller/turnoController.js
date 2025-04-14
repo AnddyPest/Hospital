@@ -2,6 +2,7 @@ const Turno = require("../model/turno");
 const Paciente = require("../model/paciente");
 const Medico = require("../model/medico");
 const Enfermero = require("../model/enfermero");
+const sequelize = require("sequelize");
 
 const turnoController = {
   // Obtener todos los turnos
@@ -169,6 +170,36 @@ const turnoController = {
     } catch (error) {
       console.error("Error al obtener los turnos por DNI del paciente:", error);
       res.status(500).json({ error: "Error al obtener los turnos" });
+    }
+  },
+
+  // metodo para obtener los horarios disponibles de un medico en un dia dado
+
+  getHorariosDisponibles: async (req, res) => {
+    try {
+      const { medico_Id, fecha } = req.params;
+      console.log(`ID Médico recibido: ${medico_Id}`);
+      console.log(`Fecha recibida: ${fecha}`);
+
+      if (!medico_Id || !fecha) {
+        return res
+          .status(400)
+          .json({ error: "medicoId y fecha son requeridos" });
+      }
+
+      // Obtener todos los turnos del médico en la fecha dada
+      const turnos = await Turno.findAll({
+        where: {
+          medico_Id,
+          fecha,
+        },
+      });
+      //filtar solo los horarios ocupados
+
+      res.status(200).json(turnos);
+    } catch (error) {
+      console.error("Error al obtener los horarios disponibles:", error);
+      res.status(500).json({ error: "Error al obtener los horarios" });
     }
   },
 };
