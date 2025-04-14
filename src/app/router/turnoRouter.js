@@ -26,7 +26,16 @@ router.get("/admin/new", (req, res) => {
     title: "Nuevo Turno",
   });
 });
-
+router.get("/listar/medicos", (req, res) => {
+  res.render("vistasPacientes/turnos/listaTurnosMedicos", {
+    title: "Listar Medicos",
+  });
+});
+router.get("/listar/triages", (req, res) => {
+  res.render("vistasPacientes/turnos/listaTriages", {
+    title: "Listar Triages",
+  });
+});
 // api FALTA AGREGAR LAS RUTAS DE LOS METODOS QUE USO ACA
 router.get("/listado", turnoController.getAllTurnos); // Obtener todos los turnos
 router.post("/admin/new", turnoController.createTurno); // Crear un nuevo turno
