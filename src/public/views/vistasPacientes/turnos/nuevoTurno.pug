@@ -59,37 +59,6 @@ block content
 
                 
     script.
-        //aca cargamos las especialidades en el select, sin repetir
-        document.addEventListener("DOMContentLoaded", async () => {
-            const selectTurno = document.getElementById("selectEsp");
-            try {
-                const response = await fetch("/medicos/especialidades");
-                if (!response.ok) {
-                    throw new Error("Error al obtener las especialidades");
-                }
-                const especialidades = await response.json();
-                especialidades.forEach(especialidad => {
-                    const option = document.createElement("option");
-                    option.value = especialidad;
-                    option.textContent = especialidad;
-                    selectTurno.appendChild(option); 
-                });
-            } catch (error) {
-                console.error("Error al cargar las especialidades:", error);
-            }});
-            //aca cargamos las fechas en el datepicker
-        $(document).ready(function() {
-            $('#datepicker input').datepicker({
-                format: 'dd/mm/yyyy',
-                autoclose: true,
-                todayHighlight: true,
-                language: 'es',
-                startDate: new Date(),
-
-            });
-        });
-        
-
         //variables globales y elementos del DOM
         const dni = document.getElementById("inputDNI");//ok
         const dniLock = document.getElementById("dniLock");//ok
@@ -109,6 +78,37 @@ block content
         let fechaTurno = ""; 
         let horaTurno = ""; 
         let motivoTurno = ""; 
+
+        //aca cargamos las especialidades en el select, sin repetir
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                const response = await fetch("/medicos/especialidades");
+                if (!response.ok) {
+                    throw new Error("Error al obtener las especialidades");
+                }
+                const especialidades = await response.json();
+                especialidades.forEach(especialidad => {
+                    const option = document.createElement("option");
+                    option.value = especialidad;
+                    option.textContent = especialidad;
+                    selectEsp.appendChild(option); 
+                });
+            } catch (error) {
+                console.error("Error al cargar las especialidades:", error);
+            }});
+            //aca cargamos las fechas en el datepicker
+        $(document).ready(function() {
+            $('#datepicker input').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'es',
+                startDate: new Date(),
+
+            });
+        });
+        
+
         
         //este metodo chequea que el dni exista y lo fija en el input
         //luego habria que cambiar todas las alert por modals
