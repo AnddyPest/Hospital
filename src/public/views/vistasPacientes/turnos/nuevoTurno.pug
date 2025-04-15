@@ -15,7 +15,7 @@ block content
                 div.col.w-25
                     input.form-control.form-control-lg.w-100(type="text" id="inputDNI" name="inputDNI" placeholder="Ingrese D.N.I." aria-label="DNI" aria-describedby="basic-addon1")
                 div.col.w-25
-                    button.btn.w-75.btn-info(id="dniLock" onclick="event.preventDefault(); fijarDni();", class="custom-button2") Chequear D.N.I.
+                    button.btn.w-75.btn-info(id="dniLock" onclick="event.preventDefault(); fijarDni();" class="custom-button2") Chequear D.N.I.
                 div.col.w-25
                     select.form-select.form-select-lg.w-100.h-100(id="selectEsp" name="selectEsp" aria-label=".form-select-lg example")
                         option.selected Seleccione un Area
@@ -217,7 +217,7 @@ block content
                     throw new Error("Error al obtener los horarios disponibles");
                 }
                 const horarios = await response.json();
-                console.log("ARRAY DE HORARIOS: "+horarios);
+                
                 hourpicker.innerHTML = "";
                 const startTime = new Date();
                 startTime.setHours(8, 0, 0); // entrada 8
@@ -233,11 +233,8 @@ block content
                 };
                 horarios.forEach(horario => {
                     const horaOcupada = horario.hora.split(":")[0] + ":" + horario.hora.split(":")[1];
-                    const option = document.createElement("option");
-                    option.value = horaOcupada;
-                    option.textContent = horaOcupada;
                     //buscamos la opcion en el select y la quitamos
-                    const optionSelect = hourpicker.querySelector(`option[value="${horaOcupada}"]`);
+                    const optionSelect = Array.from(hourpicker.options).find(option => option.value === horaOcupada);
                     if (optionSelect) {
                         hourpicker.removeChild(optionSelect);
                     }
@@ -281,17 +278,13 @@ block content
                 //ahora quitamos los horarios ocupados quitando los segundos del recibido de la bd
                 horarios.forEach(horario => {
                     const horaOcupada = horario.hora.split(":")[0] + ":" + horario.hora.split(":")[1];
-                    const option = document.createElement("option");
-                    option.value = horaOcupada;
-                    option.textContent = horaOcupada;
                     //buscamos la opcion en el select y la quitamos
-                    const optionSelect = hourpicker.querySelector(`option[value="${horaOcupada}"]`);
-                    if (optionSelect) {
+                    const optionSelect = Array.from(hourpicker.options).find(option => option.value === horaOcupada);
                         hourpicker.removeChild(optionSelect);
-                    }
                 });
             };
         };
+        
 
 
             
