@@ -38,17 +38,17 @@ mixin adminGeneral(entityURL, entityName)
 mixin tablaConBuscador(entityURL, entityName, singleEntityAttr)
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${entityName}`)
             div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
-                div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
-                    table.table.table-hover.table-dark.table-bordered.border-info.table-striped
-                        thead(style="position: sticky; top: 0;")
-                            tr.table-info
-                                th.col(style="width: 5%") ID
-                                th.col(style="width: 19%") DNI
-                                th.col(style="width: 19%") Nombre
-                                th.col(style="width: 19%") Apellido
-                                th.col(style="width: 19%") Telefono
-                                th.col(style="width: 19%") #{singleEntityAttr}
-                        tbody
+                   
+                table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+                    thead(style="position: sticky; top: 0;")
+                        tr.table-info
+                            th.col(style="width: 5%") ID
+                            th.col(style="width: 19%") DNI
+                            th.col(style="width: 19%") Nombre
+                            th.col(style="width: 19%") Apellido
+                            th.col(style="width: 19%") Telefono
+                            th.col(style="width: 19%") #{singleEntityAttr}
+                    tbody
 
             div.mt-3(id="filtros")
                 if entityName === "Paciente"
@@ -398,7 +398,111 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
                 }
             }
 
+mixin turnosListar(profesionalTypeOf)
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${profesionalTypeOf}`)
+            div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
+                table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+                    thead(style="position: sticky; top: 0;")
+                        tr.table-info
+                            th.col(style="width: 10%") Fecha
+                            th.col(style="width: 20%") Paciente
+                            th.col(style="width: 15%") D.N.I.
+                            th.col(style="width: 20%") #{profesionalTypeOf}
+                            th.col(style="width: 10%") Hora
+                            th.col(style="width: 15%") Especialidad
+                            th.col(style="width: 10%") Estado
+                    
+                    tbody
+            
+            div.mt-3(style="width: 100%;" id="filtros")
+                    div.d-flex.align-items-center.justify-content-center
+                        div.row(style="width: 100%;")
+                            div.col.w-25
+                                input.form-control.me-4(id="inputDate", type="text", placeholder="Ingrese Fecha")
+                            div.col.w-25
+                                input.form-control.me-4(id="inputDni", type="text", placeholder="Ingrese DNI")
+                            div.col.w-25
+                                input.form-control(id="inputProf", type="text", placeholder="Ingrese Profesional")
+                    div.d-flex.align-items-center.justify-content-center.mt-4
+                        div.row(style="width: 100%;")   
+                            div.col.w-25
+                                button.btn.btn-info.w-50(type="button" class="custom-button2") Aplicar Filtros
+                            div.col.w-25
+                                button.btn.btn-warning.w-50(type="button" class="custom-button2") Limpiar Filtros
+                            div.col.w-25
+                                a.btn.btn-danger.w-50(href="/turnos/listar", type="button" id="volver" class="volver custom-button2") Volver
 
+        script.
+            document.addEventListener("DOMContentLoaded", () => {
+                async function cargarTurnos() {
+                    try {
+                        //cargamos los turnos de la DB
+                        const response = await fetch(`/turnos/listado`);
+                        //cargamos los pacientes ed la DB
+                        const responsepacientes = await fetch(`/pacientes/listado`);
+                        //cargamos los medicos de la DB
+                        const responsemedicos = await fetch(`/medicos/listado`);
+                        //cargamos los enfermeros de la DB
+                        const responseenfermeros = await fetch(`/enfermeros/listado`);
+                        if (!response.ok) {
+                            throw new Error(`Error al obtener los turnos de la DB: ${response.status} ${response.statusText}`);
+                        }
+                        const turnos = await response.json();
+                        const pacientes = await responsepacientes.json();
+                        const medicos = await responsemedicos.json();
+                        const enfermeros = await responseenfermeros.json();
+                        console.log(turnos);
+                        //condicionamos el tipo de profesional a mostrar
+                        //si contiene idMedico es medico, sino es enfermero
+                        const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
+                        
+                        //cargar pacientes, medicos y enferemeros para que aparezcan en la celda correspondiente
+
+
+                        //preguntar como hacer para diferenciar la carga... no se me ocurre
+                        tbody.innerHTML = "";
+                        turnos.forEach((turno) => {
+                            if(turnos.medico_Id != undefined) {
+                                const fila = `
+                                    <tr>
+                                        <td>${turno.fecha || "N/A"}</td>
+                                        <td>${turno.paciente || "N/A"}</td>
+                                        <td>${turno.dni || "N/A"}</td>
+                                        <td>${turno.medico_Id || "N/A"}</td>
+                                        <td>${turno.hora || "N/A"}</td>
+                                        <td>${turno.especialidad || "N/A"}</td>
+                                        <td>${turno.estado || "N/A"}</td>
+                                    </tr>
+                                `;
+                                tbody.innerHTML += fila;
+                          
+                            } else {
+                            
+                                const fila = `
+                                    <tr>
+                                        <td>${turno.fecha || "N/A"}</td>
+                                        <td>${turno.paciente || "N/A"}</td>
+                                        <td>${turno.dni || "N/A"}</td>
+                                        <td>${turno.enfermero_Id || "N/A"}</td>
+                                        <td>${turno.hora || "N/A"}</td>
+                                        <td>${turno.especialidad || "N/A"}</td>
+                                        <td>${turno.estado || "N/A"}</td>
+                                    </tr>
+                                `;
+                                tbody.innerHTML += fila;
+                    }});
+                        
+                    } catch (error) {
+                        console.error(`Error al cargar los turnos:`, error);
+                        alert(`No se pudieron cargar los turnos.`);       
+                    }
+                }
+                cargarTurnos();
+            });
+                       
+                    
+                                
+                
         
 
 
