@@ -104,6 +104,21 @@ const medicoController = {
       });
     }
   },
+  //buscar medico por id
+  getMedicoById: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const medico = await Medico.findByPk(id);
+      if (medico) {
+        res.status(200).json(medico);
+      } else {
+        res.status(404).json({ error: "Medico no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al obtener el medico por id:", error);
+      res.status(500).json({ error: "Error al obtener el medico por id" });
+    }
+  },
 };
 
 module.exports = medicoController;

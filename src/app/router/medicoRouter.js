@@ -56,5 +56,6 @@ router.get(
   "/especialidades/:especialidad",
   medicoController.getMedicosByEspecialidad
 ); // <---- PROBAR!!!!
+router.get("/buscar/:id", medicoController.getMedicoById); // <---- PROBAR!!!!
 
 module.exports = router;

@@ -37,19 +37,39 @@ router.get("/listar/triages", (req, res) => {
   });
 });
 // api FALTA AGREGAR LAS RUTAS DE LOS METODOS QUE USO ACA
-router.get("/listado", turnoController.getAllTurnos); // Obtener todos los turnos
-router.post("/admin/new", turnoController.createTurno); // Crear un nuevo turno
-router.get("/:id", turnoController.getTurnoById); // Obtener un turno por ID
-router.put("/:id", turnoController.updateTurno); // Actualizar un turno por ID
-router.delete("/:id", turnoController.deleteTurno); // Eliminar un turno por ID
-router.get("/paciente/:dni", turnoController.getTurnosByPacienteDni); // Obtener turnos por DNI del paciente
+
+// Obtener todos los turnos
+router.get("/listado", turnoController.getAllTurnos);
+
+// Crear un nuevo turno
+router.post("/admin/new", turnoController.createTurno);
+
+// Obtener un turno por ID
+router.get("/:id", turnoController.getTurnoById);
+
+// Actualizar un turno por ID
+router.put("/:id", turnoController.updateTurno);
+
+// Eliminar un turno por ID
+router.delete("/:id", turnoController.deleteTurno);
+
+// Obtener turnos por DNI del paciente
+router.get("/paciente/:id", turnoController.getTurnosByPacienteId);
+
+// obtener horarios disponibles de medico
 router.get(
   "/listadohorarios/:medico_Id/:fecha",
   turnoController.getHorariosDisponibles
 );
+
+// obtener horarios de enfermeros
 router.get(
   "/listadohorariosenfermeros/:enfermero_Id/:fecha",
   turnoController.getHorariosEnfermeros
 );
+
+// join de tablas turno-paciente-medico-enfermero ordenadas
+//  por fecha y hora para listar turnos
+router.get("/listado/join", turnoController.getTurnosJoin);
 
 module.exports = router;

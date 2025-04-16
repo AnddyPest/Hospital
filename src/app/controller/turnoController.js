@@ -159,11 +159,11 @@ const turnoController = {
   },
 
   // Obtener turnos por DNI del paciente
-  getTurnosByPacienteDni: async (req, res) => {
+  getTurnosByPacienteId: async (req, res) => {
     try {
-      const { dni } = req.params;
+      const { paciente_Id } = req.params;
 
-      const paciente = await Paciente.findOne({ where: { dni } });
+      const paciente = await Paciente.findOne({ where: { paciente_Id } });
       if (!paciente) {
         return res.status(404).json({ error: "Paciente no encontrado" });
       }
@@ -227,6 +227,33 @@ const turnoController = {
     } catch {
       console.error("Error al obtener los horarios disponibles:", error);
       res.status(500).json({ error: "Error al obtener los horarios" });
+    }
+  },
+
+  // JOIN con Paciente, Medico y Enfermero ORDENADOS POR FECHA Y HORA
+  getTurnosJoin: async (req, res) => {
+    try {
+      const turnos = await Turno.findAll({
+        include: [
+          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
+          {
+            model: Medico,
+            attributes: ["id", "nombre", "apellido", "especialidad"],
+          },
+          {
+            model: Enfermero,
+            attributes: ["id", "nombre", "apellido", "area"],
+          },
+        ],
+        order: [
+          ["fecha", "ASC"],
+          ["hora", "ASC"],
+        ],
+      });
+      res.status(200).json(turnos);
+    } catch (error) {
+      console.error("Error al obtener los turnos ordenados:", error);
+      res.status(500).json({ error: "Error al obtener los turnos" });
     }
   },
 };

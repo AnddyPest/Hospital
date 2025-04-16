@@ -434,76 +434,51 @@ mixin turnosListar(profesionalTypeOf)
 
         script.
             document.addEventListener("DOMContentLoaded", () => {
-                async function cargarTurnos() {
-                    try {
-                        //cargamos los turnos de la DB
-                        const response = await fetch(`/turnos/listado`);
-                        //cargamos los pacientes ed la DB
-                        const responsepacientes = await fetch(`/pacientes/listado`);
-                        //cargamos los medicos de la DB
-                        const responsemedicos = await fetch(`/medicos/listado`);
-                        //cargamos los enfermeros de la DB
-                        const responseenfermeros = await fetch(`/enfermeros/listado`);
-                        if (!response.ok) {
-                            throw new Error(`Error al obtener los turnos de la DB: ${response.status} ${response.statusText}`);
-                        }
-                        const turnos = await response.json();
-                        const pacientes = await responsepacientes.json();
-                        const medicos = await responsemedicos.json();
-                        const enfermeros = await responseenfermeros.json();
-                        console.log(turnos);
-                        //condicionamos el tipo de profesional a mostrar
-                        //si contiene idMedico es medico, sino es enfermero
-                        const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
-                        
-                        //cargar pacientes, medicos y enferemeros para que aparezcan en la celda correspondiente
-
-
-                        //preguntar como hacer para diferenciar la carga... no se me ocurre
-                        tbody.innerHTML = "";
-                        turnos.forEach((turno) => {
-                            if(turnos.medico_Id != undefined) {
-                                const fila = `
-                                    <tr>
-                                        <td>${turno.fecha || "N/A"}</td>
-                                        <td>${turno.paciente || "N/A"}</td>
-                                        <td>${turno.dni || "N/A"}</td>
-                                        <td>${turno.medico_Id || "N/A"}</td>
-                                        <td>${turno.hora || "N/A"}</td>
-                                        <td>${turno.especialidad || "N/A"}</td>
-                                        <td>${turno.estado || "N/A"}</td>
-                                    </tr>
-                                `;
-                                tbody.innerHTML += fila;
-                          
-                            } else {
-                            
-                                const fila = `
-                                    <tr>
-                                        <td>${turno.fecha || "N/A"}</td>
-                                        <td>${turno.paciente || "N/A"}</td>
-                                        <td>${turno.dni || "N/A"}</td>
-                                        <td>${turno.enfermero_Id || "N/A"}</td>
-                                        <td>${turno.hora || "N/A"}</td>
-                                        <td>${turno.especialidad || "N/A"}</td>
-                                        <td>${turno.estado || "N/A"}</td>
-                                    </tr>
-                                `;
-                                tbody.innerHTML += fila;
-                    }});
-                        
-                    } catch (error) {
-                        console.error(`Error al cargar los turnos:`, error);
-                        alert(`No se pudieron cargar los turnos.`);       
+                async function cargarTurnos(profesionalTypeOf) {
+                    const response = await fetch("/turnos/listado/join");
+                    if (!response.ok) {
+                        throw new Error("Error al obtener los turnos de la DB");
                     }
+                    const turnos = await response.json();
+                    //console.log("JSON de los turnos:", turnos); POR FIN CARAJO
+                    const tbody = document.querySelector(`#tabla${profesionalTypeOf} tbody`);
+                    tbody.innerHTML = ""; // Limpia la tabla antes de llenarla
+                    if('#{profesionalTypeOf}' === "Medico") {
+                        turnos.forEach((turno) => {
+                            if (!turno.Medico) {return;} //si medico viene null vuelve al foreach
+                            const fila = `
+                                <tr>
+                                    <td>${turno.fecha}</td>
+                                    <td>${turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : "N/A"}</td>
+                                    <td>${turno.Paciente ? `${turno.Paciente.dni}` : "N/A"}</td>
+                                    <td>${turno.Medico ? `${turno.Medico.nombre} ${turno.Medico.apellido}`: "N/A"}</td>
+                                    <td>${turno.hora}</td>
+                                    <td>${turno.Medico ? `${turno.Medico.especialidad}`: "N/A"}</td>
+                                    <td>${turno.estado}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += fila;
+                        });
+                    } else {
+                        turnos.forEach((turno) => {
+                            if (!turno.Enfermero) {return;}
+                            const fila = `
+                                <tr>
+                                    <td>${turno.fecha}</td>
+                                    <td>${turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : "N/A"}</td>
+                                    <td>${turno.Paciente ? `${turno.Paciente.dni}` : "N/A"}</td>
+                                    <td>${turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}`: "N/A"}</td>
+                                    <td>${turno.hora}</td>
+                                    <td>${turno.Enfermero ? `${turno.Enfermero.area}`: "N/A"}</td>
+                                    <td>${turno.estado}</td>
+                                </tr>
+                            `;
+                            tbody.innerHTML += fila;
+                        });
+                    }
+
+
+
                 }
-                cargarTurnos();
+                cargarTurnos('#{profesionalTypeOf}');
             });
-                       
-                    
-                                
-                
-        
-
-
-
