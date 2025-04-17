@@ -398,41 +398,65 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
                 }
             }
 
+//-Tablas de turnos con filtros y busqueda|
 mixin turnosListar(profesionalTypeOf)
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${profesionalTypeOf}`)
             div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
                 table.table.table-hover.table-dark.table-bordered.border-info.table-striped
                     thead(style="position: sticky; top: 0;")
-                        tr.table-info
-                            th.col(style="width: 10%") Fecha
-                            th.col(style="width: 20%") Paciente
-                            th.col(style="width: 15%") D.N.I.
-                            th.col(style="width: 20%") #{profesionalTypeOf}
-                            th.col(style="width: 10%") Hora
-                            th.col(style="width: 15%") Especialidad
-                            th.col(style="width: 10%") Estado
-                    
+                        if profesionalTypeOf === "Medico"
+                            tr.table-info
+                                th.col(style="width: 10%") Fecha
+                                th.col(style="width: 20%") Paciente
+                                th.col(style="width: 15%") D.N.I.
+                                th.col(style="width: 20%") #{profesionalTypeOf}
+                                th.col(style="width: 10%") Hora
+                                th.col(style="width: 15%") Especialidad
+                                th.col(style="width: 10%") Estado
+                        
+                        else
+                            tr.table-info
+                                th.col(style="width: 10%") Fecha
+                                th.col(style="width: 20%") Paciente
+                                th.col(style="width: 15%") D.N.I.
+                                th.col(style="width: 20%") #{profesionalTypeOf}
+                                th.col(style="width: 10%") Hora
+                                th.col(style="width: 10%") Estado
                     tbody
             
             div.mt-3(style="width: 100%;" id="filtros")
                     div.d-flex.align-items-center.justify-content-center
                         div.row(style="width: 100%;")
                             div.col.w-25
-                                input.form-control.me-4(id="inputDate", type="text", placeholder="Ingrese Fecha")
+                                div.input-group.date(id="datepicker")
+                                    input.form-control(id="inputDate", type="text", placeholder="Seleccione Fecha")
+                                    span.input-group-text
+                                        img(src="/icons/calendar-days-solid.svg" style="width: 20px; height: 20px;")
                             div.col.w-25
                                 input.form-control.me-4(id="inputDni", type="text", placeholder="Ingrese DNI")
-                            div.col.w-25
-                                input.form-control(id="inputProf", type="text", placeholder="Ingrese Profesional")
+                            div.col.w-25(id="sinMedico")
+                                select.form-select.me-4(id="inputEspecialidad")
+                                    option.selected(value="") Seleccione Especialidad
+                            div.col.w-25(id="conMedico")
+                                select.form-select(id="inputProf", type="text", placeholder="Ingrese Profesional")
+                                    option.selected(value="") Seleccione #{profesionalTypeOf}
                     div.d-flex.align-items-center.justify-content-center.mt-4
                         div.row(style="width: 100%;")   
                             div.col.w-25
-                                button.btn.btn-info.w-50(type="button" class="custom-button2") Aplicar Filtros
+                                button.btn.btn-info.w-50(type="button" class="custom-button2" onclick="event.preventDefault(); aplicarFiltros();") Aplicar Filtros
                             div.col.w-25
-                                button.btn.btn-warning.w-50(type="button" class="custom-button2") Limpiar Filtros
+                                button.btn.btn-warning.w-50(type="button" class="custom-button2" onclick="event.preventDefault(); location.reload();") Limpiar Filtros
                             div.col.w-25
                                 a.btn.btn-danger.w-50(href="/turnos/listar", type="button" id="volver" class="volver custom-button2") Volver
 
         script.
+            const fecha = document.getElementById("inputDate");
+            const dni = document.getElementById("inputDni");
+            const especialidad = document.getElementById("inputEspecialidad");
+            const profesional = document.getElementById("inputProf");
+            const conMedico = document.getElementById("conMedico");
+            const sinMedico = document.getElementById("sinMedico");
+
             document.addEventListener("DOMContentLoaded", () => {
                 async function cargarTurnos(profesionalTypeOf) {
                     const response = await fetch("/turnos/listado/join");
@@ -446,9 +470,11 @@ mixin turnosListar(profesionalTypeOf)
                     if('#{profesionalTypeOf}' === "Medico") {
                         turnos.forEach((turno) => {
                             if (!turno.Medico) {return;} //si medico viene null vuelve al foreach
+                            const partesFecha = turno.fecha.split("-");
+                            const fechaFormateada = `${partesFecha[2]}/${partesFecha[1]}/${partesFecha[0]}`; 
                             const fila = `
                                 <tr>
-                                    <td>${turno.fecha}</td>
+                                    <td>${fechaFormateada}</td>
                                     <td>${turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : "N/A"}</td>
                                     <td>${turno.Paciente ? `${turno.Paciente.dni}` : "N/A"}</td>
                                     <td>${turno.Medico ? `${turno.Medico.nombre} ${turno.Medico.apellido}`: "N/A"}</td>
@@ -462,23 +488,70 @@ mixin turnosListar(profesionalTypeOf)
                     } else {
                         turnos.forEach((turno) => {
                             if (!turno.Enfermero) {return;}
+                            const partesFecha = turno.fecha.split("-");
+                            const fechaFormateada = `${partesFecha[2]}/${partesFecha[1]}/${partesFecha[0]}`; 
                             const fila = `
                                 <tr>
-                                    <td>${turno.fecha}</td>
+                                    <td>${fechaFormateada}</td>
                                     <td>${turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : "N/A"}</td>
                                     <td>${turno.Paciente ? `${turno.Paciente.dni}` : "N/A"}</td>
                                     <td>${turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}`: "N/A"}</td>
                                     <td>${turno.hora}</td>
-                                    <td>${turno.Enfermero ? `${turno.Enfermero.area}`: "N/A"}</td>
                                     <td>${turno.estado}</td>
                                 </tr>
                             `;
                             tbody.innerHTML += fila;
                         });
                     }
-
+                    if('#{profesionalTypeOf}' === "Enfermero") {
+                        sinMedico.remove();
+                    }
 
 
                 }
                 cargarTurnos('#{profesionalTypeOf}');
             });
+
+            $(document).ready(function() {
+                $('#datepicker input').datepicker({
+                    format: 'dd/mm/yyyy',
+                    autoclose: true,
+                    todayHighlight: true,
+                    language: 'es',
+                    
+
+                });
+            });
+        
+            async function aplicarFiltros() {
+                fechaValue = fecha.value.trim();
+                dniValue = dni.value.trim();
+                profesionalValue = profesional.value;
+                console.log("Valores de los filtros:", fechaValue, dniValue, profesionalValue);
+                if(fechaValue) {
+                    const partesFecha = fechaValue.split("/");
+                    fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`; // Formato YYYY-MM-DD
+                }
+             
+                
+
+                //hay que armar el query con los filros opcionales
+                const query = new URLSearchParams();
+                if (fechaValue) {
+                    query.append("fecha", fechaFormateada);
+                }
+                if (dniValue) {
+                    query.append("dni", dniValue);
+                }
+                if (profesionalValue) {
+                    query.append("profesional", profesionalValue);
+                }
+
+                const response = await fetch(`/turnos/listado/filtros?${query.toString()}`);
+                console.log("Response del filtro:", response);
+                if (!response.ok) {
+                    throw new Error("Error al obtener los turnos de la DB");
+                }
+                const turnos = await response.json();
+                console.log("JSON de los turnos:", turnos);
+            }

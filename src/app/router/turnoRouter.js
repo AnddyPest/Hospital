@@ -71,5 +71,7 @@ router.get(
 // join de tablas turno-paciente-medico-enfermero ordenadas
 //  por fecha y hora para listar turnos
 router.get("/listado/join", turnoController.getTurnosJoin);
+//join con filtros de fecha, hora y dni
+router.get("/listado/filtros", turnoController.getTurnosJoinConFiltros);
 
 module.exports = router;

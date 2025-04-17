@@ -256,6 +256,126 @@ const turnoController = {
       res.status(500).json({ error: "Error al obtener los turnos" });
     }
   },
+
+  // Join con filtros de fecha, hora y nombre del profesional, medico o enfermero
+  getTurnosJoinConFiltros: async (req, res) => {
+    try {
+      const { fecha, dni, profesional } = req.query;
+
+      const arrayDeFiltros = {};
+
+      // Filtro por fecha
+      if (fecha) {
+        arrayDeFiltros.fecha = fecha;
+      }
+
+      // Filtro por DNI del paciente
+      if (dni) {
+        const paciente = await Paciente.findOne({ where: { dni } });
+        if (paciente) {
+          arrayDeFiltros.paciente_Id = paciente.id;
+        } else {
+          return res.status(404).json({ error: "Paciente no encontrado" });
+        }
+      }
+
+      // Filtro por nombre del profesional (médico o enfermero)
+      if (profesional) {
+        // Dividir el nombre completo en nombre y apellido
+        const partes = profesional.trim().split(" ");
+        const nombre = partes[0]?.toLowerCase(); // Primer palabra como nombre
+        const apellido = partes[1]?.toLowerCase() || ""; // Segunda palabra como apellido (si existe)
+
+        // Buscar al médico
+        const medico = await Medico.findOne({
+          where: {
+            [sequelize.Op.and]: [
+              nombre
+                ? sequelize.where(
+                    sequelize.fn(
+                      "LOWER",
+                      sequelize.fn("TRIM", sequelize.col("nombre"))
+                    ),
+                    { [sequelize.Op.like]: `%${nombre}%` }
+                  )
+                : undefined,
+              apellido
+                ? sequelize.where(
+                    sequelize.fn(
+                      "LOWER",
+                      sequelize.fn("TRIM", sequelize.col("apellido"))
+                    ),
+                    { [sequelize.Op.like]: `%${apellido}%` }
+                  )
+                : undefined,
+            ].filter(Boolean), // Elimina condiciones `undefined`
+          },
+        });
+
+        if (medico) {
+          arrayDeFiltros.medico_Id = medico.id;
+        } else {
+          // Si no se encuentra un médico, buscar al enfermero
+          const enfermero = await Enfermero.findOne({
+            where: {
+              [sequelize.Op.and]: [
+                nombre
+                  ? sequelize.where(
+                      sequelize.fn(
+                        "LOWER",
+                        sequelize.fn("TRIM", sequelize.col("nombre"))
+                      ),
+                      { [sequelize.Op.like]: `%${nombre}%` }
+                    )
+                  : undefined,
+                apellido
+                  ? sequelize.where(
+                      sequelize.fn(
+                        "LOWER",
+                        sequelize.fn("TRIM", sequelize.col("apellido"))
+                      ),
+                      { [sequelize.Op.like]: `%${apellido}%` }
+                    )
+                  : undefined,
+              ].filter(Boolean), // Elimina condiciones `undefined`
+            },
+          });
+
+          if (enfermero) {
+            arrayDeFiltros.enfermero_Id = enfermero.id;
+          } else {
+            return res.status(404).json({ error: "Profesional no encontrado" });
+          }
+        }
+      }
+
+      // Consulta a la base de datos
+      const turnos = await Turno.findAll({
+        include: [
+          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
+          {
+            model: Medico,
+            attributes: ["id", "nombre", "apellido", "especialidad"],
+          },
+          {
+            model: Enfermero,
+            attributes: ["id", "nombre", "apellido", "area"],
+          },
+        ],
+        where: arrayDeFiltros,
+
+        order: [
+          ["fecha", "ASC"],
+          ["hora", "ASC"],
+        ],
+      });
+
+      res.status(200).json(turnos);
+    } catch (error) {
+      console.error("Error al obtener los turnos con filtros:", error);
+      res.status(500).json({ error: "Error al obtener los turnos" });
+    }
+  },
 };
 
 module.exports = turnoController;
