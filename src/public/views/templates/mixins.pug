@@ -443,7 +443,7 @@ mixin turnosListar(profesionalTypeOf)
                     div.d-flex.align-items-center.justify-content-center.mt-4
                         div.row(style="width: 100%;")   
                             div.col.w-25
-                                button.btn.btn-info.w-50(type="button" class="custom-button2" onclick="event.preventDefault(); aplicarFiltros();") Aplicar Filtros
+                                button.btn.btn-info.w-50(id="aplicarFiltros" type="button" class="custom-button2" onclick="event.preventDefault(); aplicarFiltros();") Aplicar Filtros
                             div.col.w-25
                                 button.btn.btn-warning.w-50(type="button" class="custom-button2" onclick="event.preventDefault(); location.reload();") Limpiar Filtros
                             div.col.w-25
@@ -456,6 +456,7 @@ mixin turnosListar(profesionalTypeOf)
             const profesional = document.getElementById("inputProf");
             const conMedico = document.getElementById("conMedico");
             const sinMedico = document.getElementById("sinMedico");
+            const aplicarFiltrosBtn = document.getElementById("aplicarFiltros");
 
             document.addEventListener("DOMContentLoaded", () => {
                 async function cargarTurnos(profesionalTypeOf) {
@@ -521,6 +522,51 @@ mixin turnosListar(profesionalTypeOf)
                     
 
                 });
+            });
+            // especialidades... el metodo de filtros deberia incluir especialidades
+            document.addEventListener("DOMContentLoaded", () => {
+                const profesionalTypeOf = "#{profesionalTypeOf}";
+                if(profesionalTypeOf === "Medico") {
+                    async function cargarEspecialidades() {
+                        const response = await fetch("/medicos/especialidades");
+                        if (!response.ok) {
+                            throw new Error("Error al obtener las especialidades de la DB");
+                        }
+                        const especialidades = await response.json();
+                        console.log("JSON de las especialidades:", especialidades);
+                        especialidades.forEach((esp) => {
+                            const option = document.createElement("option");
+                            option.value = esp;
+                            option.textContent = esp;
+                            especialidad.appendChild(option);
+                        });
+
+                    };
+                    cargarEspecialidades();
+                    
+                };
+            });
+
+            //medicos... ver de diferenciar las vistas de enfermeros y medicos
+            document.addEventListener("DOMConentLoaded", () => {
+                const profesionalTypeOf = "#{profesionalTypeOf}";
+                if(profesionalTypeOf === "Medico") {
+                    async function cargarMedicos() {
+                        const response = await fetch("/medicos/listado");
+                        if (!response.ok) {
+                            throw new Error("Error al obtener los medicos de la DB");
+                        }
+                        const medicos = await response.json();
+                        console.log("JSON de los medicos:", medicos);
+                        medicos.forEach((medico) => {
+                            const option = document.createElement("option");
+                            option.value = medico.id;
+                            option.textContent = `${medico.nombre} ${medico.apellido}`;
+                            profesional.appendChild(option);
+                        });
+                    };
+                    cargarMedicos();
+                };
             });
         
             async function aplicarFiltros() {
