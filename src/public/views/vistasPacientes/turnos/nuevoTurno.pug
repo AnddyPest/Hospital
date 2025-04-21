@@ -11,42 +11,35 @@ block content
         +header("Nuevo Turno", "/icons/user-plus-solid.svg")
 
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%" id=`formularioNewTurn`)
-            div.row.align-items-center.mb-4
+            div.row.align-items-center.mb-5.mt-5
                 div.col.w-25
-                    input.form-control.form-control-lg.w-100(type="text" id="inputDNI" name="inputDNI" placeholder="Ingrese D.N.I." aria-label="DNI" aria-describedby="basic-addon1")
+                    div.input-group
+                        input.form-control.form-control-lg(type="text" id="inputDNI" name="inputDNI" placeholder="Ingrese D.N.I." aria-label="DNI" aria-describedby="basic-addon1")
+                        span.input-group-text(id="dniSpan" style="background-color: #0d6efd;")
+                            img(src="/icons/user-solid.svg" style="width: 20px; height: 20px;")
                 div.col.w-25
-                    button.btn.w-75.btn-info(id="dniLock" onclick="event.preventDefault(); fijarDni();" class="custom-button2") Chequear D.N.I.
-                div.col.w-25
-                    select.form-select.form-select-lg.w-100.h-100(id="selectEsp" name="selectEsp" aria-label=".form-select-lg example")
+                    select.form-select.form-select-lg.h-100(id="selectEsp" name="selectEsp" aria-label=".form-select-lg example")
                         option.selected Seleccione un Area
                         option.value Triage de Ingreso
                 div.col.w-25
-                    button.btn.w-75.btn-info(id="espLock" onclick="event.preventDefault(); fijarTipo();" type="submit" class="custom-button2") Seleccionar Area
-            div.row.align-items-center.mb-4
-                div.col.w-25
                     select.form-select.form-select-lg.w-100.h-100(id="selectMedico" name="selectMedico" aria-label=".form-select-lg example")
                         option.selected Seleccione un Profesional
-                div.col.w-25
-                    button.btn.w-75.btn-info(id="medicoLock" onclick="event.preventDefault(); aceptarMedico();" class="custom-button2") Seleccionar Medico
+            div.row.align-items-center.mb-5
                 div.col.w-25
                     div.input-group.date(id="datepicker")
                         input.form-control.form-control-lg(type="text" id="inputFecha" placeholder="Seleccione una fecha")
                         span.input-group-text
                             img(src="/icons/calendar-days-solid.svg" style="width: 20px; height: 20px;")
                 div.col.w-25
-                    button.btn.w-75.btn-info(id="dateLock" onclick="event.preventDefault(); aceptarFecha();" class="custom-button2") Seleccionar Fecha
-                    
-            div.row.align-items-center
-                div.col.w-25
                     select.form-select.form-select-lg.w-100.h-100(id="hourpicker", name="hourpicker")
                         option.selected(value="Seleccione un horario") Seleccione un horario 
                 div.col.w-25
-                    button.btn.w-75.btn-info(id="hourLock" onclick="event.preventDefault(); aceptarHorario();" class="custom-button2") Seleccionar Horario
-                div.col.w-25
                     input.form-control.form-control-lg.w-100(type="text" id="motivo" name="codigo" placeholder="Motivo" aria-label="ID Turno" aria-describedby="basic-addon1")
+                 
+            div.row.align-items-center.mt-5
                 div.col.w-25
-                    button.btn.w-75.btn-info(class="btn-secondary custom-button2" id="botonNext" onclick="event.preventDefault(); aceptarDatos();") Aceptar Datos
-            div.row.align-items-center.mt-5   
+                    button.btn.w-50.btn-info(class="btn-secondary custom-button2" id="botonNext" onclick="event.preventDefault(); aceptarDatos();") Aceptar Datos
+            div.row.align-items-center  
                 div.col.w-25
                 div.col.w-50
                     a.btn.w-75.btn-warning.mt-5(href="#" class="btn-secondary custom-button2" id="botonAtras" onclick="event.preventDefault(); location.reload();") Reiniciar Formulario
@@ -61,15 +54,11 @@ block content
     script.
         //variables globales y elementos del DOM
         const dni = document.getElementById("inputDNI");//ok
-        const dniLock = document.getElementById("dniLock");//ok
+        const dniSpan = document.getElementById("dniSpan");//ok
         const selectEsp = document.getElementById("selectEsp");//ok
-        const espLock = document.getElementById("espLock");//ok
         const selectMedico = document.getElementById("selectMedico");//ok
-        const medicoLock = document.getElementById("medicoLock");//ok
-        const dateLock = document.getElementById("datepicker");//ok
-        const botonNext = document.getElementById("botonNext");//ok
+        const datePicker = document.getElementById("inputFecha");//ok
         const hourpicker = document.getElementById("hourpicker");//ok
-        const hourLock  = document.getElementById("hourLock");//ok
         const motivo = document.getElementById("motivo");//ok
         const btnNext = document.getElementById("botonNext");//ok
         let idPaciente= ""; 
@@ -112,38 +101,52 @@ block content
         
         //este metodo chequea que el dni exista y lo fija en el input
         //luego habria que cambiar todas las alert por modals
-        async function fijarDni() {
-                try {
-                    const dniValue = dni.value;
-                    const response = await fetch(`/pacientes/listado/${dniValue}`);
-                    if (!response.ok) {
-                        if(response.status === 404) {
-                            alert ("Paciente no encontrado");
-                            dni.value = "";
-                            dni.placeholder = "Ingrese D.N.I.";
-                        }else{
-                        throw new Error("Error al obtener los datos del paciente");
-                        }
-                    }
-                    const paciente = await response.json();
-                    if (paciente) {
-                        idPaciente = paciente.id;
-                        console.log(idPaciente);
-                        
-                        alert (`Paciente encontrado: ${paciente.nombre} ${paciente.apellido}`);
-                    } else {
-                        alert("Paciente no encontrado");
-                    }
-                }catch (error) {
-                    console.error("Error al cargar los datos del paciente:", error);
+        document.addEventListener("DOMContentLoaded", () => {
+            dni.addEventListener("input", async () => {
+                dni.value = dni.value.replace(/[^0-9]/g, "");
+                if (dni.value.length > 8) {
+                    dni.value = dni.value.slice(0, 8);
                 }
-        };
+                if (dni.value === "") {
+                dniSpan.style.backgroundColor = "#0d6efd"; // Azul
+                return;
+                }
+                if(dni.value.length < 7) {
+                    dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                    return;
+                }else if (dni.value.length >= 8) {
+                    dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                    
+                    try {
+                        const response = await fetch(`/pacientes/listado/${dni.value}`);
+                        if (response.ok) {
+                            // Si el DNI existe, cambia el fondo a verde
+                            dniSpan.style.backgroundColor = "#28a745"; // Verde
+                            const paciente = await response.json();
+                            idPaciente = paciente.id;
+                            console.log(idPaciente);
+                        } else if (response.status === 404) {
+                            // Si el DNI no existe, cambia el fondo a rojo
+                            dniSpan.style.backgroundColor = "#dc3545"; // Rojo
+                        
+                        }
+                        } catch (error) {
+                            console.error("Error al comprobar el DNI:", error);
+                            dniSpan.style.backgroundColor = "#ffc107"; // Amarillo en caso de error
+                    }
+                }
+            });
+        });
+        // con esto hacemos que cuando se seleccione una especialidad, se carguen los medicos en el select
+        //y si es Triage de Ingreso, se cargan los enfermeros
+        document.addEventListener("DOMContentLoaded", () => {
+            selectEsp.addEventListener("change", async () => {
+                fijarTipo();
+            });
+        });
         //metodo para fijar el area del turno
         async function fijarTipo() {
-            if(selectEsp.value === "Seleccione un Area") {
-                alert("Seleccione un Area");
-            }
-            if (selectEsp.value === "Triage de Ingreso") {
+                if (selectEsp.value === "Triage de Ingreso") {
                 const area = selectEsp.value;
                 const response = await fetch(`/enfermeros/areas/${area}`)
                 if (!response.ok) {
@@ -152,6 +155,12 @@ block content
                 const enfermeros = await response.json();
                 console.log(enfermeros);
                 selectMedico.innerHTML = "";
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Seleccione un Profesional";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                selectMedico.appendChild(defaultOption);
                 enfermeros.forEach(enfermero => {
                     const option = document.createElement("option");
                     option.value = enfermero.id;
@@ -169,18 +178,30 @@ block content
                     const medicos = await response.json();
                     console.log(medicos);
                     
-                    selectMedico.innerHTML = ""; // Limpiar opciones anteriores
+                    selectMedico.innerHTML = ""; 
+                    const defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Seleccione un Profesional";
+                    defaultOption.selected = true;
+                    defaultOption.disabled = true;
+                    selectMedico.appendChild(defaultOption);
+                    
                     medicos.forEach(medico => {
                         const option = document.createElement("option");
                         option.value = medico.id;
                         option.textContent = `${medico.id} - ${medico.nombre} ${medico.apellido}`;
-                        selectMedico.appendChild(option); // Aquí usamos 'option' correctamente
+                        selectMedico.appendChild(option);
                     });
                 }catch (error) {
                     console.error("Error al cargar los medicos:", error);
                 }
             };
         };    
+        document.addEventListener("DOMContentLoaded", () => {
+            selectMedico.addEventListener("change", async () => {
+                aceptarMedico();
+            }); 
+        });
          //metodo para fijar el medico del turno y guardar su id
         async function aceptarMedico() {
             if(selectMedico.value === "Seleccione un Profesional") {
@@ -195,6 +216,17 @@ block content
                 alert(`Medico seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
             };  
         };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            $('#datepicker input').on('changeDate', async () => {
+                if(selectMedico.value !== "Seleccione un Profesional") {
+                aceptarFecha();
+                } else {
+                    alert("Debe seleccionar un profesional antes de seleccionar una fecha");
+                    datePicker.value = "";
+                }
+            });
+        });
 
         async function aceptarFecha() {
             const fecha = document.getElementById("inputFecha").value;
@@ -219,6 +251,14 @@ block content
                 const horarios = await response.json();
                 
                 hourpicker.innerHTML = "";
+
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Seleccione un horario";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                hourpicker.appendChild(defaultOption);
+
                 const startTime = new Date();
                 startTime.setHours(8, 0, 0); // entrada 8
                 const endTime = new Date();
@@ -262,6 +302,14 @@ block content
                 //cargamos los horarios libres en el select y lugo quitamos los horarios ocupados
                 //los horarios disponibles son los que no tienen un id de turno
                 //entonces en el select cargamos todos los horarios y luego quitamos los ocupados
+                
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Seleccione un horario";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                hourpicker.appendChild(defaultOption);
+
                 const startTime = new Date();
                 startTime.setHours(8, 0, 0); // entrada 8
                 const endTime = new Date();
@@ -287,7 +335,11 @@ block content
         
 
 
-            
+        document.addEventListener("DOMContentLoaded", () => {
+            hourpicker.addEventListener("change", async () => {
+                aceptarHorario();
+            })
+        })
         
         async function aceptarHorario() {
             const hora = hourpicker.value;
@@ -302,12 +354,8 @@ block content
         async function aceptarDatos() {
             
             motivoTurno = motivo.value;
-            if (motivoTurno === "") {
-                alert("Ingrese un motivo");
-            } else {
-                alert(`Motivo seleccionado: ${motivoTurno}`);
-            }
-            if (idPaciente === "" || idMedico === "" || fechaTurno === "" || horaTurno === "" || motivoTurno === "") {
+            
+            if (idPaciente === "" || !idMedico && !idEnfermero || fechaTurno === "" || horaTurno === "" || motivoTurno === "") {
                 alert("Complete todos los campos");
             } else {
                 alert(`Datos seleccionados: ${idPaciente} ${idMedico} ${fechaTurno} ${horaTurno} ${motivoTurno}`);
@@ -317,50 +365,55 @@ block content
         };
 
         async function enviarDatos() {
-            
+            motivoTurno = motivo.value;
             const estado = "pendiente";
-
             
-            // damos formato a la fecha para que sea YYYY-MM-DD
-            const partesFecha = fechaTurno.split("/");
-            const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
-            const horaFormateada = `${horaTurno}:00`;
             
-             console.log("Datos Enviados: ",{
-                fechaFormateada,
-                horaFormateada,
-                motivoTurno,
-                estado,
-                idPaciente,
-                idMedico,
-                idEnfermero,
-            });
-            try {
-                const response = await fetch("/turnos/admin/new", {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({
-                        estado: estado,
-                        fecha: fechaFormateada,
-                        hora: horaFormateada,
-                        motivo: motivoTurno,
-                        paciente_Id: idPaciente,
-                        medico_Id: idMedico,
-                        enfermero_Id: idEnfermero,
-                    })
+                // damos formato a la fecha para que sea YYYY-MM-DD
+                const partesFecha = fechaTurno.split("/");
+                const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
+                const horaFormateada = `${horaTurno}:00`;
+                
+                console.log("Datos Enviados: ",{
+                    fechaFormateada,
+                    horaFormateada,
+                    motivoTurno,
+                    estado,
+                    idPaciente,
+                    idMedico,
+                    idEnfermero,
                 });
-                if (!response.ok) {
-                    throw new Error("Error al enviar los datos del turno");
+                try {
+                    const response = await fetch("/turnos/admin/new", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            estado: estado,
+                            fecha: fechaFormateada,
+                            hora: horaFormateada,
+                            motivo: motivoTurno,
+                            paciente_Id: idPaciente,
+                            medico_Id: idMedico,
+                            enfermero_Id: idEnfermero,
+                        })
+                    });
+                    if (!response.ok) {
+                        throw new Error("Error al enviar los datos del turno");
+                    }
+                    const data = await response.json();
+                    console.log(data);
+                    alert("Turno creado con exito");
+                    if(selectEsp.value === "Triage de Ingreso") {
+                        window.location.href = "/turnos/listar/triages";
+                    }else{
+                        window.location.href = "/turnos/listar/medicos";
+                    }
+                } catch (error) {
+                    console.error("Error al enviar los datos:", error);
                 }
-                const data = await response.json();
-                console.log(data);
-                alert("Turno creado con exito");
-                window.location.href = "/turnos/listado";
-            } catch (error) {
-                console.error("Error al enviar los datos:", error);
-            }
+            
         };
 
        
