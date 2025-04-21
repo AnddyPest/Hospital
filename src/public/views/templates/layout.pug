@@ -64,11 +64,11 @@ html(lang="en")
         // Sección Personal
         div.accordion-item.bg-azul-claro
           h2.accordion-header
-            button.accordion-button(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="true", aria-controls="collapsePersonal") 
+            button.accordion-button.collapsed(type="button", data-bs-toggle="collapse", data-bs-target="#collapsePersonal", aria-expanded="false", aria-controls="collapsePersonal") 
               | Personal 
               img(src="/icons/users-solid.svg", alt="Prescripciones", class="ms-4", style="width: 25px; height: 25px;")
               
-          div.collapse.show#collapsePersonal(data-bs-parent="#accordionSidebar")
+          div.collapse#collapsePersonal(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group <!-- BOTON DE MEDICOS -->
                 a(href="/medicos" , class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;" id="medico")
@@ -160,3 +160,29 @@ html(lang="en")
     // Pie de página
     footer.bg-azul-claro.text-center.py-3.footer
       p.mb-0 Footer Content
+  
+  script.
+    document.addEventListener("DOMContentLoaded", () => {
+      const currentPath = window.location.pathname;
+      const collapsePersonal = document.querySelector("#collapsePersonal");
+      const botonPersonal = collapsePersonal.previousElementSibling.querySelector("button")
+      const collapseGestion = document.querySelector("#collapseGestion");
+      const botonGestion = collapseGestion.previousElementSibling.querySelector("button")
+      const collapsePacientes = document.querySelector("#collapsePacientes");
+      const botonPacientes = collapsePacientes.previousElementSibling.querySelector("button")
+
+      if(["/medicos", "/enfermeros", "/administrativos", "/maestranzas"].some(path => currentPath.startsWith(path))) {
+        collapsePersonal.classList.add("show")
+        botonPersonal.setAttribute("aria-expanded", "true")
+        botonPersonal.classList.remove("collapsed")
+      } else if(["/camas", "/diagnosis", "/tratamiento", "/cirugias", "/equipos", "/farmacia", "/proveedores"].some(path => currentPath.startsWith(path))) {
+        collapseGestion.classList.add("show")
+        botonGestion.setAttribute("aria-expanded", "true")
+        botonGestion.classList.remove("collapsed")
+      } else if(["/pacientes", "/turnos"].some(path => currentPath.startsWith(path))) {
+        collapsePacientes.classList.add("show")
+        botonPacientes.setAttribute("aria-expanded", "true")
+        botonPacientes.classList.remove("collapsed")
+      }
+
+    });
