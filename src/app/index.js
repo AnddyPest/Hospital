@@ -9,6 +9,8 @@ const pacienteRouter = require("./router/pacienteRouter"); // Pacientes Router
 const turnoRouter = require("./router/turnoRouter"); // Turnos Router
 const path = require("path");
 const morgan = require("morgan");
+//const autnRouter = require("./router/authRouter"); // Auth Router
+//const session = require("express-session");
 
 const app = express();
 
@@ -22,8 +24,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
 
+/*app.use(session({
+  secret: "nova-slug-enterprise-2025",
+  resave: false,
+  saveUninitialized: true,
+}))*/
+
 // Rutas
 app.use("/", router);
+//app.use("/auth", authRouter);
 app.use("/medicos", medicoRouter);
 app.use("/enfermeros", enfermeroRouter);
 app.use("/administrativos", administrativoRouter);
