@@ -14,8 +14,8 @@ block content
         img(src="/images/trabajadores.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.8;")
     
   if !isAuthenticated
-    div.position-absolute.top-50.start-50.translate-middle.text-center.text-white.mb-5
-      div.card(style="width: 18rem; border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+    div.position-absolute.top-50.start-50.translate-middle.text-center.text-white.mb-5.h-50
+      div.card(style="width: 19rem;border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
         div.card-body
           h5.card-title.text-center Iniciar Sesión
           form(action="/auth/login" method="POST")
@@ -25,4 +25,6 @@ block content
             div.mb-3
               label(for="password", class="form-label") Contraseña
               input#password.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="password", required=true, placeholder="Ingrese su contraseña")
-            button.btn.btn-primary(type="submit" style="box-shadow: 0 2px 5px black;") Iniciar Sesión
+            button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;") Iniciar Sesión
+            a.ms-4.mt-3(href="/auth/register", class="btn btn-success", style="box-shadow: 0 2px 5px black;") Registrarse
+            
