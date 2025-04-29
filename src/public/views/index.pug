@@ -50,7 +50,7 @@ block content
             div.mb-3.col
               label(for="passwordConfirm", class="form-label") Confirmar Contraseña
               div.input-group
-                input#passwordConfirm.form-control(type="passwordConfirm", style="box-shadow: 0 2px 5px black;" name="confirmPassword", required=true, placeholder="Confirme su contraseña")
+                input#passwordConfirm.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="confirmPassword", required=true, placeholder="Confirme su contraseña")
                 span.input-group-text(role="button" onclick="muestrePassConfirm()")
                   img#ojoConfirm(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
             button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); nuevoUser();") Registrarse
@@ -132,8 +132,8 @@ block content
           },
           body: JSON.stringify({
             email,
-            [`${tipoUsuario}_Id`]: idUsuario, // Enviar el ID correspondiente al tipo de usuario
             password,
+            [`${tipoUsuario}_Id`]: idUsuario, // Enviar el ID correspondiente al tipo de usuario
           }),
         });
 
