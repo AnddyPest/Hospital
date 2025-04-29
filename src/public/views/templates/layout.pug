@@ -125,6 +125,10 @@ html(lang="en")
                   span
                     | Proveedores
                   img(src="/icons/building-user-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span 
+                    | Usuarios
+                  img(src="/icons/user-shield-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
         // Sección Pacientes
         div.accordion-item.bg-azul-claro
           h2.accordion-header
@@ -150,20 +154,58 @@ html(lang="en")
                   span
                     | Prescripciones
                   img(src="/icons/prescription-bottle-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-      
-      button.btn.btn-danger.w-75.d-flex.align-items-center.justify-content-between.mt-5(type="button", class= "custom-button2" style=style="position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); margin-bottom: 1rem;")
-        span.me-1
-          | EMERGENCIAS
-        img(src="/icons/truck-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")     
-
+          div.accordion-item.bg-azul-claro
+          h2.accordion-header
+            button.accordion-button.collapsed.online-btn(type="button", data-bs-toggle="collapse", data-bs-target="#collapseOnline", aria-expanded="false", aria-controls="collapseOnline")
+              | Turnos Online
+              img(src="/icons/clock-regular.svg", alt="Prescripciones", class="ms-3", style="width: 25px; height: 25px;")
+          div.collapse#collapseOnline(data-bs-parent="#accordionSidebar")
+            div.accordion-body
+              ul.list-group
+                a(href="/pacientes", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Ingresar Datos
+                  img(src="/icons/user-pen-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Pedir Turno
+                  img(src="/icons/user-clock-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Ver Turnos
+                  img(src="/icons/rectangle-list-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+    
+        div.accordion-item.bg-azul-claro
+          h2.accordion-header
+            button.accordion-button.collapsed.emergencias-btn(type="button", data-bs-toggle="collapse", data-bs-target="#collapseEmergencias", aria-expanded="false", aria-controls="collapseEmergencias")
+              | Emergencias
+              img(src="/icons/truck-medical-solid.svg", alt="Prescripciones", class="ms-3", style="width: 25px; height: 25px;")
+          div.collapse#collapseEmergencias(data-bs-parent="#accordionSidebar")
+            div.accordion-body
+              ul.list-group
+                a(href="/pacientes", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Ver Emergencias
+                  img(src="/icons/triangle-exclamation-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Asignar Equipo
+                  img(src="/icons/notes-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Catástrofes
+                  img(src="/icons/skull-crossbones-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
     // Área de trabajo
     div.workspace
       div.p-4
         block content
 
     // Pie de página
-    footer.bg-azul-claro.text-center.py-3.footer
-      p.mb-0 Footer Content
+    footer.bg-azul-claro.footer
+        
+      
+      
+
   
   script.
     document.addEventListener("DOMContentLoaded", () => {

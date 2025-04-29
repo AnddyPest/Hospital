@@ -21,6 +21,10 @@ const User = sequelize.define("User", {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  superAdmin: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 });
 
 Medico.hasOne(User, { foreignKey: "medico_Id" });

@@ -47,6 +47,7 @@ const authController = {
     const {
       email,
       password,
+      superAdmin,
       medico_Id,
       enfermero_Id,
       paciente_Id,
@@ -60,6 +61,7 @@ const authController = {
       const user = await User.create({
         email,
         password: salteada,
+        superAdmin: superAdmin || false,
         medico_Id,
         enfermero_Id,
         paciente_Id,

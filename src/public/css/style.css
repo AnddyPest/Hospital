@@ -86,3 +86,41 @@ html {
   left: 50%;
   transform: translate(-50%, -50%);
 }
+
+.emergencias-btn {
+  background-color: #dc3545;
+  color: white;
+}
+
+.emergencias-btn:hover {
+  background-color: #c82333;
+  color: white;
+}
+
+button.emergencias-btn[aria-expanded="true"] {
+  background-color: #d35400;
+  color: white;
+}
+
+button.emergencias-btn[aria-expanded="true"]:hover {
+  background-color: #d34700;
+}
+
+.online-btn {
+  background-color: #4e8b56;
+  color: white;
+}
+
+.online-btn:hover {
+  background-color: #137017;
+  color: white;
+}
+
+button.online-btn[aria-expanded="true"] {
+  background-color: #41a37f;
+  color: white;
+}
+
+button.online-btn[aria-expanded="true"]:hover {
+  background-color: #337259;
+}
