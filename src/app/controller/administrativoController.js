@@ -70,6 +70,21 @@ const administrativoController = {
       res.status(500).json({ error: "Error al borrar el enfermero" });
     }
   },
+  // administrativo por dni
+  getAdministrativoByDni: async (req, res) => {
+    try {
+      const { dni } = req.params;
+      const administrativo = await Administrativo.findOne({ where: { dni } });
+      if (administrativo) {
+        res.status(200).json(administrativo);
+      } else {
+        res.status(404).json({ error: "Administrativo no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al obtener el administrativo:", error);
+      res.status(500).json({ error: "Error al obtener el administrativo" });
+    }
+  },
 };
 
 module.exports = administrativoController;

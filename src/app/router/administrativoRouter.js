@@ -50,5 +50,6 @@ router.get("/listado", administrativoController.getAllAdministrativos);
 router.post("/admin/new", administrativoController.crearAdministrativo);
 router.put("/editar/:id", administrativoController.editarAdministrativo);
 router.delete("/borrar/:id", administrativoController.borrarAdministrativo);
+router.get("/buscardni/:dni", administrativoController.getAdministrativoByDni);
 
 module.exports = router;

@@ -52,5 +52,6 @@ router.put("/editar/:id", enfermeroController.editarEnfermero); // <---- PROBAR!
 router.delete("/borrar/:id", enfermeroController.borrarEnfermero); // <---- PROBAR!!!!
 router.get("/areas/:area", enfermeroController.getEnfermerosByArea);
 router.get("/buscar/:id", enfermeroController.getEnfermeroById);
+router.get("/buscardni/:dni", enfermeroController.getEnfermeroByDni);
 
 module.exports = router;

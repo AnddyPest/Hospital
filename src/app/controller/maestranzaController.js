@@ -68,6 +68,21 @@ const maestranzaController = {
       res.status(500).json({ error: "Error al borrar el Maestranza" });
     }
   },
+  // get maestranza por dni
+  getMaestranzaByDni: async (req, res) => {
+    try {
+      const { dni } = req.params;
+      const maestranza = await Maestranza.findOne({ where: { dni } });
+      if (maestranza) {
+        res.status(200).json(maestranza);
+      } else {
+        res.status(404).json({ error: "Maestranza no encontrado" });
+      }
+    } catch (error) {
+      console.error("Error al obtener el Maestranza:", error);
+      res.status(500).json({ error: "Error al obtener el Maestranza" });
+    }
+  },
 };
 
 module.exports = maestranzaController;

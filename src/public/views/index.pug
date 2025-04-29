@@ -15,16 +15,171 @@ block content
     
   if !isAuthenticated
     div.position-absolute.top-50.start-50.translate-middle.text-center.text-white.mb-5.h-50
-      div.card(style="width: 19rem;border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+      div.card.card-info(id="login", style="width: 19rem;border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
         div.card-body
           h5.card-title.text-center Iniciar Sesión
           form(action="/auth/login" method="POST")
+          div.mb-3
+              label(for="username", class="form-label") Email
+              input#username.form-control(type="email", style="box-shadow: 0 2px 5px black;" name="username", required=true, placeholder="Ingrese su Email")
+          div.mb-3
+            label(for="password", class="form-label") Contraseña
+            div.input-group
+              input#passwordLogin.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="password", required=true, placeholder="Ingrese su contraseña")
+              span.input-group-text(role="button" onclick="muestrePassLogin()")
+                img#ojoLogin(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
+          button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); login();") Iniciar Sesión
+          button.ms-4.mt-3.btn.btn-success(style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); registrarse();") Registrarse
+          button.mt-4.btn.btn-warning.w-75.mb-3(style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); invitado();") Ingrese como invitado
+      div.card.card-info(id="register", style="width: 19rem; display: none; border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+        div.card-body
+          h5.card-title.text-center Registrarse
+          form(action="/auth/register" method="POST")
             div.mb-3
-              label(for="username", class="form-label") Usuario
-              input#username.form-control(type="text", style="box-shadow: 0 2px 5px black;" name="username", required=true, placeholder="Ingrese su usuario")
+              label(for="email", class="form-label") Email
+              input#email.form-control(type="email", style="box-shadow: 0 2px 5px black;" name="email", required=true, placeholder="Ingrese su Email")
             div.mb-3
+              label(for="dni", class="form-label") DNI
+              input#dni.form-control(type="text", style="box-shadow: 0 2px 5px black;" name="dni", required=true, placeholder="Ingrese su DNI")
+            div.mb-3.col
               label(for="password", class="form-label") Contraseña
-              input#password.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="password", required=true, placeholder="Ingrese su contraseña")
-            button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;") Iniciar Sesión
-            a.ms-4.mt-3(href="/auth/register", class="btn btn-success", style="box-shadow: 0 2px 5px black;") Registrarse
-            
+              div.input-group
+                input#passwordCreate.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="password", required=true, placeholder="Ingrese su contraseña")
+                span.input-group-text(role="button" onclick="muestrePassCreate()")
+                  img#ojoCreate(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
+            div.mb-3.col
+              label(for="passwordConfirm", class="form-label") Confirmar Contraseña
+              div.input-group
+                input#passwordConfirm.form-control(type="passwordConfirm", style="box-shadow: 0 2px 5px black;" name="confirmPassword", required=true, placeholder="Confirme su contraseña")
+                span.input-group-text(role="button" onclick="muestrePassConfirm()")
+                  img#ojoConfirm(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
+            button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); nuevoUser();") Registrarse
+            button.ms-4.mt-3(class="btn btn-danger", style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); volver();") Volver
+  
+  
+  
+  
+  script.
+    const loginCard = document.getElementById('login');
+    const registerCard = document.getElementById('register');
+    const passwordLogin = document.getElementById('passwordLogin');
+    const passwordCreate = document.getElementById('passwordCreate');
+    const passwordConfirm = document.getElementById('passwordConfirm');
+    const ojoLogin = document.getElementById('ojoLogin');
+    const ojoCreate = document.getElementById('ojoCreate');
+    const ojoConfirm = document.getElementById('ojoConfirm');
+    function registrarse() {
+      loginCard.style.display = 'none';
+      registerCard.style.display = 'block';
+    };
+    function volver() {
+      loginCard.style.display = 'block';
+      registerCard.style.display = 'none';
+    };       
+    //registrarse como nuevo usuario!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    async function nuevoUser() {
+      const email = document.getElementById("email").value;
+      const dni = document.getElementById("dni").value;
+      const password = document.getElementById("passwordCreate").value;
+      const confirmPassword = document.getElementById("passwordConfirm").value;
+
+      if (password !== confirmPassword) {
+        alert("Las contraseñas no coinciden");
+        return;
+      }
+
+      let tipoUsuario = null;
+      let idUsuario = null;
+
+      // Buscar al usuario por DNI en los diferentes endpoints
+      try {
+        const endpoints = [
+          { type: "medico", url: `medicos/buscardni/${dni}` },
+          { type: "paciente", url: `pacientes/listado/${dni}` },
+          { type: "administrativo", url: `administrativos/buscardni/${dni}` },
+          { type: "maestranza", url: `maestranzas/buscardni/${dni}` },
+          { type: "enfermero", url: `enfermeros/buscardni/${dni}` },
+        ];
+
+        for (const endpoint of endpoints) {
+          const response = await fetch(endpoint.url); // Realiza la solicitud aquí
+
+          if (response.ok) {
+            const datos = await response.json();
+            tipoUsuario = endpoint.type;
+            idUsuario = datos.id; // Asegúrate de que 'datos' tenga el formato esperado
+            console.log(`ID del ${tipoUsuario}: ${idUsuario}`);
+            break; // Detén el bucle si se encuentra un usuario
+          }
+        }
+
+        if (!idUsuario) {
+          alert("No se encontró el usuario con el DNI proporcionado.");
+          return;
+        }
+      } catch (error) {
+        console.error("Error al buscar por DNI:", error);
+        alert("DNI no encontrado o error en la búsqueda.");
+        return;
+      }
+
+      // Registrar al usuario
+      try {
+        const response = await fetch("/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            [`${tipoUsuario}_Id`]: idUsuario, // Enviar el ID correspondiente al tipo de usuario
+            password,
+          }),
+        });
+
+        if (response.ok) {
+          alert("Usuario creado con éxito");
+          window.location.href = "/";
+        } else {
+          alert("Error al crear el usuario");
+        }
+      } catch (error) {
+        console.error("Error al registrar el usuario:", error);
+        alert("Error al registrar el usuario");
+      }
+    }
+    async function login() {
+      alert("CREAR FUNCION");
+    };
+    async function invitado() {
+      alert("CREAR FUNCION");
+    };
+    
+      
+    function muestrePassLogin() {
+      if (passwordLogin.type === "password") {
+        passwordLogin.type = "text";
+        ojoLogin.src = "/icons/eye-slash-solid.svg";
+      } else {
+        passwordLogin.type = "password";
+        ojoLogin.src = "/icons/eye-solid.svg";
+      }
+    };
+    function muestrePassCreate() {
+      if (passwordCreate.type === "password") {
+        passwordCreate.type = "text";
+        ojoCreate.src = "/icons/eye-slash-solid.svg";
+      } else {
+        passwordCreate.type = "password";
+        ojoCreate.src = "/icons/eye-solid.svg";
+      }
+    };
+    function muestrePassConfirm() {
+      if (passwordConfirm.type === "password") {
+        passwordConfirm.type = "text";
+        ojoConfirm.src = "/icons/eye-slash-solid.svg";
+      } else {
+        passwordConfirm.type = "password";
+        ojoConfirm.src = "/icons/eye-solid.svg";
+      }
+    };

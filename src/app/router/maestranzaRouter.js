@@ -49,6 +49,7 @@ router.get("/admin/seleccionar", (req, res) => {
 router.get("/listado", maestranzaController.getAllMaestranzas);
 router.post("/admin/new", maestranzaController.crearMaestranza);
 router.put("/editar/:id", maestranzaController.editarMaestranza); // <---- PROBAR!!!!
-router.delete("/borrar/:id", maestranzaController.borrarMaestranza); // <---- PROBAR!!!!
+router.delete("/borrar/:id", maestranzaController.borrarMaestranza);
+router.get("/buscardni/:dni", maestranzaController.getMaestranzaByDni); // <---- PROBAR!!!!
 
 module.exports = router;
