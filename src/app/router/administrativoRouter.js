@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const administrativoController = require("../controller/administrativoController");
+//const token = require("../middleware/auth");
 
 //renders
 router.get("/", (req, res) => {

@@ -1,14 +1,8 @@
 const router = require("express").Router();
 
 router.get("/", (req, res, next) => {
-  res.render("index");
+  res.render("index", { isAuthenticated: req.isAuthenticated });
   next();
 });
-
-/*router.get("/", (req, res, next) => {
-  const isAuthenticated = req.session && req.session.user;
-  res.render("index", { isAuthenticated });
-  next();
-});*/
 
 module.exports = router;

@@ -49,7 +49,7 @@ html(lang="en")
               li
                 hr.dropdown-divider
               li
-                a.dropdown-item(href="#") Cerrar sesión
+                a.dropdown-item(href="#" onclick="logout();") Cerrar sesión
 
           // Icono de Home
           li.nav-item.ms-3.me-5
@@ -208,6 +208,11 @@ html(lang="en")
 
   
   script.
+    async function logout() {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userType");
+      window.location.href = "/";
+    };
     document.addEventListener("DOMContentLoaded", () => {
       const currentPath = window.location.pathname;
       const collapsePersonal = document.querySelector("#collapsePersonal");
@@ -231,4 +236,5 @@ html(lang="en")
         botonPacientes.classList.remove("collapsed")
       }
 
-    });
+      }
+    );

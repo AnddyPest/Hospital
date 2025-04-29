@@ -9,6 +9,13 @@ const authController = {
   //inicio de sesion
   login: async (req, res) => {
     try {
+      const { email, password } = req.body;
+      //verificar si el usuario existe
+      if (!email || !password) {
+        return res
+          .status(400)
+          .json({ error: "Email y contraseña son requeridos" });
+      }
       const user = await User.findOne({ where: { email } });
       if (!user) {
         return res.status(401).json({ error: "Credenciales inválidas" });
@@ -23,11 +30,19 @@ const authController = {
         {
           id: user.id,
           email: user.email,
-          medico_Id: user.medico_Id,
-          enfermero_Id: user.enfermero_Id,
-          paciente_Id: user.paciente_Id,
-          maestranza_Id: user.maestranza_Id,
-          administrativo_Id: user.administrativo_Id,
+          role: user.medico_Id
+            ? "medico"
+            : user.enfermero_Id
+            ? "enfermero"
+            : user.paciente_Id
+            ? "paciente"
+            : user.maestranza_Id
+            ? "maestranza"
+            : user.administrativo_Id
+            ? "administrativo"
+            : "invitado",
+
+          superAdmin: user.superAdmin || false,
         },
         JWT_SECRET,
         { expiresIn: "1h" }

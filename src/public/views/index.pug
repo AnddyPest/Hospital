@@ -62,6 +62,13 @@ block content
   script.
     const loginCard = document.getElementById('login');
     const registerCard = document.getElementById('register');
+    const token = localStorage.getItem("token");
+    const isAuthenticated = !!token;
+    if (isAuthenticated) {
+      if(loginCard)
+        loginCard.style.display = "none";
+        registerCard.style.display = "none";
+    }
     const passwordLogin = document.getElementById('passwordLogin');
     const passwordCreate = document.getElementById('passwordCreate');
     const passwordConfirm = document.getElementById('passwordConfirm');
@@ -149,7 +156,31 @@ block content
       }
     }
     async function login() {
-      alert("CREAR FUNCION");
+      const email = document.getElementById("username").value;
+      const password = document.getElementById("passwordLogin").value;
+
+      try {
+        const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const userType = data.userType;
+          localStorage.setItem("userType", userType);
+          localStorage.setItem("token", data.token);
+          window.location.href = "/";
+        } else {
+          alert("Error al iniciar sesión. Verifique sus credenciales.");
+        }
+      } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        alert("Error al iniciar sesión. Intente nuevamente más tarde.");
+      }
     };
     async function invitado() {
       alert("CREAR FUNCION");
