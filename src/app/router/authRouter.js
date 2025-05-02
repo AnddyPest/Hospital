@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controller/authController");
+const auth = require("../middlewares/auth");
 
 // Inicio de sesión
 router.post("/login", authController.login);
@@ -12,5 +13,6 @@ router.post("/register", authController.register);
 
 // cerrar sesión
 router.post("/logout", authController.logout);
+router.get("/verificador", auth, authController.verificador);
 
 module.exports = router;

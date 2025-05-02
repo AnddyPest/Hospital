@@ -50,6 +50,13 @@ const authController = {
         // y en el header de las peticiones que requieran autenticacion si es necesario
         // y en el backend tenemos que verificar el token en las rutas que requieran autenticacion
       );
+      res.cookie("auth_token", token, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production", // Cambia a true en producción
+        sameSite: "Strict", // Cambia a "Lax" si tienes problemas con las cookies
+        maxAge: 3600000, // 1 hora
+        path: "/",
+      });
       //devuelve el token
       res.json({ token });
     } catch (error) {
@@ -92,9 +99,24 @@ const authController = {
 
   //cerrar sesion
   logout: (req, res) => {
-    // Eliminar el token del almacenamiento local o de la sesión en el frontend
-    // Aquí no se necesita hacer nada en el backend, ya que el token se elimina en el cliente
-    res.json({ message: "Sesión cerrada" });
+    try {
+      // Limpiar la cookie estableciendo una fecha de expiración en el pasado
+      res.clearCookie("auth_token", {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        path: "/",
+      });
+
+      // Responder con éxito
+      return res.status(200).json({ message: "Logout exitoso" });
+    } catch (error) {
+      console.error("Error en logout:", error);
+      return res.status(500).json({ error: "Error al cerrar sesión" });
+    }
+  },
+  verificador: (req, res) => {
+    return res.status(200).json({ valid: true });
   },
 };
 

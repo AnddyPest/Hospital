@@ -7,11 +7,13 @@ const medicoController = {
   // metodo para obtener todos los medicos
   getAllMedicos: async (req, res) => {
     try {
+      console.log("⚡ Ejecutando getAllMedicos");
       const medicos = await Medico.findAll();
-      res.status(200).json(medicos);
+      console.log(`✅ Encontrados ${medicos.length} médicos`);
+      return res.json(medicos); // Asegúrate de devolver la respuesta
     } catch (error) {
-      console.error("Error al obtener los medicos:", error);
-      res.status(500).json({ error: "Error al obtener los medicos" });
+      console.error("❌ Error en getAllMedicos:", error);
+      return res.status(500).json({ error: "Error al obtener médicos" });
     }
   },
 

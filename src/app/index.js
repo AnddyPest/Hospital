@@ -10,6 +10,8 @@ const turnoRouter = require("./router/turnoRouter"); // Turnos Router
 const path = require("path");
 const morgan = require("morgan");
 const authRouter = require("./router/authRouter"); // Auth Router
+const auth = require("./middlewares/auth");
+const cookieParser = require("cookie-parser");
 
 const app = express();
 
@@ -22,16 +24,20 @@ app.use(express.static(path.join(__dirname, "../public"))); //todo lo public aca
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("dev"));
+app.use(cookieParser());
 
-// Rutas
+// Rutas protegidas
+app.use("/medicos", auth, medicoRouter);
+app.use("/enfermeros", auth, enfermeroRouter);
+app.use("/administrativos", auth, administrativoRouter);
+app.use("/maestranzas", auth, maestranzaRouter);
+app.use("/pacientes", auth, pacienteRouter);
+app.use("/turnos", auth, turnoRouter);
+
+//rutas publicas
 app.use("/", router);
 app.use("/auth", authRouter);
-app.use("/medicos", medicoRouter);
-app.use("/enfermeros", enfermeroRouter);
-app.use("/administrativos", administrativoRouter);
-app.use("/maestranzas", maestranzaRouter);
-app.use("/pacientes", pacienteRouter);
-app.use("/turnos", turnoRouter);
+
 // Conexión y sincronización con la base de datos
 sequelize
   .authenticate()

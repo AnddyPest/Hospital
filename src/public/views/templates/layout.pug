@@ -16,8 +16,54 @@ html(lang="en")
 
    
   body.bg-azul-claro
+    div#pageOverlay.fixed-top(style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 2000; display: none; pointer-events: auto")
+    div.position-absolute.top-50.start-50.translate-middle.text-center.text-white.mb-5.h-50(style="z-index: 2020;")
+      div.card.card-info(id="login", style="width: 19rem;border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+        div.card-body
+          h5.card-title.text-center Iniciar Sesión
+          form(action="/auth/login" method="POST")
+          div.mb-3
+              label(for="username", class="form-label") Email
+              input#username.form-control(type="email", style="box-shadow: 0 2px 5px black;" name="username", required=true, placeholder="Ingrese su Email")
+          div.mb-3
+            label(for="password", class="form-label") Contraseña
+            div.input-group
+              input#passwordLogin.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="password", required=true, placeholder="Ingrese su contraseña")
+              span.input-group-text(role="button" onclick="muestrePassLogin()")
+                img#ojoLogin(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
+          button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); login();") Iniciar Sesión
+          button.ms-4.mt-3.btn.btn-success(style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); registrarse();") Registrarse
+          
+      div.card.card-info(id="register", style="width: 19rem; display: none; border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+        div.card-body
+          h5.card-title.text-center Registrarse
+          form(action="/auth/register" method="POST")
+            div.mb-3
+              label(for="email", class="form-label") Email
+              input#email.form-control(type="email", style="box-shadow: 0 2px 5px black;" name="email", required=true, placeholder="Ingrese su Email")
+            div.mb-3
+              label(for="dni", class="form-label") DNI
+              input#dni.form-control(type="text", style="box-shadow: 0 2px 5px black;" name="dni", required=true, placeholder="Ingrese su DNI")
+            div.mb-3.col
+              label(for="password", class="form-label") Contraseña
+              div.input-group
+                input#passwordCreate.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="password", required=true, placeholder="Ingrese su contraseña")
+                span.input-group-text(role="button" onclick="muestrePassCreate()")
+                  img#ojoCreate(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
+            div.mb-3.col
+              label(for="passwordConfirm", class="form-label") Confirmar Contraseña
+              div.input-group
+                input#passwordConfirm.form-control(type="password", style="box-shadow: 0 2px 5px black;" name="confirmPassword", required=true, placeholder="Confirme su contraseña")
+                span.input-group-text(role="button" onclick="muestrePassConfirm()")
+                  img#ojoConfirm(src="/icons/eye-solid.svg", alt="Ojo", style="width: 20px; height: 20px;")
+            button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); nuevoUser();") Registrarse
+            button.ms-4.mt-3(class="btn btn-danger", style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); volver();") Volver
+
+    
+    
+    
     // Barra de navegación superior
-    nav.navbar.navbar-expand-lg.navbar-light.bg-azul-claro.fixed-top.top-navbar
+    nav.navbar.navbar-expand-lg.navbar-light.bg-azul-claro.top-navbar.fixed-top
       // Logo y título "Hospital" alineados a la izquierda
       div.d-flex.align-items-center
         img(src="/icons/staff-snake-solid.svg", alt="Prescripciones", class="ms-4", style="width: 3vw; height: 10vh;")
@@ -71,19 +117,19 @@ html(lang="en")
           div.collapse#collapsePersonal(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group <!-- BOTON DE MEDICOS -->
-                a(href="/medicos" , class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;" id="medico")
+                button#medicosBtn(class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;" onclick="window.location.href='/medicos'")
                   span
                     | Medicos
                   img(src="/icons/user-doctor-solid.svg", alt="Medicos", class="ms-2", style="width: 20px; height: 20px;")
-                a(href="/enfermeros", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                button#EnfermerosBtn(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;" onclick="window.location.href='/enfermeros'")
                   span
                     | Enfermeros
                   img(src="/icons/user-nurse-solid.svg", alt="Enfermeros", class="ms-2", style="width: 20px; height: 20px;")
-                a(href="/administrativos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                button#AdministrativosBtn(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;" onclick="window.location.href='/administrativos'")
                   span
                     | Administrativos
                   img(src="/icons/user-tie-solid.svg", alt="Admins", class="ms-2", style="width: 20px; height: 20px;")
-                a(href="/maestranzas", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                button#MaestranzaBtn(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;" onclick="window.location.href='/maestranzas'")
                   span
                     | Maestranza
                   img(src="/icons/screwdriver-wrench-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
@@ -146,35 +192,23 @@ html(lang="en")
                   span
                     | Historia Clinica
                   img(src="/icons/file-waveform-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Derivacion
+                  img(src="/icons/circle-down-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Turnos
                   img(src="/icons/user-clock-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Atencion Turnos
+                  img(src="/icons/hospital-user-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Prescripciones
                   img(src="/icons/prescription-bottle-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-          div.accordion-item.bg-azul-claro
-          h2.accordion-header
-            button.accordion-button.collapsed.online-btn(type="button", data-bs-toggle="collapse", data-bs-target="#collapseOnline", aria-expanded="false", aria-controls="collapseOnline")
-              | Turnos Online
-              img(src="/icons/clock-regular.svg", alt="Prescripciones", class="ms-3", style="width: 25px; height: 25px;")
-          div.collapse#collapseOnline(data-bs-parent="#accordionSidebar")
-            div.accordion-body
-              ul.list-group
-                a(href="/pacientes", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
-                  span
-                    | Ingresar Datos
-                  img(src="/icons/user-pen-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
-                  span
-                    | Pedir Turno
-                  img(src="/icons/user-clock-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
-                  span
-                    | Ver Turnos
-                  img(src="/icons/rectangle-list-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-    
+              
         div.accordion-item.bg-azul-claro
           h2.accordion-header
             button.accordion-button.collapsed.emergencias-btn(type="button", data-bs-toggle="collapse", data-bs-target="#collapseEmergencias", aria-expanded="false", aria-controls="collapseEmergencias")
@@ -191,50 +225,274 @@ html(lang="en")
                   span
                     | Asignar Equipo
                   img(src="/icons/notes-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
-                  span
-                    | Catástrofes
-                  img(src="/icons/skull-crossbones-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                
     // Área de trabajo
     div.workspace
       div.p-4
         block content
 
     // Pie de página
-    footer.bg-azul-claro.footer
+    footer.bg-azul-claro.footer(style="position: fixed; bottom: 0; width: 100%; z-index: 1;")
+      div.container-fluid.text-center
+        p.text-white Copyright © 2025 Hospital. Todos los derechos reservados.
+        p.text-white Mauricio Andres Pestchanker ULP - WEB2
+        
         
       
       
 
   
   script.
+    let loginCard, registerCard;
+    let passwordLogin, passwordCreate, passwordConfirm;
+    let ojoLogin, ojoCreate, ojoConfirm;
+    // LOG OUT DE LA SESION
     async function logout() {
+      console.log("Cerrando sesión...");
+  
+      // 1. Eliminar el token del localStorage
       localStorage.removeItem("token");
       localStorage.removeItem("userType");
-      window.location.href = "/";
-    };
-    document.addEventListener("DOMContentLoaded", () => {
+      
+      // 2. También llamar al endpoint de logout para eliminar la cookie
+      try {
+        await fetch("/auth/logout", {
+          method: "POST",
+          credentials: "include" // Importante para incluir las cookies
+        });
+        console.log("Sesión cerrada exitosamente");
+      } catch (error) {
+        console.error("Error al cerrar sesión:", error);
+      }
+      
+      // 3. Redirigir al inicio
+      window.location.href = "/?showLogin=true";
+    }
+  
+    document.addEventListener("DOMContentLoaded", async () => {
+      
       const currentPath = window.location.pathname;
       const collapsePersonal = document.querySelector("#collapsePersonal");
-      const botonPersonal = collapsePersonal.previousElementSibling.querySelector("button")
+      const botonPersonal = collapsePersonal.previousElementSibling.querySelector("button");
       const collapseGestion = document.querySelector("#collapseGestion");
-      const botonGestion = collapseGestion.previousElementSibling.querySelector("button")
+      const botonGestion = collapseGestion.previousElementSibling.querySelector("button");
       const collapsePacientes = document.querySelector("#collapsePacientes");
-      const botonPacientes = collapsePacientes.previousElementSibling.querySelector("button")
+      const botonPacientes = collapsePacientes.previousElementSibling.querySelector("button");
+      passwordLogin = document.getElementById('passwordLogin');
+      passwordCreate = document.getElementById('passwordCreate');
+      passwordConfirm = document.getElementById('passwordConfirm');
+      ojoLogin = document.getElementById('ojoLogin');
+      ojoCreate = document.getElementById('ojoCreate');
+      ojoConfirm = document.getElementById('ojoConfirm');
+      loginCard = document.getElementById('login');
+      registerCard = document.getElementById('register');
 
+
+      // acordedones o collapses
       if(["/medicos", "/enfermeros", "/administrativos", "/maestranzas"].some(path => currentPath.startsWith(path))) {
-        collapsePersonal.classList.add("show")
-        botonPersonal.setAttribute("aria-expanded", "true")
-        botonPersonal.classList.remove("collapsed")
+        collapsePersonal.classList.add("show");
+        botonPersonal.setAttribute("aria-expanded", "true");
+        botonPersonal.classList.remove("collapsed");
       } else if(["/camas", "/diagnosis", "/tratamiento", "/cirugias", "/equipos", "/farmacia", "/proveedores"].some(path => currentPath.startsWith(path))) {
-        collapseGestion.classList.add("show")
-        botonGestion.setAttribute("aria-expanded", "true")
-        botonGestion.classList.remove("collapsed")
+        collapseGestion.classList.add("show");
+        botonGestion.setAttribute("aria-expanded", "true");
+        botonGestion.classList.remove("collapsed");
       } else if(["/pacientes", "/turnos"].some(path => currentPath.startsWith(path))) {
-        collapsePacientes.classList.add("show")
-        botonPacientes.setAttribute("aria-expanded", "true")
-        botonPacientes.classList.remove("collapsed")
+        collapsePacientes.classList.add("show");
+        botonPacientes.setAttribute("aria-expanded", "true");
+        botonPacientes.classList.remove("collapsed");
       }
 
+      const token = localStorage.getItem("token");
+      
+      // Si hay token, verificar si aún es válido
+      if (token) {
+        try {
+          const response = await fetch("/auth/verificador", {
+            headers: {
+              "Authorization": `Bearer ${token}`
+            }
+          });
+          
+          if (!response.ok) {
+            // Token inválido o expirado, mostrar login
+            console.log("Token expirado o inválido");
+            localStorage.removeItem("token");
+            localStorage.removeItem("userType");
+            showLoginCard();
+          } else {
+            // Token válido, ocultar login
+            hideLoginCards();
+          }
+        } catch (error) {
+          console.error("Error al verificar token:", error);
+          showLoginCard(); // Por si hay error de red
+        }
+      } else {
+        // No hay token, mostrar login
+        showLoginCard();
       }
-    );
+    });
+    
+    function showLoginCard() {
+      if (loginCard) {
+        document.getElementById('pageOverlay').style.display = 'block';
+        loginCard.style.display = "block";
+        registerCard.style.display = "none";
+        document.body.style.overflow = "hidden";
+      }
+    }
+    
+    function hideLoginCards() {
+      if (loginCard) {
+        loginCard.style.display = "none";
+        registerCard.style.display = "none";
+        document.getElementById('pageOverlay').style.display = 'none';
+        document.body.style.overflow = "hiden";
+      }
+    }
+    
+    function registrarse() {
+      loginCard.style.display = 'none';
+      registerCard.style.display = 'block';
+    };
+    function volver() {
+      loginCard.style.display = 'block';
+      registerCard.style.display = 'none';
+    };       
+    //registrarse como nuevo usuario!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    async function nuevoUser() {
+      const email = document.getElementById("email").value;
+      const dni = document.getElementById("dni").value;
+      const password = document.getElementById("passwordCreate").value;
+      const confirmPassword = document.getElementById("passwordConfirm").value;
+
+      if (password !== confirmPassword) {
+        alert("Las contraseñas no coinciden");
+        return;
+      }
+
+      let tipoUsuario = null;
+      let idUsuario = null;
+
+      // Buscar al usuario por DNI en los diferentes endpoints
+      try {
+        const endpoints = [
+          { type: "medico", url: `medicos/buscardni/${dni}` },
+          { type: "paciente", url: `pacientes/listado/${dni}` },
+          { type: "administrativo", url: `administrativos/buscardni/${dni}` },
+          { type: "maestranza", url: `maestranzas/buscardni/${dni}` },
+          { type: "enfermero", url: `enfermeros/buscardni/${dni}` },
+        ];
+
+        for (const endpoint of endpoints) {
+          const response = await fetch(endpoint.url); // Realiza la solicitud aquí
+
+          if (response.ok) {
+            const datos = await response.json();
+            tipoUsuario = endpoint.type;
+            idUsuario = datos.id; // Asegúrate de que 'datos' tenga el formato esperado
+            console.log(`ID del ${tipoUsuario}: ${idUsuario}`);
+            break; // Detén el bucle si se encuentra un usuario
+          }
+        }
+
+        if (!idUsuario) {
+          alert("No se encontró el usuario con el DNI proporcionado.");
+          return;
+        }
+      } catch (error) {
+        console.error("Error al buscar por DNI:", error);
+        alert("DNI no encontrado o error en la búsqueda.");
+        return;
+      }
+
+      // Registrar al usuario
+      try {
+        const response = await fetch("/auth/register", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            email,
+            password,
+            [`${tipoUsuario}_Id`]: idUsuario, // Enviar el ID correspondiente al tipo de usuario
+          }),
+        });
+
+        if (response.ok) {
+          alert("Usuario creado con éxito");
+          window.location.href = "/";
+        } else {
+          alert("Error al crear el usuario");
+        }
+      } catch (error) {
+        console.error("Error al registrar el usuario:", error);
+        alert("Error al registrar el usuario");
+      }
+    }
+    async function login() {
+      const email = document.getElementById("username").value;
+      const password = document.getElementById("passwordLogin").value;
+
+      try {
+        const response = await fetch("/auth/login", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          const userType = data.userType;
+          localStorage.setItem("userType", userType);
+          localStorage.setItem("token", data.token);
+          window.location.href = "/";
+        } else {
+          alert("Error al iniciar sesión. Verifique sus credenciales.");
+        }
+      } catch (error) {
+        console.error("Error al iniciar sesión:", error);
+        alert("Error al iniciar sesión. Intente nuevamente más tarde.");
+      }
+    };
+    async function invitado() {
+      alert("CREAR FUNCION");
+    };
+    
+      
+    function muestrePassLogin() {
+      if (passwordLogin.type === "password") {
+        passwordLogin.type = "text";
+        ojoLogin.src = "/icons/eye-slash-solid.svg";
+      } else {
+        passwordLogin.type = "password";
+        ojoLogin.src = "/icons/eye-solid.svg";
+      }
+    };
+    function muestrePassCreate() {
+      if (passwordCreate.type === "password") {
+        passwordCreate.type = "text";
+        ojoCreate.src = "/icons/eye-slash-solid.svg";
+      } else {
+        passwordCreate.type = "password";
+        ojoCreate.src = "/icons/eye-solid.svg";
+      }
+    };
+    function muestrePassConfirm() {
+      if (passwordConfirm.type === "password") {
+        passwordConfirm.type = "text";
+        ojoConfirm.src = "/icons/eye-slash-solid.svg";
+      } else {
+        passwordConfirm.type = "password";
+        ojoConfirm.src = "/icons/eye-solid.svg";
+      }
+    };
+  
+   
+  
+    
+     
