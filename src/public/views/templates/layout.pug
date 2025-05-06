@@ -16,9 +16,9 @@ html(lang="en")
 
    
   body.bg-azul-claro
-    div#pageOverlay.fixed-top(style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 2000; display: none; pointer-events: auto")
+    //-div#pageOverlay.fixed-top(style="position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: rgba(0,0,0,0.7); z-index: 2000; display: none; pointer-events: auto")
     div.position-absolute.top-50.start-50.translate-middle.text-center.text-white.mb-5.h-50(style="z-index: 2020;")
-      div.card.card-info(id="login", style="width: 19rem;border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+      //-div.card.card-info(id="login", style="width: 19rem;border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
         div.card-body
           h5.card-title.text-center Iniciar Sesión
           form(action="/auth/login" method="POST")
@@ -34,7 +34,7 @@ html(lang="en")
           button.btn.btn-primary.mt-3(type="submit" style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); login();") Iniciar Sesión
           button.ms-4.mt-3.btn.btn-success(style="box-shadow: 0 2px 5px black;" onclick="event.preventDefault(); registrarse();") Registrarse
           
-      div.card.card-info(id="register", style="width: 19rem; display: none; border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
+      //-div.card.card-info(id="register", style="width: 19rem; display: none; border: 2px solid #7d7eae; background-color: aliceblue; box-shadow: 0 4px  10px black; opacity: 0.9;")
         div.card-body
           h5.card-title.text-center Registrarse
           form(action="/auth/register" method="POST")
@@ -243,11 +243,11 @@ html(lang="en")
 
   
   script.
-    let loginCard, registerCard;
-    let passwordLogin, passwordCreate, passwordConfirm;
-    let ojoLogin, ojoCreate, ojoConfirm;
+    //let loginCard, registerCard;
+   // let passwordLogin, passwordCreate, passwordConfirm;
+    //let ojoLogin, ojoCreate, ojoConfirm;
     // LOG OUT DE LA SESION
-    async function logout() {
+   /** async function logout() {
       console.log("Cerrando sesión...");
   
       // 1. Eliminar el token del localStorage
@@ -267,7 +267,7 @@ html(lang="en")
       
       // 3. Redirigir al inicio
       window.location.href = "/?showLogin=true";
-    }
+    }*/
   
     document.addEventListener("DOMContentLoaded", async () => {
       
@@ -278,14 +278,14 @@ html(lang="en")
       const botonGestion = collapseGestion.previousElementSibling.querySelector("button");
       const collapsePacientes = document.querySelector("#collapsePacientes");
       const botonPacientes = collapsePacientes.previousElementSibling.querySelector("button");
-      passwordLogin = document.getElementById('passwordLogin');
+      /**passwordLogin = document.getElementById('passwordLogin');
       passwordCreate = document.getElementById('passwordCreate');
       passwordConfirm = document.getElementById('passwordConfirm');
       ojoLogin = document.getElementById('ojoLogin');
       ojoCreate = document.getElementById('ojoCreate');
       ojoConfirm = document.getElementById('ojoConfirm');
       loginCard = document.getElementById('login');
-      registerCard = document.getElementById('register');
+      registerCard = document.getElementById('register');*/
 
 
       // acordedones o collapses
@@ -303,9 +303,9 @@ html(lang="en")
         botonPacientes.classList.remove("collapsed");
       }
 
-      const token = localStorage.getItem("token");
+      //const token = localStorage.getItem("token");
       
-      // Si hay token, verificar si aún es válido
+      /** Si hay token, verificar si aún es válido
       if (token) {
         try {
           const response = await fetch("/auth/verificador", {
@@ -489,8 +489,8 @@ html(lang="en")
       } else {
         passwordConfirm.type = "password";
         ojoConfirm.src = "/icons/eye-solid.svg";
-      }
-    };
+      }*/
+    //};
   
    
   

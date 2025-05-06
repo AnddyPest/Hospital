@@ -8,7 +8,7 @@ const pacienteController = {
   // Vista principal de pacientes
   index: async (req, res) => {
     try {
-      res.render("vistasPacientes/portadaPacientes", {
+      res.render("vistasPacientes/gestion/portadaPacientes", {
         title: "Pacientes",
         userType: req.session?.userType || "guest",
       });
@@ -27,7 +27,7 @@ const pacienteController = {
       // Simplemente cargar todos los pacientes sin filtrar
       const pacientes = await Paciente.findAll();
 
-      res.render("vistasPacientes/listarPacientes", {
+      res.render("vistasPacientes/gestion/listarPacientes", {
         title: "Listar Pacientes",
         pacientes,
         userType: req.session?.userType || "guest",
@@ -44,7 +44,7 @@ const pacienteController = {
   // Vista de administración de pacientes
   adminView: async (req, res) => {
     try {
-      res.render("vistasPacientes/administrarPacientes", {
+      res.render("vistasPacientes/gestion/administrarPacientes", {
         title: "Administrar Pacientes",
         userType: req.session?.userType || "guest",
         success: req.query.success,
@@ -62,7 +62,7 @@ const pacienteController = {
   // Vista de formulario para nuevo paciente
   nuevoView: async (req, res) => {
     try {
-      res.render("vistasPacientes/nuevoPaciente", {
+      res.render("vistasPacientes/gestion/nuevoPaciente", {
         title: "Nuevo Paciente",
         userType: req.session?.userType || "guest",
       });
@@ -79,7 +79,7 @@ const pacienteController = {
   borrarView: async (req, res) => {
     try {
       const pacientes = await Paciente.findAll();
-      res.render("vistasPacientes/borrarPaciente", {
+      res.render("vistasPacientes/gestion/borrarPaciente", {
         title: "Borrar Paciente",
         pacientes,
         userType: req.session?.userType || "guest",
@@ -109,7 +109,7 @@ const pacienteController = {
       }
 
       const pacientes = await Paciente.findAll();
-      res.render("vistasPacientes/editarPacientes", {
+      res.render("vistasPacientes/gestion/editarPacientes", {
         title: "Editar Paciente",
         pacientes,
         pacienteAEditar,
@@ -137,7 +137,7 @@ const pacienteController = {
         ],
       });
 
-      res.render("vistasPacientes/seleccionarPaciente", {
+      res.render("vistasPacientes/gestion/seleccionarPaciente", {
         title: "Seleccionar Paciente",
         pacientes,
         obrasSociales: obrasSociales.map((os) => os.obra_social),

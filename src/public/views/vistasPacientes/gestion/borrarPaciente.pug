@@ -1,6 +1,6 @@
 extends ../../templates/layout.pug
 
-include ../../templates/mixins.pug
+include ../../templates/tablaEntidadesMixin.pug
 
 block content
         
@@ -11,4 +11,4 @@ block content
         
         +header("Borrar Pacientes", "/icons/user-slash-solid.svg")
 
-        +tablaEditErase("pacientes", "Paciente", "Obra_Social","Borrar")
+        +tablaGeneralEntidades("borrar")

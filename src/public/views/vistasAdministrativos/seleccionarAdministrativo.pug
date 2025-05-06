@@ -1,6 +1,6 @@
 extends ../templates/layout.pug
 
-include ../templates/mixins.pug
+include ../templates/tablaEntidadesMixin.pug
 
 block content
         
@@ -10,5 +10,4 @@ block content
         img(src="/images/administrativos.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
         
         +header("Editar Administrativos", "/icons/user-pen-solid.svg")
-        +tablaEditErase("administrativos", "Administrativo", "Area","Editar")
-        
+        +tablaGeneralEntidades("editar")
