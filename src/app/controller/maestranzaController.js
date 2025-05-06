@@ -1,22 +1,156 @@
 const Maestranza = require("../model/maestranza");
+const sequelize = require("sequelize");
 
-//dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
+// Controlador para manejar las peticiones http para la tabla Maestranza
 const maestranzaController = {
-  // metodo para obtener todos los medicos
-  getAllMaestranzas: async (req, res) => {
+  // MÉTODOS DE RENDERIZADO DE VISTAS
+
+  // Vista principal de maestranzas
+  index: async (req, res) => {
     try {
-      const maestranza = await Maestranza.findAll();
-      res.status(200).json(maestranza);
+      res.render("vistasMaestranzas/portadaMaestranzas", {
+        title: "Personal de Maestranza",
+        userType: req.session?.userType || "guest",
+      });
     } catch (error) {
-      console.error("Error al obtener los Maestranzas:", error);
-      res.status(500).json({ error: "Error al obtener los Maestranzas" });
+      console.error("Error en index maestranzas:", error);
+      res.status(500).render("error", {
+        message: "Error en la página de maestranzas",
+        error,
+      });
     }
   },
 
-  // metodo para agregar un nuevo medico
+  // Vista para listar todos los maestranzas
+  listarView: async (req, res) => {
+    try {
+      const maestranzas = await Maestranza.findAll();
+      res.render("vistasMaestranzas/listarMaestranzas", {
+        title: "Listar Personal de Maestranza",
+        maestranzas,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al listar maestranzas:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la lista de personal de maestranza",
+        error,
+      });
+    }
+  },
+
+  // Vista de administración de maestranzas
+  adminView: async (req, res) => {
+    try {
+      res.render("vistasMaestranzas/administrarMaestranzas", {
+        title: "Administrar Personal de Maestranza",
+        userType: req.session?.userType || "guest",
+        success: req.query.success,
+        message: req.query.message,
+      });
+    } catch (error) {
+      console.error("Error en vista de administración:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar panel de administración",
+        error,
+      });
+    }
+  },
+
+  // Vista de formulario para nuevo maestranza
+  nuevoView: async (req, res) => {
+    try {
+      res.render("vistasMaestranzas/nuevoMaestranza", {
+        title: "Nuevo Personal de Maestranza",
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en formulario nuevo maestranza:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar el formulario",
+        error,
+      });
+    }
+  },
+
+  // Vista para borrar maestranzas
+  borrarView: async (req, res) => {
+    try {
+      const maestranzas = await Maestranza.findAll();
+      res.render("vistasMaestranzas/borrarMaestranza", {
+        title: "Borrar Personal de Maestranza",
+        maestranzas,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista borrar maestranza:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar personal para borrar",
+        error,
+      });
+    }
+  },
+
+  // Vista para editar maestranzas
+  editarView: async (req, res) => {
+    try {
+      const { id } = req.query;
+      let maestranzaAEditar = null;
+
+      if (id) {
+        maestranzaAEditar = await Maestranza.findByPk(id);
+        if (!maestranzaAEditar) {
+          return res.status(404).render("error", {
+            message: "Personal de maestranza no encontrado",
+          });
+        }
+      }
+
+      const maestranzas = await Maestranza.findAll();
+      res.render("vistasMaestranzas/editarMaestranzas", {
+        title: "Editar Personal de Maestranza",
+        maestranzas,
+        maestranzaAEditar,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista editar maestranza:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar datos para editar",
+        error,
+      });
+    }
+  },
+
+  // Vista para seleccionar maestranza
+  seleccionarView: async (req, res) => {
+    try {
+      const maestranzas = await Maestranza.findAll();
+      const areas = await Maestranza.findAll({
+        attributes: [[sequelize.fn("DISTINCT", sequelize.col("area")), "area"]],
+      });
+
+      res.render("vistasMaestranzas/seleccionarMaestranza", {
+        title: "Seleccionar Personal de Maestranza",
+        maestranzas,
+        areas: areas.map((e) => e.area),
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista seleccionar maestranza:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar selección de personal",
+        error,
+      });
+    }
+  },
+
+  // MÉTODOS PARA OPERACIONES CRUD
+
+  // Método para agregar un nuevo maestranza
   crearMaestranza: async (req, res) => {
     try {
-      console.log("Creando nuevo Maestranza:", req.body);
+      console.log("Creando nuevo personal de maestranza:", req.body);
       const { dni, nombre, apellido, area, telefono } = req.body;
       const nuevoMaestranza = await Maestranza.create({
         dni,
@@ -25,14 +159,23 @@ const maestranzaController = {
         area,
         telefono,
       });
-      res.status(201).json(nuevoMaestranza);
+
+      res.redirect(
+        "/maestranzas/admin?success=true&message=Personal+de+maestranza+creado+correctamente"
+      );
     } catch (error) {
-      console.error("Error al crear el Maestranza:", error);
-      res.status(500).json({ error: "Error al crear el Maestranza" });
+      console.error("Error al crear personal de maestranza:", error);
+
+      res.status(500).render("vistasMaestranzas/nuevoMaestranza", {
+        title: "Nuevo Personal de Maestranza",
+        error: "Error al crear: " + error.message,
+        formData: req.body,
+        userType: req.session?.userType || "guest",
+      });
     }
   },
 
-  // metodo para editar un medico buscando por id
+  // Método para editar un maestranza buscando por id
   editarMaestranza: async (req, res) => {
     try {
       const { id } = req.params;
@@ -41,46 +184,50 @@ const maestranzaController = {
         { dni, nombre, apellido, area, telefono },
         { where: { id } }
       );
+
       if (updated) {
-        const updatedMaestranza = await Maestranza.findOne({ where: { id } });
-        res.status(200).json(updatedMaestranza);
+        res.redirect(
+          "/maestranzas/admin?success=true&message=Personal+de+maestranza+actualizado+correctamente"
+        );
       } else {
-        res.status(404).json({ error: "Maestranza no encontrado" });
+        res.status(404).render("error", {
+          message: "Personal de maestranza no encontrado",
+          error: { status: 404 },
+        });
       }
     } catch (error) {
-      console.error("Error al editar el Maestranza:", error);
-      res.status(500).json({ error: "Error al editar el Maestranza" });
+      console.error("Error al editar el personal de maestranza:", error);
+
+      res.status(500).render("error", {
+        message: "Error al actualizar personal",
+        error,
+      });
     }
   },
 
-  // metodo para borrar un medico buscando por su id
+  // Método para borrar un maestranza buscando por su id
   borrarMaestranza: async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await Maestranza.destroy({ where: { id } });
+
       if (deleted) {
-        res.status(204).send();
+        res.redirect(
+          "/maestranzas/admin?success=true&message=Personal+de+maestranza+eliminado+correctamente"
+        );
       } else {
-        res.status(404).json({ error: "Maestranza no encontrado" });
+        res.status(404).render("error", {
+          message: "Personal de maestranza no encontrado al intentar eliminar",
+          error: { status: 404 },
+        });
       }
     } catch (error) {
-      console.error("Error al borrar el Maestranza:", error);
-      res.status(500).json({ error: "Error al borrar el Maestranza" });
-    }
-  },
-  // get maestranza por dni
-  getMaestranzaByDni: async (req, res) => {
-    try {
-      const { dni } = req.params;
-      const maestranza = await Maestranza.findOne({ where: { dni } });
-      if (maestranza) {
-        res.status(200).json(maestranza);
-      } else {
-        res.status(404).json({ error: "Maestranza no encontrado" });
-      }
-    } catch (error) {
-      console.error("Error al obtener el Maestranza:", error);
-      res.status(500).json({ error: "Error al obtener el Maestranza" });
+      console.error("Error al borrar personal de maestranza:", error);
+
+      res.status(500).render("error", {
+        message: "Error al eliminar personal",
+        error,
+      });
     }
   },
 };

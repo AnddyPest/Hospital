@@ -2,56 +2,18 @@ const express = require("express");
 const router = express.Router();
 const enfermeroController = require("../controller/enfermeroController");
 
-//renders
-router.get("/", (req, res) => {
-  res.render("vistasEnfermeros/portadaEnfermeros", {
-    title: "Enfermeros",
-  });
-});
+// RUTAS DE VISTA
+router.get("/", enfermeroController.index);
+router.get("/listar", enfermeroController.listarView);
+router.get("/admin", enfermeroController.adminView);
+router.get("/admin/new", enfermeroController.nuevoView);
+router.get("/admin/borrar", enfermeroController.borrarView);
+router.get("/admin/editar", enfermeroController.editarView);
+router.get("/admin/seleccionar", enfermeroController.seleccionarView);
 
-router.get("/listar", (req, res) => {
-  res.render("vistasEnfermeros/listarEnfermeros", {
-    title: "Listar Enfermeros",
-  });
-});
-
-router.get("/admin", (req, res) => {
-  res.render("vistasEnfermeros/administrarEnfermeros", {
-    title: "Administrar Enfermeros",
-  });
-});
-
-router.get("/admin/new", (req, res) => {
-  res.render("vistasEnfermeros/nuevoEnfermero", {
-    title: "Nuevo Enfermero",
-  });
-});
-
-router.get("/admin/borrar", (req, res) => {
-  res.render("vistasEnfermeros/borrarEnfermero", {
-    title: "Borrar Enfermero",
-  });
-});
-
-router.get("/admin/editar", (req, res) => {
-  res.render("vistasEnfermeros/editarEnfermeros", {
-    title: "Editar Enfermero",
-  });
-});
-
-router.get("/admin/seleccionar", (req, res) => {
-  res.render("vistasEnfermeros/seleccionarEnfermero", {
-    title: "Seleccionar Enfermero",
-  });
-});
-
-//api
-router.get("/listado", enfermeroController.getAllEnfermeros);
+// RUTAS DE OPERACIONES CRUD
 router.post("/admin/new", enfermeroController.crearEnfermero);
-router.put("/editar/:id", enfermeroController.editarEnfermero); // <---- PROBAR!!!!
-router.delete("/borrar/:id", enfermeroController.borrarEnfermero); // <---- PROBAR!!!!
-router.get("/areas/:area", enfermeroController.getEnfermerosByArea);
-router.get("/buscar/:id", enfermeroController.getEnfermeroById);
-router.get("/buscardni/:dni", enfermeroController.getEnfermeroByDni);
+router.put("/editar/:id", enfermeroController.editarEnfermero);
+router.delete("/borrar/:id", enfermeroController.borrarEnfermero);
 
 module.exports = router;

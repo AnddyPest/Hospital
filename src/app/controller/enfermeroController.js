@@ -1,19 +1,153 @@
 const Enfermero = require("../model/enfermero");
+const sequelize = require("sequelize");
 
-//dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
+//dentro de este controlador se encuentran los métodos para manejar las peticiones http para la tabla Enfermero
 const enfermeroController = {
-  // metodo para obtener todos los medicos
-  getAllEnfermeros: async (req, res) => {
+  // MÉTODOS DE RENDERIZADO DE VISTAS
+
+  // Vista principal de enfermeros
+  index: async (req, res) => {
     try {
-      const enfermero = await Enfermero.findAll();
-      res.status(200).json(enfermero);
+      res.render("vistasEnfermeros/portadaEnfermeros", {
+        title: "Enfermeros",
+        userType: req.session?.userType || "guest",
+      });
     } catch (error) {
-      console.error("Error al obtener los enfermeros:", error);
-      res.status(500).json({ error: "Error al obtener los enfermeros" });
+      console.error("Error en index enfermeros:", error);
+      res.status(500).render("error", {
+        message: "Error en la página de enfermeros",
+        error,
+      });
     }
   },
 
-  // metodo para agregar un nuevo medico
+  // Vista para listar todos los enfermeros
+  listarView: async (req, res) => {
+    try {
+      const enfermeros = await Enfermero.findAll();
+      res.render("vistasEnfermeros/listarEnfermeros", {
+        title: "Listar Enfermeros",
+        enfermeros,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al listar enfermeros:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la lista de enfermeros",
+        error,
+      });
+    }
+  },
+
+  // Vista de administración de enfermeros
+  adminView: async (req, res) => {
+    try {
+      res.render("vistasEnfermeros/administrarEnfermeros", {
+        title: "Administrar Enfermeros",
+        userType: req.session?.userType || "guest",
+        success: req.query.success,
+        message: req.query.message,
+      });
+    } catch (error) {
+      console.error("Error en vista de administración:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar panel de administración",
+        error,
+      });
+    }
+  },
+
+  // Vista de formulario para nuevo enfermero
+  nuevoView: async (req, res) => {
+    try {
+      res.render("vistasEnfermeros/nuevoEnfermero", {
+        title: "Nuevo Enfermero",
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en formulario nuevo enfermero:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar el formulario",
+        error,
+      });
+    }
+  },
+
+  // Vista para borrar enfermeros
+  borrarView: async (req, res) => {
+    try {
+      const enfermeros = await Enfermero.findAll();
+      res.render("vistasEnfermeros/borrarEnfermero", {
+        title: "Borrar Enfermero",
+        enfermeros,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista borrar enfermero:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar enfermeros para borrar",
+        error,
+      });
+    }
+  },
+
+  // Vista para editar enfermeros
+  editarView: async (req, res) => {
+    try {
+      const { id } = req.query;
+      let enfermeroAEditar = null;
+
+      if (id) {
+        enfermeroAEditar = await Enfermero.findByPk(id);
+        if (!enfermeroAEditar) {
+          return res.status(404).render("error", {
+            message: "Enfermero no encontrado",
+          });
+        }
+      }
+
+      const enfermeros = await Enfermero.findAll();
+      res.render("vistasEnfermeros/editarEnfermeros", {
+        title: "Editar Enfermero",
+        enfermeros,
+        enfermeroAEditar,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista editar enfermero:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar datos para editar",
+        error,
+      });
+    }
+  },
+
+  // Vista para seleccionar enfermero
+  seleccionarView: async (req, res) => {
+    try {
+      const enfermeros = await Enfermero.findAll();
+      const areas = await Enfermero.findAll({
+        attributes: [[sequelize.fn("DISTINCT", sequelize.col("area")), "area"]],
+      });
+
+      res.render("vistasEnfermeros/seleccionarEnfermero", {
+        title: "Seleccionar Enfermero",
+        enfermeros,
+        areas: areas.map((e) => e.area),
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista seleccionar enfermero:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar selección de enfermeros",
+        error,
+      });
+    }
+  },
+
+  // MÉTODOS PARA OPERACIONES CRUD
+
+  // Método para agregar un nuevo enfermero
   crearEnfermero: async (req, res) => {
     try {
       console.log("Creando nuevo enfermero:", req.body);
@@ -25,14 +159,23 @@ const enfermeroController = {
         area,
         telefono,
       });
-      res.status(201).json(nuevoEnfermero);
+
+      res.redirect(
+        "/enfermeros/admin?success=true&message=Enfermero+creado+correctamente"
+      );
     } catch (error) {
       console.error("Error al crear el enfermero:", error);
-      res.status(500).json({ error: "Error al crear el enfermero" });
+
+      res.status(500).render("vistasEnfermeros/nuevoEnfermero", {
+        title: "Nuevo Enfermero",
+        error: "Error al crear el enfermero: " + error.message,
+        formData: req.body,
+        userType: req.session?.userType || "guest",
+      });
     }
   },
 
-  // metodo para editar un medico buscando por id
+  // Método para editar un enfermero buscando por id
   editarEnfermero: async (req, res) => {
     try {
       const { id } = req.params;
@@ -41,73 +184,50 @@ const enfermeroController = {
         { dni, nombre, apellido, area, telefono },
         { where: { id } }
       );
+
       if (updated) {
-        const updatedEnfermero = await Enfermero.findOne({ where: { id } });
-        res.status(200).json(updatedEnfermero);
+        res.redirect(
+          "/enfermeros/admin?success=true&message=Enfermero+actualizado+correctamente"
+        );
       } else {
-        res.status(404).json({ error: "Enfermero no encontrado" });
+        res.status(404).render("error", {
+          message: "Enfermero no encontrado",
+          error: { status: 404 },
+        });
       }
     } catch (error) {
       console.error("Error al editar el enfermero:", error);
-      res.status(500).json({ error: "Error al editar el enfermero" });
+
+      res.status(500).render("error", {
+        message: "Error al actualizar enfermero",
+        error,
+      });
     }
   },
 
-  // metodo para borrar un medico buscando por su id
+  // Método para borrar un enfermero buscando por su id
   borrarEnfermero: async (req, res) => {
     try {
       const { id } = req.params;
       const deleted = await Enfermero.destroy({ where: { id } });
-      if (deleted) {
-        res.status(204).send();
-      } else {
-        res.status(404).json({ error: "Enfermero no encontrado" });
-      }
-    } catch (error) {
-      console.error("Error al borrar el Enfermero:", error);
-      res.status(500).json({ error: "Error al borrar el enfermero" });
-    }
-  },
 
-  //metodo para listar todos los enfermeros por area
-  getEnfermerosByArea: async (req, res) => {
-    try {
-      const { area } = req.params;
-      const enfermeros = await Enfermero.findAll({ where: { area } });
-      res.status(200).json(enfermeros);
-    } catch (error) {
-      console.error("Error al obtener los enfermeros por área:", error);
-      res.status(500).json({ error: "Error al obtener los enfermeros" });
-    }
-  },
-  //buscar enfermero por ID
-  getEnfermeroById: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const enfermero = await Enfermero.findOne({ where: { id } });
-      if (enfermero) {
-        res.status(200).json(enfermero);
+      if (deleted) {
+        res.redirect(
+          "/enfermeros/admin?success=true&message=Enfermero+eliminado+correctamente"
+        );
       } else {
-        res.status(404).json({ error: "Enfermero no encontrado" });
+        res.status(404).render("error", {
+          message: "Enfermero no encontrado al intentar eliminar",
+          error: { status: 404 },
+        });
       }
     } catch (error) {
-      console.error("Error al obtener el enfermero por ID:", error);
-      res.status(500).json({ error: "Error al obtener el enfermero" });
-    }
-  },
-  //buscar enfermero por dni
-  getEnfermeroByDni: async (req, res) => {
-    try {
-      const { dni } = req.params;
-      const enfermero = await Enfermero.findOne({ where: { dni } });
-      if (enfermero) {
-        res.status(200).json(enfermero);
-      } else {
-        res.status(404).json({ error: "Enfermero no encontrado" });
-      }
-    } catch (error) {
-      console.error("Error al obtener el enfermero por DNI:", error);
-      res.status(500).json({ error: "Error al obtener el enfermero" });
+      console.error("Error al borrar el enfermero:", error);
+
+      res.status(500).render("error", {
+        message: "Error al eliminar enfermero",
+        error,
+      });
     }
   },
 };

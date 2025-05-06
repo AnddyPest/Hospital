@@ -11,7 +11,7 @@ router.get("/admin/borrar", medicoController.borrarView);
 router.get("/admin/editar", medicoController.editarView);
 router.get("/admin/seleccionar", medicoController.seleccionarView);
 
-// RUTAS DE API
+// RUTAS DE CRUD
 
 router.post("/admin/new", medicoController.crearMedico);
 router.put("/editar/:id", medicoController.editarMedico);
