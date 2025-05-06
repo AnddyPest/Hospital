@@ -1,6 +1,7 @@
 extends ../templates/layout.pug
-
+include ../templates/entityMixin.pug
 include ../templates/mixins.pug
+
 
 block content
     div
@@ -8,4 +9,4 @@ block content
         
         +header("Editar Administrativos", "/icons/user-pen-solid.svg")
 
-        +editEntidad("administrativos", "Administrativo", "Area")
+        +entidadForm("administrativos", "Administrativo", "editar", administrativoAEditar)

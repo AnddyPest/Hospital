@@ -1,6 +1,7 @@
 extends ../templates/layout.pug
 
-include ../templates/mixins.pug
+include ../templates/entityMixin.pug
+include ../templates/Mixins.pug
 
 block content
     
@@ -11,4 +12,4 @@ block content
         
         +header("Nuevo Médico", "/icons/user-plus-solid.svg")
         
-        +nuevaEntidad("medicos", "Medico", "Especialidad")
+        +entidadForm("medicos", "Médico", "nuevo", "")

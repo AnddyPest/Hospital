@@ -1,5 +1,5 @@
 extends ../../templates/layout.pug
-
+include ../../templates/entityMixin.pug
 include ../../templates/mixins.pug
 
 block content
@@ -8,4 +8,4 @@ block content
         
         +header("Editar Pacientes", "/icons/user-pen-solid.svg")
 
-        +editEntidad("pacientes", "Paciente", "Obra_Social")
+        +entidadForm("pacientes", "Pacientes", "editar", pacienteAEditar)

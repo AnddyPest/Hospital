@@ -1,0 +1,156 @@
+mixin entidadForm(entityURL, entityName, context, entityData)
+  - const isEdit = context === 'editar'
+  - const actionText = isEdit ? 'Actualizar' : 'Guardar'
+  - const formId = `form${entityName}`
+  - const isPaciente = entityURL === 'pacientes'
+  - const actionUrl = isEdit && entityData ? `/${entityURL}/editar/${entityData.id}` : `/${entityURL}/admin/new`
+
+  div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rounded-3(style="width: 80%;" id=`formulario${entityName}`)
+    div.d-flex.justify-content-center
+      form.w-75(id=formId, method="POST", action=actionUrl)
+        
+        // Campo DNI
+        div.form-floating.mb-3
+          input.form-control(
+            type="text" 
+            id="dni" 
+            name="dni" 
+            placeholder="DNI" 
+            required
+            value=isEdit && entityData ? entityData.dni : '')
+          label(for="dni") DNI
+
+        // Campos Nombre y Apellido
+        div.form-floating.mb-3
+          input.form-control(
+            type="text" 
+            id="nombre" 
+            name="nombre" 
+            placeholder="Nombre" 
+            required
+            value=isEdit && entityData ? entityData.nombre : '')
+          label(for="nombre") Nombre
+        
+        div.form-floating.mb-3
+          input.form-control(
+            type="text" 
+            id="apellido" 
+            name="apellido" 
+            placeholder="Apellido" 
+            required
+            value=isEdit && entityData ? entityData.apellido : '')
+          label(for="apellido") Apellido
+
+        // Campos específicos según tipo de entidad
+        if isPaciente
+          // Campos específicos de paciente
+          div.form-floating.mb-3
+            input.form-control(
+              type="number" 
+              id="edad" 
+              name="edad" 
+              placeholder="Edad" 
+              min="0" 
+              max="120"
+              required
+              value=isEdit && entityData ? entityData.edad : '')
+            label(for="edad") Edad
+
+          div.form-floating.mb-3
+            select.form-select(id="sexo" name="sexo" required)
+              option(value="" selected=!isEdit) Seleccione...
+              option(value="M" selected=isEdit && entityData && entityData.sexo === "M") Masculino
+              option(value="F" selected=isEdit && entityData && entityData.sexo === "F") Femenino
+            label(for="sexo") Sexo
+
+          div.form-floating.mb-3
+            input.form-control(
+              type="email" 
+              id="email" 
+              name="email" 
+              placeholder="Email" 
+              required
+              value=isEdit && entityData ? entityData.email : '')
+            label(for="email") Email
+
+          div.form-floating.mb-3
+            input.form-control(
+              type="text" 
+              id="obraSocial" 
+              name="obraSocial" 
+              placeholder="Obra Social" 
+              required
+              value=isEdit && entityData ? entityData.obra_social : '')
+            label(for="obraSocial") Obra Social
+        else
+          // Campo específico según entidad (área o especialidad)
+          - const fieldName = entityURL === 'medicos' ? 'especialidad' : 'area'
+          - const fieldLabel = entityURL === 'medicos' ? 'Especialidad' : 'Área'
+          div.form-floating.mb-3
+            input.form-control(
+              type="text" 
+              id=fieldName 
+              name=fieldName 
+              placeholder=fieldLabel 
+              required
+              value=isEdit && entityData ? (entityURL === 'medicos' ? entityData.especialidad : entityData.area) : '')
+            label(for=fieldName) #{fieldLabel}
+
+        // Campo teléfono (común a todas las entidades)
+        div.form-floating.mb-3
+          input.form-control(
+            type="text" 
+            id="telefono" 
+            name="telefono" 
+            placeholder="Teléfono" 
+            required
+            value=isEdit && entityData ? entityData.telefono : '')
+          label(for="telefono") Teléfono
+        
+        // Botones de acción
+        input(type="hidden" name="_method" value=isEdit ? "PUT" : "POST")
+        div.d-flex.justify-content-center.mt-4
+          button.btn.btn-primary.me-5.w-25(type="submit") #{actionText} #{entityName}
+          a.btn.btn-danger.ms-5.w-25(href=`/${entityURL}/admin` type="button", id="cancelar") Cancelar
+
+  - const scriptUrl = isEdit && entityData ? `/${entityURL}/editar/${entityData.id}` : `/${entityURL}/admin/new`
+  script.
+    document.getElementById('#{formId}').addEventListener("submit", async function(event) {
+      event.preventDefault();
+      
+      const form = event.target;
+      const formData = new FormData(form);
+      const datos = Object.fromEntries(formData.entries());
+      const method = '#{isEdit ? "PUT" : "POST"}';
+      const url = '#{scriptUrl}';
+      
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(datos),
+        });
+        
+        if (response.redirected) {
+          window.location.href = response.url;
+          return;
+        }
+        
+        if (response.ok) {
+          alert(`#{entityName} ${datos.nombre} ${datos.apellido} #{isEdit ? 'actualizado' : 'agregado'} con éxito.`);
+          if (!#{isEdit}) {
+            form.reset();
+          } else {
+            window.location.href = '#{`/${entityURL}/admin`}';
+          }
+        } else {
+          const result = await response.json();
+          alert(result.error || "Ha ocurrido un error");
+        }
+      } catch (error) {
+        console.error("Error al enviar el formulario:", error);
+        alert("Ha ocurrido un error inesperado");
+      }
+    });
