@@ -7,111 +7,151 @@ mixin entidadForm(entityURL, entityName, context, entityData)
 
   div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rounded-3(style="width: 80%;" id=`formulario${entityName}`)
     div.d-flex.justify-content-center
-      form.w-75(id=formId, method="POST", action=actionUrl)
+      form.w-100(id=formId, method="POST", action=actionUrl)
         
-        // Campo DNI
-        div.form-floating.mb-3
-          input.form-control(
-            type="text" 
-            id="dni" 
-            name="dni" 
-            placeholder="DNI" 
-            required
-            value=isEdit && entityData ? entityData.dni : '')
-          label(for="dni") DNI
+        // Primera fila: DNI, Nombre, Apellido
+        div.row.mb-3
+          // DNI
+          div.col-md-4
+            div.form-floating
+              input.form-control(
+                type="text" 
+                id="dni" 
+                name="dni" 
+                placeholder="DNI" 
+                required
+                value=isEdit && entityData ? entityData.dni : '')
+              label(for="dni") DNI
+          
+          // Nombre
+          div.col-md-4
+            div.form-floating
+              input.form-control(
+                type="text" 
+                id="nombre" 
+                name="nombre" 
+                placeholder="Nombre" 
+                required
+                value=isEdit && entityData ? entityData.nombre : '')
+              label(for="nombre") Nombre
+          
+          // Apellido
+          div.col-md-4
+            div.form-floating
+              input.form-control(
+                type="text" 
+                id="apellido" 
+                name="apellido" 
+                placeholder="Apellido" 
+                required
+                value=isEdit && entityData ? entityData.apellido : '')
+              label(for="apellido") Apellido
 
-        // Campos Nombre y Apellido
-        div.form-floating.mb-3
-          input.form-control(
-            type="text" 
-            id="nombre" 
-            name="nombre" 
-            placeholder="Nombre" 
-            required
-            value=isEdit && entityData ? entityData.nombre : '')
-          label(for="nombre") Nombre
-        
-        div.form-floating.mb-3
-          input.form-control(
-            type="text" 
-            id="apellido" 
-            name="apellido" 
-            placeholder="Apellido" 
-            required
-            value=isEdit && entityData ? entityData.apellido : '')
-          label(for="apellido") Apellido
-
-        // Campos específicos según tipo de entidad
         if isPaciente
-          // Campos específicos de paciente
-          div.form-floating.mb-3
-            input.form-control(
-              type="number" 
-              id="edad" 
-              name="edad" 
-              placeholder="Edad" 
-              min="0" 
-              max="120"
-              required
-              value=isEdit && entityData ? entityData.edad : '')
-            label(for="edad") Edad
+          // Segunda fila para pacientes: Edad, Sexo, Email
+          div.row.mb-3
+            // Edad
+            div.col-md-4
+              div.form-floating
+                input.form-control(
+                  type="number" 
+                  id="edad" 
+                  name="edad" 
+                  placeholder="Edad" 
+                  min="0" 
+                  max="120"
+                  required
+                  value=isEdit && entityData ? entityData.edad : '')
+                label(for="edad") Edad
+            
+            // Sexo
+            div.col-md-4
+              div.form-floating
+                select.form-select(id="sexo" name="sexo" required)
+                  option(value="" selected=!isEdit) Seleccione...
+                  option(value="M" selected=isEdit && entityData && entityData.sexo === "M") Masculino
+                  option(value="F" selected=isEdit && entityData && entityData.sexo === "F") Femenino
+                label(for="sexo") Sexo
+            
+            // Email
+            div.col-md-4
+              div.form-floating
+                input.form-control(
+                  type="email" 
+                  id="email" 
+                  name="email" 
+                  placeholder="Email" 
+                  required
+                  value=isEdit && entityData ? entityData.email : '')
+                label(for="email") Email
 
-          div.form-floating.mb-3
-            select.form-select(id="sexo" name="sexo" required)
-              option(value="" selected=!isEdit) Seleccione...
-              option(value="M" selected=isEdit && entityData && entityData.sexo === "M") Masculino
-              option(value="F" selected=isEdit && entityData && entityData.sexo === "F") Femenino
-            label(for="sexo") Sexo
+          // Tercera fila para pacientes: Obra Social, Teléfono
+          div.row.mb-3
+            // Obra Social
+            div.col-md-4
+              div.form-floating
+                input.form-control(
+                  type="text" 
+                  id="obraSocial" 
+                  name="obraSocial" 
+                  placeholder="Obra Social" 
+                  required
+                  value=isEdit && entityData ? entityData.obra_social : '')
+                label(for="obraSocial") Obra Social
+            
+            // Teléfono
+            div.col-md-4
+              div.form-floating
+                input.form-control(
+                  type="text" 
+                  id="telefono" 
+                  name="telefono" 
+                  placeholder="Teléfono" 
+                  required
+                  value=isEdit && entityData ? entityData.telefono : '')
+                label(for="telefono") Teléfono
+            
+            // Columna vacía para mantener la disposición
+            div.col-md-4
 
-          div.form-floating.mb-3
-            input.form-control(
-              type="email" 
-              id="email" 
-              name="email" 
-              placeholder="Email" 
-              required
-              value=isEdit && entityData ? entityData.email : '')
-            label(for="email") Email
-
-          div.form-floating.mb-3
-            input.form-control(
-              type="text" 
-              id="obraSocial" 
-              name="obraSocial" 
-              placeholder="Obra Social" 
-              required
-              value=isEdit && entityData ? entityData.obra_social : '')
-            label(for="obraSocial") Obra Social
         else
-          // Campo específico según entidad (área o especialidad)
-          - const fieldName = entityURL === 'medicos' ? 'especialidad' : 'area'
-          - const fieldLabel = entityURL === 'medicos' ? 'Especialidad' : 'Área'
-          div.form-floating.mb-3
-            input.form-control(
-              type="text" 
-              id=fieldName 
-              name=fieldName 
-              placeholder=fieldLabel 
-              required
-              value=isEdit && entityData ? (entityURL === 'medicos' ? entityData.especialidad : entityData.area) : '')
-            label(for=fieldName) #{fieldLabel}
-
-        // Campo teléfono (común a todas las entidades)
-        div.form-floating.mb-3
-          input.form-control(
-            type="text" 
-            id="telefono" 
-            name="telefono" 
-            placeholder="Teléfono" 
-            required
-            value=isEdit && entityData ? entityData.telefono : '')
-          label(for="telefono") Teléfono
+          // Segunda fila para otras entidades: Especialidad/Área, Teléfono
+          div.row.mb-3
+            // Especialidad o Área
+            - const fieldName = entityURL === 'medicos' ? 'especialidad' : 'area'
+            - const fieldLabel = entityURL === 'medicos' ? 'Especialidad' : 'Área'
+            div.col-md-4
+              div.form-floating
+                input.form-control(
+                  type="text" 
+                  id=fieldName 
+                  name=fieldName 
+                  placeholder=fieldLabel 
+                  required
+                  value=isEdit && entityData ? (entityURL === 'medicos' ? entityData.especialidad : entityData.area) : '')
+                label(for=fieldName) #{fieldLabel}
+            
+            // Teléfono
+            div.col-md-4
+              div.form-floating
+                input.form-control(
+                  type="text" 
+                  id="telefono" 
+                  name="telefono" 
+                  placeholder="Teléfono" 
+                  required
+                  value=isEdit && entityData ? entityData.telefono : '')
+                label(for="telefono") Teléfono
+            
+            // Columna vacía para mantener la disposición
+            div.col-md-4
         
         // Botones de acción
         input(type="hidden" name="_method" value=isEdit ? "PUT" : "POST")
-        div.d-flex.justify-content-center.mt-4
-          button.btn.btn-primary.me-5.w-25(type="submit") #{actionText} #{entityName}
-          a.btn.btn-danger.ms-5.w-25(href=`/${entityURL}/admin` type="button", id="cancelar") Cancelar
+        div.row.mt-4
+          div.col-12.d-flex.justify-content-center
+            button.btn.btn-primary.me-5.w-25(type="submit") #{actionText} #{entityName}
+            a.btn.btn-danger.ms-5.w-25(href=`/${entityURL}/admin` type="button", id="cancelar") Cancelar
 
   - const scriptUrl = isEdit && entityData ? `/${entityURL}/editar/${entityData.id}` : `/${entityURL}/admin/new`
   script.
