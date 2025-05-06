@@ -1,19 +1,152 @@
 const Medico = require("../model/medico");
-
 const sequelize = require("sequelize");
 
 //dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
 const medicoController = {
-  // metodo para obtener todos los medicos
-  getAllMedicos: async (req, res) => {
+  // MÉTODOS DE RENDERIZADO DE VISTAS
+
+  // Vista principal de médicos
+  index: async (req, res) => {
     try {
-      console.log("⚡ Ejecutando getAllMedicos");
-      const medicos = await Medico.findAll();
-      console.log(`✅ Encontrados ${medicos.length} médicos`);
-      return res.json(medicos); // Asegúrate de devolver la respuesta
+      res.render("vistasMedicos/portadaMedicos", {
+        title: "Médicos",
+        userType: req.session?.userType || "guest",
+      });
     } catch (error) {
-      console.error("❌ Error en getAllMedicos:", error);
-      return res.status(500).json({ error: "Error al obtener médicos" });
+      console.error("Error en index médicos:", error);
+      res.status(500).render("error", {
+        message: "Error en la página de médicos",
+        error,
+      });
+    }
+  },
+
+  // Vista para listar todos los médicos
+  listarView: async (req, res) => {
+    try {
+      const medicos = await Medico.findAll();
+      res.render("vistasMedicos/listarMedicos", {
+        title: "Listar Médicos",
+        medicos,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al listar médicos:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la lista de médicos",
+        error,
+      });
+    }
+  },
+
+  // Vista de administración de médicos
+  adminView: async (req, res) => {
+    try {
+      res.render("vistasMedicos/administrarMedicos", {
+        title: "Administrar Médicos",
+        userType: req.session?.userType || "guest",
+        success: req.query.success,
+        message: req.query.message,
+      });
+    } catch (error) {
+      console.error("Error en vista de administración:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar panel de administración",
+        error,
+      });
+    }
+  },
+
+  // Vista de formulario para nuevo médico
+  nuevoView: async (req, res) => {
+    try {
+      res.render("vistasMedicos/nuevoMedico", {
+        title: "Nuevo Médico",
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en formulario nuevo médico:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar el formulario",
+        error,
+      });
+    }
+  },
+
+  // Vista para borrar médicos
+  borrarView: async (req, res) => {
+    try {
+      const medicos = await Medico.findAll();
+      res.render("vistasMedicos/borrarMedico", {
+        title: "Borrar Médico",
+        medicos,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista borrar médico:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar médicos para borrar",
+        error,
+      });
+    }
+  },
+
+  // Vista para editar médicos
+  editarView: async (req, res) => {
+    try {
+      const { id } = req.query;
+      let medicoAEditar = null;
+
+      if (id) {
+        medicoAEditar = await Medico.findByPk(id);
+        if (!medicoAEditar) {
+          return res.status(404).render("error", {
+            message: "Médico no encontrado",
+          });
+        }
+      }
+
+      const medicos = await Medico.findAll();
+      res.render("vistasMedicos/editarMedicos", {
+        title: "Editar Médico",
+        medicos,
+        medicoAEditar,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista editar médico:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar datos para editar",
+        error,
+      });
+    }
+  },
+
+  // Vista para seleccionar médico
+  seleccionarView: async (req, res) => {
+    try {
+      const medicos = await Medico.findAll();
+      const especialidades = await Medico.findAll({
+        attributes: [
+          [
+            sequelize.fn("DISTINCT", sequelize.col("especialidad")),
+            "especialidad",
+          ],
+        ],
+      });
+
+      res.render("vistasMedicos/seleccionarMedico", {
+        title: "Seleccionar Médico",
+        medicos,
+        especialidades: especialidades.map((e) => e.especialidad),
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista seleccionar médico:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar selección de médicos",
+        error,
+      });
     }
   },
 
@@ -29,10 +162,19 @@ const medicoController = {
         especialidad,
         telefono,
       });
-      res.status(201).json(nuevoMedico);
+
+      res.redirect(
+        "/medicos/admin?success=true&message=Médico+creado+correctamente"
+      );
     } catch (error) {
       console.error("Error al crear el medico:", error);
-      res.status(500).json({ error: "Error al crear el medico" });
+
+      res.status(500).render("vistasMedicos/nuevoMedico", {
+        title: "Nuevo Médico",
+        error: "Error al crear el médico: " + error.message,
+        formData: req.body,
+        userType: req.session?.userType || "guest",
+      });
     }
   },
 
@@ -45,15 +187,24 @@ const medicoController = {
         { dni, nombre, apellido, especialidad, telefono },
         { where: { id } }
       );
+
       if (updated) {
-        const updatedMedico = await Medico.findOne({ where: { id } });
-        res.status(200).json(updatedMedico);
+        res.redirect(
+          "/medicos/admin?success=true&message=Médico+actualizado+correctamente"
+        );
       } else {
-        res.status(404).json({ error: "Medico no encontrado" });
+        res.status(404).render("error", {
+          message: "Médico no encontrado",
+          error: { status: 404 },
+        });
       }
     } catch (error) {
       console.error("Error al editar el medico:", error);
-      res.status(500).json({ error: "Error al editar el medico" });
+
+      res.status(500).render("error", {
+        message: "Error al actualizar médico",
+        error,
+      });
     }
   },
 
@@ -62,79 +213,24 @@ const medicoController = {
     try {
       const { id } = req.params;
       const deleted = await Medico.destroy({ where: { id } });
+
       if (deleted) {
-        res.status(204).send();
+        res.redirect(
+          "/medicos/admin?success=true&message=Médico+eliminado+correctamente"
+        );
       } else {
-        res.status(404).json({ error: "Medico no encontrado" });
+        res.status(404).render("error", {
+          message: "Médico no encontrado al intentar eliminar",
+          error: { status: 404 },
+        });
       }
     } catch (error) {
       console.error("Error al borrar el medico:", error);
-      res.status(500).json({ error: "Error al borrar el medico" });
-    }
-  },
 
-  // metodos especificos para funcionalidades de otras vistas
-  // metodo para listar las especialidades sin repetir
-  getEspecialidades: async (req, res) => {
-    try {
-      const especialidades = await Medico.findAll({
-        attributes: [
-          [
-            sequelize.fn("DISTINCT", sequelize.col("especialidad")),
-            "especialidad",
-          ],
-        ],
+      res.status(500).render("error", {
+        message: "Error al eliminar médico",
+        error,
       });
-      res.status(200).json(especialidades.map((e) => e.especialidad));
-    } catch (error) {
-      console.error("Error al obtener las especialidades:", error);
-      res.status(500).json({ error: "Error al obtener las especialidades" });
-    }
-  },
-  // metodo para listar los medicos por especialidad
-  getMedicosByEspecialidad: async (req, res) => {
-    try {
-      const { especialidad } = req.params;
-      const medicos = await Medico.findAll({
-        where: { especialidad },
-      });
-      res.status(200).json(medicos);
-    } catch (error) {
-      console.error("Error al obtener los medicos por especialidad:", error);
-      res.status(500).json({
-        error: "Error al obtener los medicos por especialidad",
-      });
-    }
-  },
-  //buscar medico por id
-  getMedicoById: async (req, res) => {
-    try {
-      const { id } = req.params;
-      const medico = await Medico.findByPk(id);
-      if (medico) {
-        res.status(200).json(medico);
-      } else {
-        res.status(404).json({ error: "Medico no encontrado" });
-      }
-    } catch (error) {
-      console.error("Error al obtener el medico por id:", error);
-      res.status(500).json({ error: "Error al obtener el medico por id" });
-    }
-  },
-
-  //buscar medico por dni
-  getMedicoByDni: async (req, res) => {
-    try {
-      const { dni } = req.params;
-      const medico = await Medico.findOne({ where: { dni } });
-      if (medico) {
-        res.status(200).json(medico);
-      } else {
-        res.status(404).json({ error: "Medico no encontrado" });
-      }
-    } catch (error) {
-      console.error("Error al obtener el medico por dni:", error);
-      res.status(500).json({ error: "Error al obtener el medico por dni" });
     }
   },
 };

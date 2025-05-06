@@ -36,6 +36,38 @@ router.get("/listar/triages", (req, res) => {
     title: "Listar Triages",
   });
 });
+router.get("/admin/seleccionar", (req, res) => {
+  res.render("vistasPacientes/turnos/seleccionarEditTurno", {
+    title: "Seleccionar Turno",
+  });
+});
+router.get("/admin/seleccionar/turnos", (req, res) => {
+  res.render("vistasPacientes/turnos/editarTurnos", {
+    title: "Editar Turno",
+  });
+});
+router.get("/admin/seleccionar/triages", (req, res) => {
+  res.render("vistasPacientes/turnos/editarTriages", {
+    title: "Seleccionar Triage",
+  });
+});
+router.get("/admin/borrar", (req, res) => {
+  res.render("vistasPacientes/turnos/seleccionarBorrarTurno", {
+    title: "Borrar Turno",
+  });
+});
+
+router.get("/admin/borrar/turno", (req, res) => {
+  res.render("vistasPacientes/turnos/borrarTurnos", {
+    title: "Borrar Turno",
+  });
+});
+router.get("/admin/borrar/triage", (req, res) => {
+  res.render("vistasPacientes/turnos/borrarTriages", {
+    title: "Borrar Turno",
+  });
+});
+
 // api FALTA AGREGAR LAS RUTAS DE LOS METODOS QUE USO ACA
 
 // Obtener todos los turnos

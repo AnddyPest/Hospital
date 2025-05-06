@@ -398,8 +398,8 @@ mixin editEntidad(entityURL,entityName,singleEntityAttr)
                 }
             }
 
-//-Tablas de turnos con filtros y busqueda|
-mixin turnosListar(profesionalTypeOf)
+//-Tablas de turnos con filtros y busqueda
+mixin turnosListar(profesionalTypeOf, context)
         div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${profesionalTypeOf}`)
             div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
                 table.table.table-hover.table-dark.table-bordered.border-info.table-striped
@@ -409,19 +409,27 @@ mixin turnosListar(profesionalTypeOf)
                                 th.col(style="width: 10%") Fecha
                                 th.col(style="width: 20%") Paciente
                                 th.col(style="width: 12%") D.N.I.
-                                th.col(style="width: 20%") #{profesionalTypeOf}
+                                th.col(style="width: 15%") #{profesionalTypeOf}
                                 th.col(style="width: 10%") Hora
                                 th.col(style="width: 20%") Especialidad
                                 th.col(style="width: 8%") Estado
+                                if context === "editar"
+                                    th.col(style="width: 5%") Editar
+                                else if context === "borrar"
+                                    th.col(style="width: 5%") Borrar
                         
                         else
                             tr.table-info
                                 th.col(style="width: 10%") Fecha
                                 th.col(style="width: 20%") Paciente
                                 th.col(style="width: 15%") D.N.I.
-                                th.col(style="width: 20%") #{profesionalTypeOf}
+                                th.col(style="width: 15%") #{profesionalTypeOf}
                                 th.col(style="width: 10%") Hora
                                 th.col(style="width: 10%") Estado
+                                if context === "editar"
+                                    th.col(style="width: 5%") Editar
+                                else if context === "borrar"
+                                    th.col(style="width: 5%") Borrar
                     tbody
             
             div.mt-3(style="width: 100%;" id="filtros")
@@ -447,7 +455,12 @@ mixin turnosListar(profesionalTypeOf)
                             div.col.w-25
                                 button.btn.btn-warning.w-50(type="button" class="custom-button2" onclick="event.preventDefault(); location.reload();") Limpiar Filtros
                             div.col.w-25
-                                a.btn.btn-danger.w-50(href="/turnos/listar", type="button" id="volver" class="volver custom-button2") Volver
+                                if context === "listar"
+                                    a.btn.btn-danger.w-50(href="/turnos/listar", type="button" id="volver" class="volver custom-button2") Volver
+                                else if context === "editar"
+                                    a.btn.btn-danger.w-50(href="/turnos/admin/seleccionar", type="button" id="volver" class="volver custom-button2") Volver
+                                else if context === "borrar"
+                                    a.btn.btn-danger.w-50(href="/turnos/admin/borrar", type="button" id="volver" class="volver custom-button2") Volver
 
         script.
             const fecha = document.getElementById("inputDate");
@@ -483,6 +496,21 @@ mixin turnosListar(profesionalTypeOf)
                                     <td>${turno.hora}</td>
                                     <td>${turno.Medico ? `${turno.Medico.especialidad}`: "N/A"}</td>
                                     <td>${turno.estado}</td>
+                                    ${
+                                        '#{context}' === "Editar" || '#{context}' === "editar"
+                                            ? `<td>
+                                                <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarTurno(${turno.id}, '${turno.fecha}', '${turno.hora}', '${turno.estado}', '${turno.Paciente.dni}', '${turno.Medico.nombre} ${turno.Medico.apellido}', '${turno.Medico.especialidad}')">
+                                                <img src="/icons/user-pen-solid.svg" alt="Editar" style="width: 25px; height: 25px;">
+                                                </button>
+                                            </td>`
+                                            : '#{context}' === "Borrar" || '#{context}' === "borrar"
+                                            ? `<td>
+                                                <button type="button" class="btn btn-danger" style="width: 100%; padding:5px;" onclick="borrarTurno(${turno.id}, '${turno.fecha}', '${turno.hora}', '${turno.estado}', '${turno.Paciente.dni}', '${turno.Medico.nombre} ${turno.Medico.apellido}')">
+                                                <img src="/icons/user-slash-solid.svg" alt="Borrar" style="width: 25px; height: 25px;">
+                                                </button>
+                                            </td>`
+                                            : ""
+                                    }
                                 </tr>
                             `;
                             tbody.innerHTML += fila;
@@ -500,6 +528,21 @@ mixin turnosListar(profesionalTypeOf)
                                     <td>${turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}`: "N/A"}</td>
                                     <td>${turno.hora}</td>
                                     <td>${turno.estado}</td>
+                                    ${
+                                        '#{context}' === "Editar" || '#{context}' === "editar"
+                                            ? `<td>
+                                                <button type="button" class="btn btn-warning" style="width: 100%; padding:5px;" onclick="editarTurno(${turno.id}, '${turno.fecha}', '${turno.hora}', '${turno.estado}', '${turno.Paciente ? turno.Paciente.dni : ""}', '${turno.Enfermero ? turno.Enfermero.nombre + " " + turno.Enfermero.apellido : ""}', '')">
+                                                <img src="/icons/user-pen-solid.svg" alt="Editar" style="width: 25px; height: 25px;">
+                                                </button>
+                                            </td>`
+                                            : '#{context}' === "Borrar" || '#{context}' === "borrar"
+                                            ? `<td>
+                                                <button type="button" class="btn btn-danger" style="width: 100%; padding:5px;" onclick="borrarTurno(${turno.id}, '${turno.fecha}', '${turno.hora}', '${turno.estado}', '${turno.Paciente ? turno.Paciente.dni : ""}', '${turno.Enfermero ? turno.Enfermero.nombre + " " + turno.Enfermero.apellido : ""}')">
+                                                <img src="/icons/user-slash-solid.svg" alt="Borrar" style="width: 25px; height: 25px;">
+                                                </button>
+                                            </td>`
+                                            : ""
+                                    }
                                 </tr>
                             `;
                             tbody.innerHTML += fila;
@@ -666,3 +709,4 @@ mixin turnosListar(profesionalTypeOf)
                     
                 }
             }
+

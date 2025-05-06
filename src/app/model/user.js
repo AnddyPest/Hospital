@@ -31,8 +31,6 @@ Medico.hasOne(User, { foreignKey: "medico_Id" });
 User.belongsTo(Medico, { foreignKey: "medico_Id" });
 Enfermero.hasOne(User, { foreignKey: "enfermero_Id" });
 User.belongsTo(Enfermero, { foreignKey: "enfermero_Id" });
-Paciente.hasOne(User, { foreignKey: "paciente_Id" });
-User.belongsTo(Paciente, { foreignKey: "paciente_Id" });
 Administrativo.hasOne(User, { foreignKey: "administrativo_Id" });
 User.belongsTo(Administrativo, { foreignKey: "administrativo_Id" });
 Maestranza.hasOne(User, { foreignKey: "maestranza_Id" });

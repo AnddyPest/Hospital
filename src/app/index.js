@@ -27,12 +27,12 @@ app.use(morgan("dev"));
 app.use(cookieParser());
 
 // Rutas protegidas
-app.use("/medicos", auth, medicoRouter);
-app.use("/enfermeros", auth, enfermeroRouter);
-app.use("/administrativos", auth, administrativoRouter);
-app.use("/maestranzas", auth, maestranzaRouter);
-app.use("/pacientes", auth, pacienteRouter);
-app.use("/turnos", auth, turnoRouter);
+app.use("/medicos", medicoRouter);
+app.use("/enfermeros", enfermeroRouter);
+app.use("/administrativos", administrativoRouter);
+app.use("/maestranzas", maestranzaRouter);
+app.use("/pacientes", pacienteRouter);
+app.use("/turnos", turnoRouter);
 
 //rutas publicas
 app.use("/", router);

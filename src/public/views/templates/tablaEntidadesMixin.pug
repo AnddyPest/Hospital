@@ -1,0 +1,439 @@
+//-Header de la pag con título e icono
+
+mixin header(title, iconSrc)
+    div.position-absolute.start-50.translate-middle-x.text-center.text-white.mb-5(style="top: 10%; opacity: 0.8;")
+        h1(style="padding: 15px; background-color: rgba(0, 0, 0, 0.5); border-radius: 10px;")
+            span(id="cabecera" style="font-size: 2.2rem;")= title
+            img(src=iconSrc, alt="Medicos", class="ms-4", style="width: 60px; height: 60px;")
+
+mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
+                div.mt-3(id=id)
+                    div.d-flex.align-items-center.justify-content-center
+                        input.form-control.me-4(type="text", placeholder=placeholder, aria-label=placeholder, style="width: 400px; padding: 15px 30px;")
+                        button.btn.btn-info(type="button" class="custom-button2")= btnFiltrarText
+                        button.btn.btn-warning.ms-2(type="button" class="custom-button2")= btnLimpiarText
+                        button.btn.btn-danger.ms-2(type="button" id="volver" class="volver custom-button2")= btnVolverText
+
+//-tablas de entidades con buscador
+
+mixin tablaGeneralEntidades(contexto)
+  div#tablaGeneralEntidades.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%")
+    //- Tabla con datos
+    div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
+      table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+        if medicos 
+          //- Tabla para médicos
+          thead
+            tr.table-info
+              th.col(style="width: 5%") ID
+              th.col(style="width: 19%") Nombre
+              th.col(style="width: 19%") Apellido
+              th.col(style="width: 19%") DNI
+              th.col(style="width: 19%") Especialidad
+              th.col(style="width: 19%") Teléfono
+              if contexto === "editar" || contexto === "borrar"
+                th.col(style="width: 10%") Acciones
+          tbody
+            if medicos && medicos.length > 0
+              each medico in medicos
+                tr
+                  td= medico.id
+                  td= medico.nombre
+                  td= medico.apellido
+                  td= medico.dni
+                  td= medico.especialidad
+                  td= medico.telefono
+                  if contexto === "editar"
+                    td
+                      button.btn.btn-warning.w-100(class="custom-button2", type="button", onclick=`editarMedico(${medico.id})`) Editar
+                        img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 20px; height: 20px;")
+                  else if contexto === "borrar"
+                    td
+                      button.btn.btn-danger.w-100(class="custom-button2" onclick=`borrarMedico(${medico.id})`) Borrar
+                        img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 20px; height: 20px;")
+            else                    
+              tr
+                td(colspan="7").text-center No hay datos disponibles
+                
+        else if enfermeros
+          //- Tabla para enfermeros
+          thead
+            tr.table-info
+              th.col(style="width: 5%") ID
+              th.col(style="width: 19%") Nombre
+              th.col(style="width: 19%") Apellido
+              th.col(style="width: 19%") DNI
+              th.col(style="width: 19%") Teléfono
+              th.col(style="width: 19%") Área
+              if contexto === "editar" || contexto === "borrar"
+                th.col(style="width: 10%") Acciones
+          tbody
+            if enfermeros.length > 0
+              each enfermero in enfermeros
+                tr
+                  td= enfermero.id
+                  td= enfermero.nombre
+                  td= enfermero.apellido
+                  td= enfermero.dni
+                  td= enfermero.telefono
+                  td= enfermero.area
+                  if contexto === "editar"
+                    td
+                      button.btn.btn-warning.w-100(class="custom-button2", type="button", onclick=`editarEnfermero(${enfermero.id})`) Editar
+                        img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 20px; height: 20px;")
+                  else if contexto === "borrar"
+                    td
+                      button.btn.btn-danger.w-100(class="custom-button2" onclick=`borrarEnfermero(${enfermero.id})`) Borrar
+                        img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 20px; height: 20px;")
+            else
+              tr
+                td(colspan="7").text-center No hay datos disponibles
+                
+        else if maestranzas
+          //- Tabla para personal de maestranza
+          thead
+            tr.table-info
+              th.col(style="width: 5%") ID
+              th.col(style="width: 19%") Nombre
+              th.col(style="width: 19%") Apellido
+              th.col(style="width: 19%") DNI
+              th.col(style="width: 19%") Teléfono
+              th.col(style="width: 19%") Área
+              if contexto === "editar" || contexto === "borrar"
+                th.col(style="width: 10%") Acciones
+          tbody
+            if maestranzas.length > 0
+              each maestranza in maestranzas
+                tr
+                  td= maestranza.id
+                  td= maestranza.nombre
+                  td= maestranza.apellido
+                  td= maestranza.dni
+                  td= maestranza.telefono
+                  td= maestranza.area
+                  if contexto === "editar"
+                    td
+                      button.btn.btn-warning.w-100(class="custom-button2", type="button", onclick=`editarMaestranza(${maestranza.id})`) Editar
+                        img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 20px; height: 20px;")
+                  else if contexto === "borrar"
+                    td
+                      button.btn.btn-danger.w-100(class="custom-button2" onclick=`borrarMaestranza(${maestranza.id})`) Borrar
+                        img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 20px; height: 20px;")
+            else
+              tr
+                td(colspan="7").text-center No hay datos disponibles
+
+        else if administrativos
+          //- Tabla para administrativos
+          thead
+            tr.table-info
+              th.col(style="width: 5%") ID
+              th.col(style="width: 19%") Nombre
+              th.col(style="width: 19%") Apellido
+              th.col(style="width: 19%") DNI
+              th.col(style="width: 19%") Teléfono
+              th.col(style="width: 19%") Área
+              if contexto === "editar" || contexto === "borrar"
+                th.col(style="width: 10%") Acciones
+          tbody
+            if administrativos.length > 0
+              each administrativo in administrativos
+                tr
+                  td= administrativo.id
+                  td= administrativo.nombre
+                  td= administrativo.apellido
+                  td= administrativo.dni
+                  td= administrativo.telefono
+                  td= administrativo.area
+                  if contexto === "editar"
+                    td
+                      button.btn.btn-warning.w-100(class="custom-button2", type="button", onclick=`editarAdministrativo(${administrativo.id})`) Editar
+                        img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 20px; height: 20px;")
+                  else if contexto === "borrar"
+                    td
+                      button.btn.btn-danger.w-100(class="custom-button2" onclick=`borrarAdministrativo(${administrativo.id})`) Borrar
+                        img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 20px; height: 20px;")
+            else
+              tr
+                td(colspan="7").text-center No hay datos disponibles
+
+        else if pacientes
+          //- Tabla para pacientes
+          thead
+            tr.table-info
+              th.col(style="width: 5%") ID
+              th.col(style="width: 10%") DNI
+              th.col(style="width: 15%") Nombre
+              th.col(style="width: 15%") Apellido
+              th.col(style="width: 5%") Edad
+              th.col(style="width: 5%") Sexo
+              th.col(style="width: 20%") E-Mail
+              th.col(style="width: 15%") Teléfono
+              th.col(style="width: 10%") Obra Social
+              if contexto === "editar" || contexto === "borrar"
+                th.col(style="width: 10%") Acciones
+          tbody
+            if pacientes.length > 0
+              each paciente in pacientes
+                tr
+                  td= paciente.id
+                  td= paciente.dni
+                  td= paciente.nombre
+                  td= paciente.apellido
+                  td= paciente.edad
+                  td= paciente.sexo
+                  td= paciente.email
+                  td= paciente.telefono
+                  td= paciente.obraSocial
+                  if contexto === "editar"
+                    td
+                      button.btn.btn-warning.w-100(class="custom-button2", type="button", onclick=`editarPaciente(${paciente.id})`) Editar
+                        img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 20px; height: 20px;")
+                  else if contexto === "borrar"
+                    td
+                      button.btn.btn-danger.w-100(class="custom-button2" onclick=`borrarPaciente(${paciente.id})`) Borrar
+                        img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 20px; height: 20px;")
+            else
+              tr
+                td(colspan="10").text-center No hay datos disponibles
+        else
+          //- Cuando no hay datos
+          thead
+            tr.table-info
+              th.col(colspan="6") Sin datos
+          tbody
+            tr
+              td(colspan="6").text-center No hay datos disponibles para mostrar
+
+    //- Sección de filtros (condicionales según tipo de entidad)
+    if medicos
+      div.mt-3.filter-buttons#filterButtons
+        button.btn.btn-info.me-2(class="custom-button2" onclick="event.preventDefault(); mostrarFiltro('especialidad');") Filtrar por Especialidad
+        button.btn.btn-info.me-2(class="custom-button2" onclick="event.preventDefault(); mostrarFiltro('apellido');") Buscar por Apellido
+        button.btn.btn-danger(class="custom-button2" onclick="window.location.href='/medicos'") Volver
+      
+      div.mt-3#filtroApellidoContainer(style="display: none;")    
+        +inputGroup("inputApellido", "Ingrese apellido", "Buscar", "Limpiar", "Volver")
+      
+      div.mt-3#filtroEspecialidadContainer(style="display: none;")
+        +inputGroup("inputEspecialidad", "Ingrese especialidad", "Buscar", "Limpiar", "Volver")
+
+    else if enfermeros || maestranzas || administrativos
+      div.mt-3.filter-buttons#filterButtons
+        button.btn.btn-info.me-2(class="custom-button2" onclick="event.preventDefault(); mostrarFiltro('area');") Filtrar por Área
+        button.btn.btn-info.me-2(class="custom-button2" onclick="event.preventDefault(); mostrarFiltro('apellido');") Buscar por Apellido
+        button.btn.btn-danger(class="custom-button2" onclick="window.location.href='/personal'") Volver
+      
+      div.mt-3#filtroApellidoContainer(style="display: none;")    
+        +inputGroup("inputApellido", "Ingrese apellido", "Buscar", "Limpiar", "Volver")
+      
+      div.mt-3#filtroAreaContainer(style="display: none;")
+        +inputGroup("inputArea", "Ingrese área", "Buscar", "Limpiar", "Volver")
+
+    else if pacientes
+      div.mt-3.filter-buttons#filterButtons
+        button.btn.btn-info.me-2(class="custom-button2" onclick="event.preventDefault(); mostrarFiltro('dni');") Filtrar por DNI
+        button.btn.btn-danger(class="custom-button2" onclick="window.location.href='/pacientes'") Volver
+      
+      div.mt-3#filtroDniContainer(style="display: none;")    
+        +inputGroup("inputDni", "Ingrese número de DNI", "Buscar", "Limpiar", "Volver")
+
+    script.
+        // Almacena todas las filas originales para poder filtrar
+        let todasLasFilas = [];
+        
+        document.addEventListener('DOMContentLoaded', function() {
+          // Guardar todas las filas de la tabla al cargar la página
+          const tbody = document.querySelector('table tbody');
+          if (tbody) {
+            todasLasFilas = Array.from(tbody.querySelectorAll('tr'));
+          }
+          
+          // Configuración de filtros y eventos
+          configurarFiltros();
+        });
+        
+        function mostrarFiltro(tipo) {
+          // Ocultar los botones de filtro
+          document.getElementById('filterButtons').style.display = 'none';
+          
+          // Mostrar el filtro adecuado según el tipo
+          if (tipo === 'especialidad') {
+            document.getElementById('filtroEspecialidadContainer').style.display = 'block';
+            configurarBotonesFiltroDinamico('inputEspecialidad');
+          } else if (tipo === 'apellido') {
+            document.getElementById('filtroApellidoContainer').style.display = 'block';
+            configurarBotonesFiltroDinamico('inputApellido');
+          } else if (tipo === 'area') {
+            document.getElementById('filtroAreaContainer').style.display = 'block';
+            configurarBotonesFiltroDinamico('inputArea');
+          } else if (tipo === 'dni') {
+            document.getElementById('filtroDniContainer').style.display = 'block';
+            configurarBotonesFiltroDinamico('inputDni');
+          }
+        }
+
+        function configurarBotonesFiltroDinamico(idFiltro) {
+          // Configurar el botón de búsqueda
+          const buscarBtn = document.querySelector(`#${idFiltro} .btn-info`);
+          if (buscarBtn) {
+            buscarBtn.onclick = function() { filtrarTabla(idFiltro); };
+          }
+          
+          // Configurar el botón de limpieza
+          const limpiarBtn = document.querySelector(`#${idFiltro} .btn-warning`);
+          if (limpiarBtn) {
+            limpiarBtn.onclick = function() { 
+              limpiarFiltro(idFiltro);
+              mostrarTodasLasFilas(); 
+            };
+          }
+          
+          // Configurar el botón de volver
+          const volverBtn = document.querySelector(`#${idFiltro} .btn-danger`);
+          if (volverBtn) {
+            volverBtn.onclick = function() {
+              ocultarFiltros();
+              mostrarTodasLasFilas();
+            };
+          }
+        }
+
+        function ocultarFiltros() {
+          // Ocultar todos los posibles filtros
+          const containers = [
+            'filtroEspecialidadContainer', 
+            'filtroApellidoContainer', 
+            'filtroAreaContainer', 
+            'filtroDniContainer'
+          ];
+          
+          containers.forEach(container => {
+            const elemento = document.getElementById(container);
+            if (elemento) elemento.style.display = 'none';
+          });
+          
+          // Mostrar nuevamente los botones de filtro
+          document.getElementById('filterButtons').style.display = 'block';
+        }
+
+        function filtrarTabla(idFiltro) {
+          const input = document.querySelector(`#${idFiltro} input`);
+          if (!input) {
+            console.error(`No se encontró el input para el filtro ${idFiltro}`);
+            return;
+          }
+          
+          const valorFiltro = input.value.trim().toLowerCase();
+          if (!valorFiltro) {
+            alert('Por favor ingrese un valor para filtrar');
+            return;
+          }
+          
+          // Determinar qué columna filtrar según el tipo de filtro
+          let columnasAFiltrar = [];
+          
+          if (idFiltro === 'inputEspecialidad') {
+            columnasAFiltrar = [4]; // Columna especialidad (índice 4)
+          } else if (idFiltro === 'inputApellido') {
+            columnasAFiltrar = [2]; // Columna apellido (índice 2)
+          } else if (idFiltro === 'inputArea') {
+            columnasAFiltrar = [5]; // Columna área (índice 5)
+          } else if (idFiltro === 'inputDni') {
+            columnasAFiltrar = [1]; // Columna DNI (índice 1)
+          }
+          
+          const tbody = document.querySelector('table tbody');
+          if (!tbody || todasLasFilas.length === 0) {
+            console.error('No hay tabla o filas para filtrar');
+            return;
+          }
+          
+          // Limpiar tabla actual
+          tbody.innerHTML = '';
+          
+          // Filtrar y añadir filas que coincidan
+          let coincidencias = false;
+          
+          todasLasFilas.forEach(fila => {
+            let mostrarFila = false;
+            
+            columnasAFiltrar.forEach(indice => {
+              const celda = fila.cells[indice];
+              if (celda && celda.textContent.toLowerCase().includes(valorFiltro)) {
+                mostrarFila = true;
+              }
+            });
+            
+            if (mostrarFila) {
+              tbody.appendChild(fila);
+              coincidencias = true;
+            }
+          });
+          
+          // Mostrar mensaje si no hay coincidencias
+          if (!coincidencias) {
+            const colspanValue = document.querySelector('table thead th').getAttribute('colspan') || 
+                                document.querySelectorAll('table thead th').length;
+            
+            const filaNoData = document.createElement('tr');
+            const celdaNoData = document.createElement('td');
+            
+            celdaNoData.textContent = `No se encontraron resultados para "${valorFiltro}"`;
+            celdaNoData.className = 'text-center';
+            celdaNoData.colSpan = colspanValue;
+            
+            filaNoData.appendChild(celdaNoData);
+            tbody.appendChild(filaNoData);
+          }
+        }
+
+        function limpiarFiltro(idFiltro) {
+          const input = document.querySelector(`#${idFiltro} input`);
+          if (input) {
+            input.value = '';
+          }
+        }
+        
+        function mostrarTodasLasFilas() {
+          const tbody = document.querySelector('table tbody');
+          if (tbody && todasLasFilas.length > 0) {
+            // Limpiar tabla actual
+            tbody.innerHTML = '';
+            
+            // Añadir todas las filas originales
+            todasLasFilas.forEach(fila => {
+              tbody.appendChild(fila.cloneNode(true));
+            });
+          }
+        }
+        
+        function configurarFiltros() {
+          // Añadir listeners para las teclas Enter en los campos de búsqueda
+          const inputFields = document.querySelectorAll('.form-control');
+          inputFields.forEach(input => {
+            input.addEventListener('keypress', function(e) {
+              if (e.key === 'Enter') {
+                e.preventDefault();
+                
+                // Identificar el filtro padre
+                let parentContainer = this.closest('div[id]');
+                if (parentContainer) {
+                  const id = parentContainer.id;
+                  
+                  // Obtener el ID del input
+                  if (id.includes('filtroEspecialidad')) {
+                    filtrarTabla('inputEspecialidad');
+                  } else if (id.includes('filtroApellido')) {
+                    filtrarTabla('inputApellido');
+                  } else if (id.includes('filtroArea')) {
+                    filtrarTabla('inputArea');
+                  } else if (id.includes('filtroDni')) {
+                    filtrarTabla('inputDni');
+                  }
+                }
+              }
+            });
+          });
+        }
+
