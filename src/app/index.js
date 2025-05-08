@@ -7,6 +7,8 @@ const administrativoRouter = require("./router/administrativoRouter"); // Admini
 const maestranzaRouter = require("./router/maestranzaRouter"); // Maestranzas Router
 const pacienteRouter = require("./router/pacienteRouter"); // Pacientes Router
 const turnoRouter = require("./router/turnoRouter"); // Turnos Router
+const camaRouter = require("./router/camasRouter"); // Camas Router
+const historiaClinicaRouter = require("./router/historiaClinicaRouter"); // Historia Clinica Router
 const path = require("path");
 const morgan = require("morgan");
 //const authRouter = require("./router/authRouter"); // Auth Router
@@ -33,6 +35,8 @@ app.use("/administrativos", administrativoRouter);
 app.use("/maestranzas", maestranzaRouter);
 app.use("/pacientes", pacienteRouter);
 app.use("/turnos", turnoRouter);
+app.use("/camas", camaRouter);
+app.use("/historiaClinica", historiaClinicaRouter);
 
 //rutas publicas
 app.use("/", router);
