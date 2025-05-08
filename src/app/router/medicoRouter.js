@@ -17,4 +17,13 @@ router.post("/admin/new", medicoController.crearMedico);
 router.put("/editar/:id", medicoController.editarMedico);
 router.delete("/borrar/:id", medicoController.borrarMedico);
 
+// rutas de api
+
+router.get("/especialidades", medicoController.getEspecialidades);
+router.get(
+  "/especialidades/:especialidad",
+  medicoController.getMedicosPorEspecialidad
+);
+router.get("/all", medicoController.getAllMedicos);
+
 module.exports = router;

@@ -16,4 +16,7 @@ router.post("/admin/new", pacienteController.crearPaciente);
 router.put("/editar/:id", pacienteController.editarPaciente);
 router.delete("/borrar/:id", pacienteController.borrarPaciente);
 
+// rutas de api
+router.get("/listado/:dni", pacienteController.obtenerPorDni);
+
 module.exports = router;

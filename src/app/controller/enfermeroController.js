@@ -230,6 +230,70 @@ const enfermeroController = {
       });
     }
   },
+
+  // Método para obtener todas las áreas de enfermeros
+  obtenerAreas: async (req, res) => {
+    try {
+      const areas = await Enfermero.findAll({
+        attributes: [[sequelize.fn("DISTINCT", sequelize.col("area")), "area"]],
+      });
+
+      const listaAreas = areas.map((item) => item.area);
+      res.json(listaAreas);
+    } catch (error) {
+      console.error("Error al obtener áreas:", error);
+      res.status(500).json({
+        message: "Error al obtener áreas",
+        error: error.message,
+      });
+    }
+  },
+
+  // Método para obtener enfermeros por área
+  obtenerEnfermerosPorArea: async (req, res) => {
+    try {
+      const { area } = req.params;
+
+      const enfermeros = await Enfermero.findAll({
+        where: { area },
+        attributes: ["id", "nombre", "apellido", "area"],
+      });
+
+      if (enfermeros.length === 0) {
+        return res.status(404).json({
+          message: `No se encontraron enfermeros para el área: ${area}`,
+        });
+      }
+
+      res.json(enfermeros);
+    } catch (error) {
+      console.error("Error al obtener enfermeros por área:", error);
+      res.status(500).json({
+        message: "Error al obtener enfermeros por área",
+        error: error.message,
+      });
+    }
+  },
+  // Método para obtener todos los enfermeros
+  getAllEnfermeros: async (req, res) => {
+    try {
+      const enfermeros = await Enfermero.findAll({
+        attributes: ["id", "nombre", "apellido", "area"],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
+
+      res.json(enfermeros);
+    } catch (error) {
+      console.error("Error al obtener todos los enfermeros:", error);
+      res.status(500).json({
+        message: "Error al obtener la lista de enfermeros",
+        error: error.message,
+      });
+    }
+  },
 };
 
 module.exports = enfermeroController;

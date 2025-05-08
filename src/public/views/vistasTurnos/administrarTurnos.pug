@@ -1,0 +1,27 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+
+block content
+        
+        
+        
+    div
+        img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Administrar Turnos", "/icons/user-clock-solid.svg")
+        
+        
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.w-75(id="adminControl")
+            div.d-flex.justify-content-center.align-items-center.gap-4.mt-5
+                a.btn.btn-success.ms-4(href=`/turnos/admin/new` type="button", id="agregar" class="custom-button2" style="width: 350px;") 
+                    span() Agregar Turno
+                    img(src="/icons/user-plus-solid.svg", alt=`Agregar Turno`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+                a.btn.btn-warning(href=`/turnos/admin/seleccionar/edit`, type="button", id="editar" class="custom-button2" style="width: 350px;") 
+                    span() Editar Turno
+                    img(src="/icons/user-pen-solid.svg", alt=`Editar Turno`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+                a.btn.btn-danger.me-4(href=`/turnos/admin/seleccionar/borrar`, type="button", id="borrar" class="custom-button2" style="width: 350px;") 
+                    span() Borrar Turno
+                    img(src="/icons/user-slash-solid.svg", alt=`Borrar Turno`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+                a.btn.btn-danger.ms-4(href=`/turnos` type="button", class="custom-button2" style="width: 50px; padding:5px;") 
+                    img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")

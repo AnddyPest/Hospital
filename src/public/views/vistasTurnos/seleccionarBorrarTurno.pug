@@ -1,6 +1,6 @@
-extends ../../templates/layout.pug
+extends ../templates/layout.pug
 
-include ../../templates/mixins.pug
+include ../templates/mixins.pug
 
 block content
         
@@ -9,13 +9,13 @@ block content
     div
         img(src="/images/trabajadores.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
         
-        +header("Editar Turnos", "/icons/user-pen-solid.svg")
+        +header("Borrar Turnos", "/icons/user-pen-solid.svg")
         div.position-absolute.top-50.start-50.translate-middle.text-center
                 div.d-flex.justify-content-center
-                    a(href="/turnos/admin/seleccionar/turnos" id="botonMedicos" class="btn btn-info btn-lg px-5 me-5 custom-button") 
+                    a(href="/turnos/admin/borrar/turno" id="botonMedicos" class="btn btn-info btn-lg px-5 me-5 custom-button") 
                         span() Turnos Medicos
                         img(src="/icons/user-doctor-solid.svg", alt="Medicos", class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
-                    a(href="/turnos/admin/seleccionar/triages" id="botonTriage" class="btn btn-info btn-lg px-5 ms-5 custom-button")
+                    a(href="/turnos/admin/borrar/triage" id="botonTriage" class="btn btn-info btn-lg px-5 ms-5 custom-button")
                         span() Triages
                         img(src="/icons/user-nurse-solid.svg", alt="Medicos", class="ms-5", style="width: 40px; height: 40px; opacity: 0.8;")
         

@@ -16,4 +16,9 @@ router.post("/admin/new", enfermeroController.crearEnfermero);
 router.put("/editar/:id", enfermeroController.editarEnfermero);
 router.delete("/borrar/:id", enfermeroController.borrarEnfermero);
 
+// RUTAS DE ÁREAS
+router.get("/areas", enfermeroController.obtenerAreas);
+router.get("/areas/:area", enfermeroController.obtenerEnfermerosPorArea);
+router.get("/all", enfermeroController.getAllEnfermeros);
+
 module.exports = router;

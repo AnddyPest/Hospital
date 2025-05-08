@@ -1,0 +1,463 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+
+        
+block content
+
+    div
+        img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Editar Turno", "/icons/user-pen-solid.svg")
+
+        mixin editarTurno(turno)
+            div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%" id=`formularioEditTurn`)
+                div.row.align-items-center.mb-5.mt-5
+                    div.col.w-25
+                        div.input-group
+                            input.form-control.form-control-lg(type="text" id="inputDNI" name="inputDNI" placeholder="D.N.I. del Paciente" aria-label="DNI" aria-describedby="basic-addon1" readonly)
+                            span.input-group-text(id="dniSpan" style="background-color: #28a745;")
+                                img(src="/icons/user-solid.svg" style="width: 20px; height: 20px;")
+                    div.col.w-25
+                        select.form-select.form-select-lg.h-100(id="selectEsp" name="selectEsp" aria-label=".form-select-lg example")
+                            option.selected Seleccione un Area
+                            
+                    div.col.w-25
+                        select.form-select.form-select-lg.w-100.h-100(id="selectMedico" name="selectMedico" aria-label=".form-select-lg example")
+                            option.selected Seleccione un Profesional
+                div.row.align-items-center.mb-4
+                    div.col.w-25
+                        div.input-group.date(id="datepicker")
+                            input.form-control.form-control-lg(type="text" id="inputFecha" placeholder="Seleccione una fecha")
+                            span.input-group-text
+                                img(src="/icons/calendar-days-solid.svg" style="width: 20px; height: 20px;")
+                    div.col.w-25
+                        select.form-select.form-select-lg.w-100.h-100(id="hourpicker", name="hourpicker")
+                            option.selected(value="Seleccione un horario") Seleccione un horario 
+                    div.col.w-25
+                        input.form-control.form-control-lg.w-100(type="text" id="motivo" name="codigo" placeholder="Motivo" aria-label="Motivo" aria-describedby="basic-addon1")
+                    
+                div.row.align-items-center.mb-2
+                    div.col.w-25
+                    div.col.w-50
+                        select.form-select.form-select-lg.w-100.h-100(id="estado", name="estado")
+                            option(value="Pendiente") Pendiente
+                            option(value="Confirmado") Confirmado
+                            option(value="Atendido") Atendido
+                            option(value="Cancelado") Cancelado
+                            option(value="No Presentado") Ausente
+                            option(value="Reprogramado") Reprogramado
+                    div.col.w-25
+
+                div.row.align-items-center.mt-4
+                    div.col.w-25
+                        button.btn.w-50.btn-info(class="btn-secondary custom-button2" id="botonNext" onclick="event.preventDefault(); actualizarTurno();") Guardar Cambios
+                div.row.align-items-center  
+                    div.col.w-25
+                    div.col.w-50
+                        a.btn.w-75.btn-warning.mt-4(href="#" class="btn-secondary custom-button2" id="botonAtras" onclick="event.preventDefault(); cargarDatosTurno();") Restablecer Datos
+                    div.col.w-25
+                div.row.align-items-center   
+                    div.col.w-25
+                    div.col.w-50
+                    div.col.w-25
+                        a.btn.w-50.btn-danger(id="btnVolver" href="/turnos/admin/seleccionar/edit" class="btn-secondary custom-button2") Volver
+        +editarTurno(turno)
+
+        script.
+            // Inicializar objeto turno con los datos que viene del servidor
+            const turno = !{JSON.stringify(turno || {})};
+
+            // Variables para uso en el formulario
+            const turnoId = turno.id;
+            const idPaciente = turno.paciente_Id;
+            const idMedico = turno.medico_Id || null;
+            const idEnfermero = turno.enfermero_Id || null;
+            let fechaTurno = ""; 
+            let horaTurno = ""; 
+            const motivoTurno = turno.motivo || "";
+            const estadoTurno = turno.estado || "Pendiente";
+            const dniPaciente = turno.Paciente ? turno.Paciente.dni : '';
+            const nombrePaciente = turno.Paciente ? turno.Paciente.nombre + ' ' + turno.Paciente.apellido : '';
+            const especialidadOriginal = turno.Medico ? turno.Medico.especialidad : (turno.Enfermero ? "Triage de Ingreso" : "");
+            const esTurnoEnfermero = turno.enfermero_Id ? true : false;
+            
+            // Elementos del DOM
+            const inputDNI = document.getElementById('inputDNI');
+            const selectEsp = document.getElementById('selectEsp');
+            const selectMedico = document.getElementById('selectMedico');
+            const inputFecha = document.getElementById('inputFecha');
+            const selectHora = document.getElementById('hourpicker');
+            const inputMotivo = document.getElementById('motivo');
+            const selectEstado = document.getElementById('estado');
+            
+            // Inicializar componentes al cargar la página
+            document.addEventListener('DOMContentLoaded', async function() {
+                // Inicializar datepicker EN EL INPUT, no en el contenedor
+                $('#inputFecha').datepicker({
+                    format: 'dd/mm/yyyy',
+                    autoclose: true,
+                    todayHighlight: true,
+                    language: 'es'
+                });
+                
+                // Cargar los datos del turno
+                await cargarDatosTurno();
+                
+                // Configurar event listeners
+                selectEsp.addEventListener('change', cargarProfesionales);
+                inputFecha.addEventListener('change', () => cargarHorarios(false));
+                selectMedico.addEventListener('change', () => cargarHorarios(false));
+            });
+            
+            // Función para cargar/recargar los datos del turno
+            async function cargarDatosTurno() {
+                try {
+                    // Cargar DNI del paciente
+                    inputDNI.value = dniPaciente;
+                    
+                    // Formatear y cargar fecha (convertir de YYYY-MM-DD a DD/MM/YYYY)
+                    const fechaDB = turno.fecha.split('-');
+                    fechaTurno = `${fechaDB[2]}/${fechaDB[1]}/${fechaDB[0]}`;
+                    inputFecha.value = fechaTurno;
+                    
+                    // Formatear y cargar hora
+                    horaTurno = turno.hora.substring(0, 5);
+                    
+                    // Cargar motivo
+                    inputMotivo.value = motivoTurno;
+                    
+                    // Seleccionar estado
+                    for (let i = 0; i < selectEstado.options.length; i++) {
+                        if (selectEstado.options[i].value === estadoTurno) {
+                            selectEstado.selectedIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    // Cargar especialidades/áreas
+                    await cargarEspecialidades();
+                    
+                    // Cargar profesionales y seleccionar el original
+                    await cargarProfesionales(true);
+                    
+                    // Cargar horarios y seleccionar el original
+                    await cargarHorarios(true);
+                    
+                } catch (error) {
+                    console.error("Error al cargar datos del turno:", error);
+                    alert("No se pudieron cargar los datos del turno.");
+                }
+            }
+            
+            // Cargar especialidades o áreas según el tipo de turno
+            async function cargarEspecialidades() {
+                try {
+                    // Limpiar opciones actuales
+                    selectEsp.innerHTML = '<option>Cargando...</option>';
+                    
+                    // Determinar la URL según el tipo de turno (médico o enfermero)
+                    const url = esTurnoEnfermero 
+                        ? '/enfermeros/areas' 
+                        : '/medicos/especialidades';
+                    
+                    console.log("Obteniendo datos de:", url);
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Error en respuesta:", errorText);
+                        throw new Error('Error al obtener especialidades/áreas');
+                    }
+                    
+                    const especialidades = await response.json();
+                    console.log("Especialidades/áreas obtenidas:", especialidades);
+                    
+                    // Reconstruir las opciones
+                    selectEsp.innerHTML = '<option value="">Seleccione un Área</option>';
+                    
+                    especialidades.forEach(esp => {
+                        const option = document.createElement('option');
+                        option.value = esp;
+                        option.textContent = esp;
+                        option.selected = esp === especialidadOriginal;
+                        selectEsp.appendChild(option);
+                    });
+                    
+                } catch (error) {
+                    console.error("Error al cargar especialidades:", error);
+                    selectEsp.innerHTML = '<option value="">Error al cargar datos</option>';
+                }
+            }
+            
+            // Cargar profesionales según la especialidad
+            async function cargarProfesionales(seleccionarOriginal = false) {
+                try {
+                    const especialidad = selectEsp.value;
+                    if (!especialidad) {
+                        selectMedico.innerHTML = '<option value="">Seleccione primero un área</option>';
+                        return;
+                    }
+                    
+                    // Limpiar opciones actuales
+                    selectMedico.innerHTML = '<option>Cargando...</option>';
+                    
+                    // Determinar la URL según el tipo de turno
+                    const url = esTurnoEnfermero 
+                        ? `/enfermeros/areas/${encodeURIComponent(especialidad)}` 
+                        : `/medicos/especialidades/${encodeURIComponent(especialidad)}`;
+                    
+                    console.log("Obteniendo profesionales de:", url);
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Error en respuesta:", errorText);
+                        throw new Error('Error al obtener profesionales');
+                    }
+                    
+                    const profesionales = await response.json();
+                    console.log("Profesionales obtenidos:", profesionales);
+                    
+                    // Reconstruir las opciones
+                    selectMedico.innerHTML = '<option value="">Seleccione un profesional</option>';
+                    
+                    profesionales.forEach(prof => {
+                        const option = document.createElement('option');
+                        option.value = prof.id;
+                        option.textContent = `${prof.nombre} ${prof.apellido}`;
+                        // Si debemos seleccionar el profesional original
+                        if (seleccionarOriginal && 
+                            ((esTurnoEnfermero && prof.id == idEnfermero) || 
+                            (!esTurnoEnfermero && prof.id == idMedico))) {
+                            option.selected = true;
+                        }
+                        selectMedico.appendChild(option);
+                    });
+                    
+                    // Si es la primera carga, automáticamente cargamos los horarios
+                    if (seleccionarOriginal) {
+                        await cargarHorarios(true);
+                    }
+                } catch (error) {
+                    console.error("Error al cargar profesionales:", error);
+                    selectMedico.innerHTML = '<option value="">Error al cargar datos</option>';
+                }
+            }
+            
+            // Cargar horarios disponibles según la fecha y el profesional
+            async function cargarHorarios(seleccionarOriginal = false) {
+                try {
+                    const profesionalId = selectMedico.value;
+                    const fecha = inputFecha.value;
+                    
+                    if (!profesionalId || !fecha) {
+                        selectHora.innerHTML = '<option value="">Complete los campos anteriores</option>';
+                        return;
+                    }
+                    
+                    // Convertir fecha de DD/MM/YYYY a YYYY-MM-DD para la API
+                    const [dia, mes, anio] = fecha.split('/');
+                    const fechaFormateada = `${anio}-${mes}-${dia}`;
+                    
+                    // Limpiar opciones actuales
+                    selectHora.innerHTML = '<option>Cargando...</option>';
+                    
+                    // Determinar la URL según el tipo de turno
+                    const url = esTurnoEnfermero 
+                        ? `/turnos/listadohorariosenfermeros/${profesionalId}/${fechaFormateada}` 
+                        : `/turnos/listadohorarios/${profesionalId}/${fechaFormateada}`;
+                    
+                    console.log("Obteniendo turnos ocupados de:", url);
+                    const response = await fetch(url);
+                    
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error("Error en respuesta:", errorText);
+                        throw new Error('Error al obtener horarios');
+                    }
+                    
+                    // Obtenemos los turnos ocupados desde la API
+                    const turnosOcupados = await response.json();
+                    console.log("Turnos obtenidos:", turnosOcupados);
+                    
+                    // Extraer horas de los turnos ocupados (excepto el turno actual)
+                    const horariosOcupados = new Set();
+                    turnosOcupados.forEach(turnoOcupado => {
+                        // Si no es el turno que estamos editando
+                        if (turnoOcupado.id != turnoId) {
+                            const horaOcupada = turnoOcupado.hora.substring(0, 5);
+                            horariosOcupados.add(horaOcupada);
+                        }
+                    });
+                    
+                    console.log("Horarios ocupados:", [...horariosOcupados]);
+                    
+                    // Limpiar y reconfigurar el selector
+                    selectHora.innerHTML = "";
+                    
+                    // Opción por defecto
+                    const defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Seleccione un horario";
+                    defaultOption.selected = true;
+                    selectHora.appendChild(defaultOption);
+                    
+                    // Definir horario laboral
+                    const startTime = new Date();
+                    startTime.setHours(8, 0, 0); // Entrada 8:00
+                    const endTime = new Date();
+                    endTime.setHours(16, 0, 0); // Salida 16:00
+                    
+                    // Generar horarios cada 15 o 40 minutos según tipo de profesional
+                    const intervaloMinutos = esTurnoEnfermero ? 15 : 40;
+                    let currentTime = new Date(startTime);
+                    
+                    // Generamos todos los horarios disponibles
+                    while (currentTime <= endTime) {
+                        const hora = currentTime.getHours().toString().padStart(2, "0");
+                        const minuto = currentTime.getMinutes().toString().padStart(2, "0");
+                        const horarioStr = `${hora}:${minuto}`;
+                        
+                        if (!horariosOcupados.has(horarioStr) || horarioStr === horaTurno) {
+                            const option = document.createElement("option");
+                            option.value = horarioStr;
+                            option.textContent = horarioStr;
+                            
+                            // Seleccionar el horario original si corresponde
+                            if (seleccionarOriginal && horarioStr === horaTurno) {
+                                option.selected = true;
+                                defaultOption.selected = false;
+                            }
+                            
+                            selectHora.appendChild(option);
+                        }
+                        
+                        currentTime.setMinutes(currentTime.getMinutes() + intervaloMinutos);
+                    }
+                    
+                    // Asegurar que el horario original esté disponible (incluso si está fuera del rango)
+                    if (seleccionarOriginal && horaTurno) {
+                        let horarioIncluido = false;
+                        for (let i = 0; i < selectHora.options.length; i++) {
+                            if (selectHora.options[i].value === horaTurno) {
+                                horarioIncluido = true;
+                                break;
+                            }
+                        }
+                        
+                        if (!horarioIncluido) {
+                            const option = document.createElement("option");
+                            option.value = horaTurno;
+                            option.textContent = horaTurno + " (original)";
+                            option.selected = true;
+                            defaultOption.selected = false;
+                            selectHora.appendChild(option);
+                        }
+                    }
+                    
+                } catch (error) {
+                    console.error("Error al cargar horarios:", error);
+                    selectHora.innerHTML = '<option value="">Error al cargar horarios</option>';
+                }
+            }
+            
+            // Función para actualizar el turno
+            async function actualizarTurno() {
+                try {
+                    // Validar campos obligatorios
+                    if (!validarFormulario()) {
+                        return;
+                    }
+                    
+                    // Convertir fecha de DD/MM/YYYY a YYYY-MM-DD para enviar al servidor
+                    const [dia, mes, anio] = inputFecha.value.split('/');
+                    const fechaFormateada = `${anio}-${mes}-${dia}`;
+                    
+                    // Crear objeto con datos del formulario
+                    const datosTurno = {
+                        id: turnoId,
+                        paciente_Id: idPaciente,
+                        fecha: fechaFormateada,
+                        hora: selectHora.value,
+                        motivo: inputMotivo.value,
+                        estado: selectEstado.value
+                    };
+                    
+                    // Agregar el ID del profesional según corresponda
+                    if (esTurnoEnfermero) {
+                        datosTurno.enfermero_Id = selectMedico.value;
+                        datosTurno.medico_Id = null;
+                    } else {
+                        datosTurno.medico_Id = selectMedico.value;
+                        datosTurno.enfermero_Id = null;
+                    }
+                    
+                    console.log("Enviando datos:", datosTurno);
+                    
+                    // Enviar datos al servidor
+                    const response = await fetch(`/turnos/editar/${turnoId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(datosTurno)
+                        
+                    });
+                    
+                                       
+                    if (response.ok) {
+                        alert('Turno actualizado correctamente');
+                        window.location.href = esTurnoEnfermero ? 
+                            "/turnos/admin/seleccionar/edit/triages" : 
+                            "/turnos/admin/seleccionar/edit/turnos";
+                    } else {
+                        const errorData = await response.json();
+                        alert(`Error: ${errorData.message || 'No se pudo actualizar el turno'}`);
+                    }
+                } catch (error) {
+                    console.error("Error al actualizar turno:", error);
+                    alert("Ocurrió un error al intentar actualizar el turno");
+                }
+            }
+            
+            // Validar todos los campos obligatorios
+            function validarFormulario() {
+                if (!inputDNI.value) {
+                    alert('El DNI del paciente es obligatorio');
+                    inputDNI.focus();
+                    return false;
+                }
+                
+                if (!selectEsp.value) {
+                    alert('Debe seleccionar un área o especialidad');
+                    selectEsp.focus();
+                    return false;
+                }
+                
+                if (!selectMedico.value) {
+                    alert('Debe seleccionar un profesional');
+                    selectMedico.focus();
+                    return false;
+                }
+                
+                if (!inputFecha.value) {
+                    alert('Debe seleccionar una fecha para el turno');
+                    inputFecha.focus();
+                    return false;
+                }
+                
+                if (!selectHora.value) {
+                    alert('Debe seleccionar un horario');
+                    selectHora.focus();
+                    return false;
+                }
+                
+                if (!inputMotivo.value) {
+                    alert('Debe ingresar un motivo');
+                    inputMotivo.focus();
+                    return false;
+                }
+                
+                return true;
+            }

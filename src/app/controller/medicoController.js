@@ -233,6 +233,73 @@ const medicoController = {
       });
     }
   },
+  // api para obtener especialidades
+  getEspecialidades: async (req, res) => {
+    try {
+      const especialidades = await Medico.findAll({
+        attributes: [
+          [
+            sequelize.fn("DISTINCT", sequelize.col("especialidad")),
+            "especialidad",
+          ],
+        ],
+        order: [[sequelize.col("especialidad"), "ASC"]],
+      });
+
+      // Devolver solo un array con las especialidades
+      const especialidadesArray = especialidades.map((e) => e.especialidad);
+      res.json(especialidadesArray);
+    } catch (error) {
+      console.error("Error al obtener especialidades:", error);
+      res.status(500).json({
+        error: "Error al obtener especialidades",
+        message: error.message,
+      });
+    }
+  },
+
+  getMedicosPorEspecialidad: async (req, res) => {
+    try {
+      const { especialidad } = req.params;
+      const medicos = await Medico.findAll({
+        where: { especialidad },
+        attributes: ["id", "nombre", "apellido", "especialidad"],
+        distinct: true,
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
+
+      res.json(medicos);
+    } catch (error) {
+      console.error("Error al obtener médicos por especialidad:", error);
+      res.status(500).json({
+        error: "Error al obtener médicos",
+        message: error.message,
+      });
+    }
+  },
+
+  getAllMedicos: async (req, res) => {
+    try {
+      const medicos = await Medico.findAll({
+        attributes: ["id", "nombre", "apellido", "especialidad"],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
+
+      res.json(medicos);
+    } catch (error) {
+      console.error("Error al obtener todos los médicos:", error);
+      res.status(500).json({
+        error: "Error al obtener médicos",
+        message: error.message,
+      });
+    }
+  },
 };
 
 module.exports = medicoController;

@@ -1,6 +1,6 @@
-extends ../../templates/layout.pug
-
-include ../../templates/mixins.pug
+extends ../templates/layout.pug
+include ../templates/turnosMixins.pug
+include ../templates/mixins.pug
 
 block content
 
@@ -8,4 +8,4 @@ block content
             img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
             
             +header("Borrar Triages", "/icons/user-clock-solid.svg")
-            +turnosListar("Enfermero", "borrar")
+            +tablaTurnos(profesionalTypeOf, context)

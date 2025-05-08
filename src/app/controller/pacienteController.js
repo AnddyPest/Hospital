@@ -253,6 +253,46 @@ const pacienteController = {
       });
     }
   },
+  // Añade este método a tu pacienteController
+  obtenerPorDni: async (req, res) => {
+    try {
+      const { dni } = req.params;
+
+      if (!dni || isNaN(dni)) {
+        return res.status(400).json({
+          error: "DNI inválido",
+          message: "El DNI debe ser un número válido",
+        });
+      }
+
+      // Buscar paciente por su DNI
+      const paciente = await Paciente.findOne({
+        where: { dni },
+      });
+
+      // Si no encuentra el paciente
+      if (!paciente) {
+        return res.status(404).json({
+          error: "No encontrado",
+          message: "No se encontró ningún paciente con ese DNI",
+        });
+      }
+
+      // Si lo encuentra, devolver el paciente
+      res.json({
+        id: paciente.id,
+        nombre: paciente.nombre,
+        apellido: paciente.apellido,
+        dni: paciente.dni,
+      });
+    } catch (error) {
+      console.error("Error al buscar paciente por DNI:", error);
+      res.status(500).json({
+        error: "Error del servidor",
+        message: "Error al buscar el paciente",
+      });
+    }
+  },
 };
 
 module.exports = pacienteController;

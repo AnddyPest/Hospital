@@ -1,0 +1,471 @@
+mixin tablaTurnos(profesionalTypeOf, context)
+  div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%" id=`tabla${profesionalTypeOf}`)
+    div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
+      table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+        thead(style="position: sticky; top: 0;")
+          if profesionalTypeOf === "Medico"
+            tr.table-info
+              th.col(style="width: 10%") Fecha
+              th.col(style="width: 20%") Paciente
+              th.col(style="width: 12%") D.N.I.
+              th.col(style="width: 15%") #{profesionalTypeOf}
+              th.col(style="width: 10%") Hora
+              th.col(style="width: 20%") Especialidad
+              th.col(style="width: 8%") Estado
+              if context === "editar"
+                th.col(style="width: 5%") Editar
+              else if context === "borrar"
+                th.col(style="width: 5%") Borrar
+          else
+            tr.table-info
+              th.col(style="width: 10%") Fecha
+              th.col(style="width: 20%") Paciente
+              th.col(style="width: 15%") D.N.I.
+              th.col(style="width: 15%") #{profesionalTypeOf}
+              th.col(style="width: 10%") Hora
+              th.col(style="width: 10%") Estado
+              if context === "editar"
+                th.col(style="width: 5%") Editar
+              else if context === "borrar"
+                th.col(style="width: 5%") Borrar
+        tbody
+          if turnos && turnos.length > 0
+            each turno in turnos
+              if (profesionalTypeOf === "Medico" && turno.medico_Id) || (profesionalTypeOf === "Enfermero" && turno.enfermero_Id)
+                - var fechaFormateada = turno.fecha
+                if turno.fecha && turno.fecha.includes('-')
+                  - var partesFecha = turno.fecha.split('-')
+                  - fechaFormateada = `${partesFecha[2]}/${partesFecha[1]}/${partesFecha[0]}`
+                
+                tr(data-id=turno.id)
+                  td= fechaFormateada
+                  td= turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : 'N/A'
+                  td= turno.Paciente ? turno.Paciente.dni : 'N/A'
+                  if profesionalTypeOf === "Medico"
+                    td= turno.Medico ? `${turno.Medico.nombre} ${turno.Medico.apellido}` : 'N/A'
+                    td= turno.hora
+                    td= turno.Medico ? turno.Medico.especialidad : 'N/A'
+                  else
+                    td= turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}` : 'N/A'
+                    td= turno.hora
+                  td= turno.estado
+                  if context === "editar"
+                    td
+                      a.btn.btn-warning.w-75.h-75(href=`/turnos/editar/formulario?id=${turno.id}`)
+                        img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 25px; height: 25px;")
+                  else if context === "borrar"
+                    td
+                      button.btn.btn-danger.w-75.h-75(onclick=`confirmarBorrarTurno(${turno.id}, '${profesionalTypeOf.toLowerCase()}')`)
+                        img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 25px; height: 25px;")
+          else
+            tr
+              td(colspan="8").text-center No hay turnos disponibles
+
+    div.mt-3.filter-buttons#filterButtons
+      button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('fecha');") Filtrar por Fecha
+      button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('dni');") Filtrar por DNI
+      if profesionalTypeOf === "Medico"
+        button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('medicoEspecialidad');") Filtrar por Médico
+      else
+        button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('profesional');") Filtrar por Profesional
+      button.btn.btn-warning.me-2(onclick="event.preventDefault(); limpiarTodosFiltros();") Limpiar Filtros
+      button.btn.btn-danger(onclick=`window.location.href='${
+        context === "borrar" ? "/turnos/admin/seleccionar/borrar" : 
+        context === "editar" ? "/turnos/admin/seleccionar/edit" : 
+        "/turnos/listar"
+      }'`) Volver
+    
+    div.mt-3#filtroFechaContainer(style="display: none;")
+      div.d-flex.align-items-center.justify-content-center
+        div.input-group.date(style="width: 400px;")
+          input.form-control(id="inputFecha", type="text", placeholder="Seleccione Fecha")
+          span.input-group-text
+            img(src="/icons/calendar-days-solid.svg" style="width: 20px; height: 20px;")
+          button.btn.btn-info.ms-2(onclick="filtrarTabla('fecha')") Filtrar
+          button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
+    
+    div.mt-3#filtroDniContainer(style="display: none;")
+      div.d-flex.align-items-center.justify-content-center
+        input.form-control(id="inputDni", type="text", placeholder="Ingrese DNI", style="width: 400px;")
+        button.btn.btn-info.ms-2(onclick="filtrarTabla('dni')") Filtrar
+        button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
+    
+    div.mt-3#filtroProfesionalContainer(style="display: none;")
+      div.d-flex.align-items-center.justify-content-center
+        select.form-select(id="inputProf", style="width: 400px;")
+          option(value="0") Seleccione Profesional
+        button.btn.btn-info.ms-2(onclick="filtrarTabla('profesional')") Filtrar
+        button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
+    
+    if profesionalTypeOf === "Medico"
+      div.mt-3#filtroMedicoEspecialidadContainer(style="display: none;")
+        div.d-flex.flex-column.align-items-center.justify-content-center
+          div.d-flex.flex-row.justify-content-center.mb-3.gap-4(style="width: 100%;")
+            div.d-flex.flex-column(style="width: 250px;")
+              label.form-label.fw-bold.text-black.mb-2(for="inputEspecialidad") ESPECIALIDAD:
+              select.form-select(id="inputEspecialidad", onchange="cargarMedicosPorEspecialidad()")
+                option(value="0") Seleccione Especialidad
+            div.d-flex.flex-column(style="width: 250px;")
+              label.form-label.fw-bold.text-black.mb-2(for="inputMed") MÉDICO:
+              select.form-select(id="inputMed")
+                option(value="0") Seleccione Médico
+          div.mt-2
+            button.btn.btn-info.me-2(onclick="filtrarTabla('medicoEspecialidad')") Filtrar
+            button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
+
+  script.
+    let todasLasFilasTurnos = [];
+    
+    document.addEventListener('DOMContentLoaded', function() {
+      if ($.fn.datepicker) {
+        $('#filtroFechaContainer .date input').datepicker({
+          format: 'dd/mm/yyyy',
+          autoclose: true,
+          todayHighlight: true,
+          language: 'es'
+        });
+      }
+      
+      const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
+      if (tbody) {
+        todasLasFilasTurnos = Array.from(tbody.querySelectorAll('tr'));
+      }
+      
+      cargarDatosFiltros('#{profesionalTypeOf}');
+      configurarEventosTeclas();
+    });
+    
+    function mostrarFiltro(tipo) {
+      document.getElementById('filterButtons').style.display = 'none';
+      
+      const filtros = [
+        'filtroFechaContainer', 
+        'filtroDniContainer', 
+        'filtroProfesionalContainer', 
+        'filtroMedicoEspecialidadContainer'
+      ];
+      
+      filtros.forEach(filtro => {
+        const elemento = document.getElementById(filtro);
+        if (elemento) elemento.style.display = 'none';
+      });
+      
+      if (tipo === 'fecha') {
+        document.getElementById('filtroFechaContainer').style.display = 'block';
+      } else if (tipo === 'dni') {
+        document.getElementById('filtroDniContainer').style.display = 'block';
+      } else if (tipo === 'profesional') {
+        document.getElementById('filtroProfesionalContainer').style.display = 'block';
+      } else if (tipo === 'medicoEspecialidad') {
+        document.getElementById('filtroMedicoEspecialidadContainer').style.display = 'block';
+        cargarEspecialidades(); // Cargar especialidades cuando se muestra este filtro
+      }
+    }
+    
+    function ocultarFiltros() {
+      const filtros = [
+        'filtroFechaContainer', 
+        'filtroDniContainer', 
+        'filtroProfesionalContainer', 
+        'filtroMedicoEspecialidadContainer'
+      ];
+      
+      filtros.forEach(filtro => {
+        const elemento = document.getElementById(filtro);
+        if (elemento) elemento.style.display = 'none';
+      });
+      
+      document.getElementById('filterButtons').style.display = 'block';
+    }
+    
+    async function cargarEspecialidades() {
+      try {
+        const selectEsp = document.getElementById('inputEspecialidad');
+        if (!selectEsp) return;
+        
+        // Mostrar estado de carga
+        selectEsp.innerHTML = '<option value="0">Cargando especialidades...</option>';
+        
+        const response = await fetch("/medicos/especialidades");
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: No se pudieron obtener las especialidades`);
+        }
+        
+        const especialidades = await response.json();
+        
+        // Poblar el selector de especialidades
+        selectEsp.innerHTML = '<option value="0">Seleccione Especialidad</option>';
+        
+        especialidades.forEach(esp => {
+          const option = document.createElement("option");
+          option.value = esp;
+          option.textContent = esp;
+          selectEsp.appendChild(option);
+        });
+        
+      } catch (error) {
+        console.error("Error al cargar especialidades:", error);
+        alert("Error al cargar las especialidades. Por favor, inténtelo nuevamente.");
+      }
+    }
+    
+    async function cargarDatosFiltros(profesionalTypeOf) {
+      if (profesionalTypeOf === 'Medico') {
+        try {
+          const responseEsp = await fetch("/medicos/especialidades");
+          if (responseEsp.ok) {
+            const especialidades = await responseEsp.json();
+            
+            const selectEsp = document.getElementById("inputEspecialidad");
+            if (selectEsp) {
+              selectEsp.innerHTML = '<option value="0">Seleccione Especialidad</option>';
+              
+              especialidades.forEach(esp => {
+                const option = document.createElement("option");
+                option.value = esp;
+                option.textContent = esp;
+                selectEsp.appendChild(option);
+              })
+            }
+          }
+          
+          const responseMed = await fetch("/medicos/all");
+          if (responseMed.ok) {
+            const medicos = await responseMed.json();
+            console.log(medicos); 
+            const selectProf = document.getElementById("inputMed");
+            if (selectProf) {
+              selectProf.innerHTML = '<option value="0">Seleccione Médico</option>';
+              
+              medicos.forEach(medico => {
+                const option = document.createElement("option");
+                option.value = medico.id;
+                option.textContent = `${medico.nombre} ${medico.apellido}`;
+                selectProf.appendChild(option);
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error al cargar datos para filtros:", error);
+        }
+      } else if (profesionalTypeOf === 'Enfermero') {
+        try {
+          const response = await fetch("/enfermeros/all");
+          if (response.ok) {
+            const enfermeros = await response.json();
+                
+            const selectProf = document.getElementById("inputProf");
+            if (selectProf) {
+              selectProf.innerHTML = '<option value="0">Seleccione Enfermero</option>';
+              
+              enfermeros.forEach(enfermero => {
+                const option = document.createElement("option");
+                option.value = enfermero.id;
+                option.textContent = `${enfermero.nombre} ${enfermero.apellido}`;
+                selectProf.appendChild(option);
+              });
+            }
+          }
+        } catch (error) {
+          console.error("Error al cargar enfermeros:", error);
+        }
+      }
+    }
+    
+    function filtrarTabla(tipo) {
+      const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
+      if (!tbody || todasLasFilasTurnos.length === 0) {
+        console.error('No hay tabla o filas para filtrar');
+        return;
+      }
+      
+      let valorFiltro = '';
+      let columnaFiltro = 0;
+      
+      if (tipo === 'fecha') {
+        valorFiltro = document.getElementById('inputFecha').value.trim();
+        columnaFiltro = 0;
+      } else if (tipo === 'dni') {
+        valorFiltro = document.getElementById('inputDni').value.trim().toLowerCase();
+        columnaFiltro = 2;
+      } else if (tipo === 'profesional') {
+        const selectProf = document.getElementById('inputProf');
+        valorFiltro = selectProf.options[selectProf.selectedIndex]?.textContent.trim().toLowerCase() || '';
+        columnaFiltro = 3;
+      } else if (tipo === 'medicoEspecialidad') {
+        // Comprobar si se seleccionó un médico específico
+        const selectProf = document.getElementById('inputMed');
+        if (selectProf.selectedIndex > 0) {
+          valorFiltro = selectProf.options[selectProf.selectedIndex]?.textContent.trim().toLowerCase() || '';
+          columnaFiltro = 3; // Columna del médico
+        } else {
+          // Si no se seleccionó un médico, filtrar por especialidad
+          const selectEsp = document.getElementById('inputEspecialidad');
+          if (selectEsp.selectedIndex > 0) {
+            valorFiltro = selectEsp.options[selectEsp.selectedIndex]?.textContent.trim().toLowerCase() || '';
+            columnaFiltro = 5; // Columna de la especialidad
+          } else {
+            alert('Por favor seleccione una especialidad o un médico para filtrar');
+            return;
+          }
+        }
+      }
+      
+      if (!valorFiltro || valorFiltro === "0") {
+        alert('Por favor ingrese un valor para filtrar');
+        return;
+      }
+      
+      tbody.innerHTML = '';
+      
+      let coincidencias = false;
+      let contador = 0;
+      
+      todasLasFilasTurnos.forEach(fila => {
+        const celda = fila.cells[columnaFiltro];
+        if (celda && celda.textContent.toLowerCase().includes(valorFiltro.toLowerCase())) {
+          tbody.appendChild(fila.cloneNode(true));
+          coincidencias = true;
+          contador++;
+        }
+      });
+      
+      if (!coincidencias) {
+        const colspanValue = document.querySelectorAll(`#tabla#{profesionalTypeOf} thead th`).length;
+        const filaNoData = document.createElement('tr');
+        const celdaNoData = document.createElement('td');
+        
+        celdaNoData.textContent = `No se encontraron resultados para "${valorFiltro}"`;
+        celdaNoData.className = 'text-center';
+        celdaNoData.colSpan = colspanValue;
+        
+        filaNoData.appendChild(celdaNoData);
+        tbody.appendChild(filaNoData);
+      } else {
+        // Mostrar cuántos resultados se encontraron
+        alert(`Se encontraron ${contador} resultados para "${valorFiltro}"`);
+      }
+    }
+    
+    function limpiarTodosFiltros() {
+      window.location.reload();
+      
+    }
+    
+      
+    function configurarEventosTeclas() {
+      const inputDni = document.getElementById('inputDni');
+      if (inputDni) {
+        inputDni.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            filtrarTabla('dni');
+          }
+        });
+      }
+      
+      const inputFecha = document.getElementById('inputFecha');
+      if (inputFecha) {
+        inputFecha.addEventListener('keypress', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            filtrarTabla('fecha');
+          }
+        });
+      }
+    }
+    
+    async function cargarMedicosPorEspecialidad() {
+      try {
+        const selectEsp = document.getElementById('inputEspecialidad');
+        if (!selectEsp) return;
+        
+        const especialidad = selectEsp.value;
+        const selectProf = document.getElementById('inputMed');
+        if (!selectProf) return;
+        
+              
+        // Mostrar estado de carga
+        selectProf.innerHTML = '<option value="0">Cargando médicos...</option>';
+        
+        // Hacer la petición para obtener médicos por especialidad
+        const response = await fetch(`/medicos/especialidades/${especialidad}`);
+        
+        if (!response.ok) {
+          throw new Error(`Error ${response.status}: No se pudieron obtener los médicos`);
+        }
+        
+        const medicos = await response.json();
+        
+        // Poblar el selector de médicos
+        selectProf.innerHTML = '<option value="0">Seleccione Médico (opcional)</option>';
+        
+        if (medicos.length === 0 && selectProf.value !== "0") {
+          selectProf.innerHTML = '<option value="0">No hay médicos en esta especialidad</option>';
+        } else if (selectEsp.value === "0") {
+          const responseTodos = await fetch("/medicos/all");
+          if (responseTodos.ok) {
+            const todosMedicos = await responseTodos.json();
+            selectProf.innerHTML = '<option value="0">Seleccione Médico</option>';
+            todosMedicos.forEach(medico => {
+              const option = document.createElement("option");
+              option.value = medico.id;
+              option.textContent = `${medico.nombre} ${medico.apellido}`;
+              selectProf.appendChild(option);
+            });
+          }
+        } else {
+          medicos.forEach(medico => {
+            const option = document.createElement("option");
+            option.value = medico.id;
+            option.textContent = `${medico.nombre} ${medico.apellido}`;
+            selectProf.appendChild(option);
+          });
+        }
+      } catch (error) {
+        console.error("Error al cargar médicos por especialidad:", error);
+        const selectProf = document.getElementById('inputMed');
+        if (selectProf) {
+          selectProf.innerHTML = '<option value="0">Error al cargar médicos</option>';
+        }
+      }
+    }
+    
+    function confirmarBorrarTurno(id, tipo) {
+      if (confirm('¿Está seguro que desea eliminar este turno?')) {
+        borrarTurno(id, tipo);
+      }
+    }
+    
+    async function borrarTurno(id, tipo) {
+      try {
+        const response = await fetch(`/turnos/borrar/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (response.redirected) {
+          window.location.reload();
+          return;
+        }
+        
+        if (response.ok) {
+          alert('Turno eliminado correctamente');
+          const fila = document.querySelector(`tr[data-id="${id}"]`);
+          if (fila) {
+            fila.remove();
+            todasLasFilasTurnos = todasLasFilasTurnos.filter(f => 
+              f.getAttribute('data-id') != id);
+          }
+        } else {
+          const error = await response.json();
+          alert(`Error al eliminar: ${error.message || 'Ha ocurrido un error'}`);
+        }
+      } catch (error) {
+        console.error('Error:', error);
+        alert('Error al procesar la solicitud');
+      }
+    }
