@@ -9,7 +9,12 @@ const Camas = sequelize.define("Camas", {
     autoIncrement: true,
   },
   ala: {
-    type: DataTypes.ENUM("Comun", "Terapia Intermedia", "Terapia Intensiva"),
+    type: DataTypes.ENUM(
+      "Comun",
+      "Terapia Intermedia",
+      "Terapia Intensiva",
+      "Pre Quirurgico"
+    ),
     allowNull: false,
   },
   numeroCama: {
