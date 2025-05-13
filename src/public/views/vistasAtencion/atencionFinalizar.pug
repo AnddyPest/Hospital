@@ -8,7 +8,7 @@ mixin atencionPaciente(turno)
                 h4 Registro de Atención Médica
             
             div.card-body
-                form#atencionForm.ms-5(action="/atencion/guardar" method="POST")
+                form#atencionForm.ms-5()
                     div.row
                         //- columna de datos del paciente con labels inline
                         div.col-md-5.ms-1
@@ -38,7 +38,7 @@ mixin atencionPaciente(turno)
                                     span.text-light #{turno.Paciente.obra_social || "No registrada"}
                                 div.input-group
                                     span.input-group-text.bg-dark.text-light N°:
-                                    input.form-control.bg-dark.text-light(
+                                    input#afiliado.form-control.bg-dark.text-light(
                                         type="text" 
                                         name="numeroAfiliado"
                                         placeholder="Ingrese número de afiliado")
@@ -46,33 +46,47 @@ mixin atencionPaciente(turno)
                             div.row.mb-3
                                 div.row-md-5
                                     label.form-label Observaciones:
-                                    textarea.form-control.bg-dark.text-light(rows="5"  name="diagnostico")
+                                    textarea#observaciones.form-control.bg-dark.text-light(rows="5"  name="observaciones")
                         //- datos de la consulta 
                         div.col-md-6.mb-2
                             
                             div.mb-3
                                 label.form-label Diagnosis:
-                                textarea.form-control.bg-dark.text-light(rows="10" name="observaciones")
-                                    div.text-end.mt-2.fst-italic
-                                        if turno.medico_Id && turno.Medico
-                                            span.text-light Dr./Dra. #{turno.Medico.nombre} #{turno.Medico.apellido}
-                                            if turno.Medico.matricula
-                                                span.text-light.ms-1 - Mat. #{turno.Medico.matricula}
-                                        else if turno.enfermero_Id && turno.Enfermero
-                                            span.text-light Enf. #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
-                           
-                            button.btn.btn-warning.me-5 Limpiar Formulario                                                        
-                            button.btn.btn-success(type="submit") Guardar
+                                textarea#diagnosis.form-control.bg-dark.text-light(rows="10" name="diagnosis")
+                            div.col
+                                if turno.Medico
+                                    div.d-flex.align-items-center.mb-3
+                                        div.me-3
+                                            label.fw-bold.ms-2.me-2 Dr./Dra.:
+                                            span.text-light #{turno.Medico.nombre} #{turno.Medico.apellido}
+                                        
+                                        div.input-group.ms-5(style="max-width: 300px;")
+                                            span.input-group-text.bg-dark.text-light Matricula N°:
+                                            input#matricula.form-control.bg-dark.text-light(
+                                                value=turno.Medico.matricula || ""
+                                                name="matricula"
+                                                
+                                            )
+                                                
+
+                                else if turno.Enfermero
+                                    div.d-flex.align-items-center.mb-3
+                                        label.fw-bold.me-2 Enf.:
+                                        span.text-light #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
+                                    
+    
+                            button#cleanForm.btn.btn-warning.me-5(onclick="event.preventDefault(); refreshPage();") Limpiar Formulario                                                        
+                            button#saveForm.btn.btn-success(onclick="event.preventDefault(); guardarConsulta();") Guardar
                             //- campo fantasma para el id del turno
                             input(type="hidden" name="turnoId" value=turno ? turno.id : '')
                             
                             //- botones ver de agregar lo que haga falta
                     hr.border-info.opacity-75.mt-1.mb-1
                     div.d-flex.justify-content-between.mt-4
-                        button.btn.btn-primary() Derivacion
-                        button.btn.btn-info() Prescripcion
-                        button.btn.btn-warning() Internacion
-                        button.btn.btn-danger.me-5() Emergencia
+                        button#derivation.btn.btn-primary(onclick="event.preventDefault(); derivarPaciente();") Derivacion
+                        button#prescription.btn.btn-info(onclick="event.preventDefault(); prescripcion();") Prescripcion
+                        button#intern.btn.btn-warning(onclick="event.preventDefault(); internar();") Internacion
+                        button#emergency.btn.btn-danger.me-5(onclick="event.preventDefault(); emergencia();") Emergencia
         a.btn.btn-secondary.mt-2(href="/atencion") Cancelar
 block content
    
@@ -83,3 +97,27 @@ block content
         
         
         +atencionPaciente(turno)
+    script.
+        let idTurno = "#{turno.id}";
+        let idPaciente = "#{turno.Paciente.id}";
+        let idMedico = "#{turno.Medico ? turno.Medico.id : ''}";
+        let idEnfermero = "#{turno.Enfermero ? turno.Enfermero.id : ''}";
+        let nombrePaciente = "#{turno.Paciente.nombre} #{turno.Paciente.apellido}";
+        let dniPaciente = "#{turno.Paciente.dni}";
+        let fechaTurno = "#{turno.fecha}";
+        let horaTurno = "#{turno.hora}";
+        let numeroAfiliado = "#{turno.Paciente.numeroAfiliado || ''}";
+        let obraSocial = "#{turno.Paciente.obra_social || ''}";
+        let nombreMedico = "#{turno.Medico ? turno.Medico.nombre : ''} #{turno.Medico ? turno.Medico.apellido : ''}";
+        let nombreEnfermero = "#{turno.Enfermero ? turno.Enfermero.nombre : ''} #{turno.Enfermero ? turno.Enfermero.apellido : ''}";
+        let motivo = "#{turno.motivo}";
+        let estado = "#{turno.estado}";
+        let diagnostico = document.getElementById('diagnosis').value;
+        let observaciones = document.getElementById('observaciones').value;
+        let matricula = document.getElementById('matricula').value;
+        let afiliado = document.getElementById('afiliado').value;
+
+        // limpia el formulario
+        function refreshPage()  {
+            window.location.reload();
+        }
