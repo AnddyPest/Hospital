@@ -8,7 +8,7 @@ block content
     div
         img(src="/images/atencion.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
         
-        +header("Historia Clinica", "/icons/file-waveform-solid.svg")
+        +header("Atencion Pacientes", "/icons/user-injured-solid.svg")
               
         div.position-absolute.top-50.start-50.translate-middle.text-center
             div.row.align-items-center.mb-5.mt-5
@@ -129,7 +129,7 @@ block content
             }
             const status = dniSpan.dataset.status;
             if (status === "found") {
-                window.location.href = "/atencion/" + dni;
+                window.location.href = `/atencion/paciente/${dni}`;
                 
             }else{
                 alert("Paciente no encontrado, verifique el DNI.");

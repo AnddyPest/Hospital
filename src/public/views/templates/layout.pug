@@ -194,17 +194,17 @@ html(lang="en")
                   img(src="/icons/file-waveform-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(htype="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
-                    | Derivacion
+                    | Derivaciones
                   img(src="/icons/circle-down-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Turnos
                   img(src="/icons/user-clock-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                a(href="/atencion", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Atencion Turnos
                   img(src="/icons/hospital-user-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                a(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Prescripciones
                   img(src="/icons/prescription-bottle-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
@@ -297,7 +297,7 @@ html(lang="en")
         collapseGestion.classList.add("show");
         botonGestion.setAttribute("aria-expanded", "true");
         botonGestion.classList.remove("collapsed");
-      } else if(["/pacientes", "/turnos"].some(path => currentPath.startsWith(path))) {
+      } else if(["/pacientes", "/turnos", "/atencion"].some(path => currentPath.startsWith(path))) {
         collapsePacientes.classList.add("show");
         botonPacientes.setAttribute("aria-expanded", "true");
         botonPacientes.classList.remove("collapsed");

@@ -672,5 +672,41 @@ const turnoController = {
     }
   },
 };
+// hooks
+Turno.afterCreate(async (turno, options) => {
+  try {
+    // Importar el modelo HistoriaClinica
+    const HistoriaClinica = require("../model/historiaClinica");
+
+    // Buscar la historia clínica existente del paciente
+    let historiaClinica = await HistoriaClinica.findOne({
+      where: { paciente_Id: turno.paciente_Id },
+    });
+
+    // Si no existe una historia clínica para este paciente, crearla
+    if (!historiaClinica) {
+      historiaClinica = await HistoriaClinica.create({
+        paciente_Id: turno.paciente_Id,
+        fecha: new Date(),
+        detalle: "Historia clínica creada automáticamente",
+      });
+    }
+
+    // Crear una entrada para este turno en la historia clínica
+    // Opción 1: Actualizar el turno para que apunte a la historia clínica
+    await turno.update(
+      {
+        historiaClinica_Id: historiaClinica.id,
+      },
+      { transaction: options.transaction }
+    );
+
+    console.log(
+      `Turno ID: ${turno.id} asociado a Historia Clínica ID: ${historiaClinica.id}`
+    );
+  } catch (error) {
+    console.error("Error al asociar turno con historia clínica:", error);
+  }
+});
 
 module.exports = turnoController;

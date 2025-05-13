@@ -41,12 +41,12 @@ block content
                     div.col.w-25
                     div.col.w-50
                         select.form-select.form-select-lg.w-100.h-100(id="estado", name="estado")
-                            option(value="Pendiente") Pendiente
-                            option(value="Confirmado") Confirmado
-                            option(value="Atendido") Atendido
-                            option(value="Cancelado") Cancelado
-                            option(value="No Presentado") Ausente
-                            option(value="Reprogramado") Reprogramado
+                            option(value="pendiente") Pendiente
+                            option(value="confirmado") Confirmado
+                            option(value="atendido") Atendido
+                            option(value="cancelado") Cancelado
+                            option(value="no presentado") Ausente
+                            option(value="reprogramado") Reprogramado
                     div.col.w-25
 
                 div.row.align-items-center.mt-4
@@ -76,7 +76,7 @@ block content
             let fechaTurno = ""; 
             let horaTurno = ""; 
             const motivoTurno = turno.motivo || "";
-            const estadoTurno = turno.estado || "Pendiente";
+            const estadoTurno = turno.estado || "pendiente";
             const dniPaciente = turno.Paciente ? turno.Paciente.dni : '';
             const nombrePaciente = turno.Paciente ? turno.Paciente.nombre + ' ' + turno.Paciente.apellido : '';
             const especialidadOriginal = turno.Medico ? turno.Medico.especialidad : (turno.Enfermero ? "Triage de Ingreso" : "");

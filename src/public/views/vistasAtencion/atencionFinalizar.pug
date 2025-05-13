@@ -1,0 +1,85 @@
+extends ../templates/layout
+
+include ../templates/mixins.pug
+mixin atencionPaciente(turno)
+    div.position-absolute.top-50.start-50.translate-middle.text-center(style="width: 90%;")
+        div.card.bg-dark.text-light.border-info.shadow.mt-5
+            div.card-header.bg-primary.text-white
+                h4 Registro de Atención Médica
+            
+            div.card-body
+                form#atencionForm.ms-5(action="/atencion/guardar" method="POST")
+                    div.row
+                        //- columna de datos del paciente con labels inline
+                        div.col-md-5.ms-1
+                            div.row.mb-1
+                                div.col.text-start
+                                    div.mb-1
+                                        label.fw-bold.me-2 Fecha:
+                                        span.text-light #{turno ? turno.fecha : new Date().toLocaleDateString()}
+                                
+                                div.col.text-start
+                                    div.mb-1
+                                        label.fw-bold.me-2 Hora:
+                                        span.text-light #{turno ? turno.hora : new Date().toLocaleTimeString()}
+                            hr.border-info.opacity-75.mt-1.mb-1
+                            div.row.mb-1
+                                div.col.mb-3.text-start
+                                    label.fw-bold.me-2 Paciente:
+                                    span.text-light #{turno.Paciente.nombre} #{turno.Paciente.apellido}
+                                
+                                div.col.mb-3.text-start
+                                    label.fw-bold.me-2 DNI:
+                                    span.text-light #{turno.Paciente.dni}
+                            hr.border-info.opacity-75.mt-1.mb-1    
+                            div.d-flex.align-items-center
+                                div.mb-2
+                                    label.fw-bold.me-2 Obra Social:
+                                    span.text-light #{turno.Paciente.obra_social || "No registrada"}
+                                div.input-group
+                                    span.input-group-text.bg-dark.text-light N°:
+                                    input.form-control.bg-dark.text-light(
+                                        type="text" 
+                                        name="numeroAfiliado"
+                                        placeholder="Ingrese número de afiliado")
+                            hr.border-info.opacity-75.mt-1.mb-1
+                            div.row.mb-3
+                                div.row-md-5
+                                    label.form-label Observaciones:
+                                    textarea.form-control.bg-dark.text-light(rows="5"  name="diagnostico")
+                        //- datos de la consulta 
+                        div.col-md-6.mb-2
+                            
+                            div.mb-3
+                                label.form-label Diagnosis:
+                                textarea.form-control.bg-dark.text-light(rows="10" name="observaciones")
+                                    div.text-end.mt-2.fst-italic
+                                        if turno.medico_Id && turno.Medico
+                                            span.text-light Dr./Dra. #{turno.Medico.nombre} #{turno.Medico.apellido}
+                                            if turno.Medico.matricula
+                                                span.text-light.ms-1 - Mat. #{turno.Medico.matricula}
+                                        else if turno.enfermero_Id && turno.Enfermero
+                                            span.text-light Enf. #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
+                           
+                            button.btn.btn-warning.me-5 Limpiar Formulario                                                        
+                            button.btn.btn-success(type="submit") Guardar
+                            //- campo fantasma para el id del turno
+                            input(type="hidden" name="turnoId" value=turno ? turno.id : '')
+                            
+                            //- botones ver de agregar lo que haga falta
+                    hr.border-info.opacity-75.mt-1.mb-1
+                    div.d-flex.justify-content-between.mt-4
+                        button.btn.btn-primary() Derivacion
+                        button.btn.btn-info() Prescripcion
+                        button.btn.btn-warning() Internacion
+                        button.btn.btn-danger.me-5() Emergencia
+        a.btn.btn-secondary.mt-2(href="/atencion") Cancelar
+block content
+   
+
+    div
+        img(src="/images/atencion.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        
+        
+        +atencionPaciente(turno)

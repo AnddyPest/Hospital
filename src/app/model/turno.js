@@ -3,6 +3,7 @@ const sequelize = require("../database-connection");
 const Paciente = require("./paciente"); // Importar el modelo Paciente
 const Medico = require("./medico"); // Importar el modelo Medico
 const Enfermero = require("./enfermero"); // Importar el modelo Enfermero
+const Atencion = require("./atencion"); // Importar el modelo Atencion
 
 const Turno = sequelize.define("Turno", {
   id: {
@@ -42,5 +43,7 @@ Medico.hasMany(Turno, { foreignKey: "medico_Id" });
 Turno.belongsTo(Medico, { foreignKey: "medico_Id" });
 Enfermero.hasMany(Turno, { foreignKey: "enfermero_Id" });
 Turno.belongsTo(Enfermero, { foreignKey: "enfermero_Id" });
+Turno.hasOne(Atencion, { foreignKey: "turno_Id" });
+Atencion.belongsTo(Turno, { foreignKey: "turno_Id" });
 
 module.exports = Turno;

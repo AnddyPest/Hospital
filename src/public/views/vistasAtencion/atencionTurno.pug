@@ -1,0 +1,80 @@
+extends ../templates/layout
+
+include ../templates/mixins.pug
+mixin historiaPaciente(paciente, turnos)
+            div.position-absolute.top-50.start-50.translate-middle.text-center.row
+                div.d-flex.justify-content-center.align-items-center.gap-4.mt-5
+                    div.card.bg-dark.text-dark.border-1.rounded-3.p-2.mb-2  
+                        if paciente
+                            h4.text-light Nombre Paciente: #{paciente.nombre} #{paciente.apellido}
+                            h4.text-light DNI: #{paciente.dni}
+                div.table-container(style="max-height: 200px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
+                    table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+                        thead(style="position: sticky; top: 0;")
+                            tr.table-info
+                                th.col() Profesional
+                                th.col() Fecha
+                                th.col() Hora
+                                th.col() Motivo
+                                th.col() Estado
+                                th.col() Acciones
+                            tbody
+                                if turnos
+                                    each turno in turnos
+                                        tr
+                                            if turno.medico_Id
+                                                td #{turno.Medico.nombre} #{turno.Medico.apellido}
+                                            else if turno.enfermero_Id
+                                                td #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
+                                            td #{turno.fecha}
+                                            td #{turno.hora}
+                                            td #{turno.motivo}
+                                            td #{turno.estado}
+                                            td
+                                                button#atencionBtn.btn.btn-success.me-1(onclick=`event.preventDefault(); atencion(${turno.id});`) Atender
+                                                button#ausenteBtn.btn.btn-danger.ms-1(onclick=`event.preventDefault(); ausente(${turno.id})`) Ausente
+                                else
+                                    h4 No hay turnos disponibles para este paciente
+                        
+            - console.log("Datos del paciente: ", paciente.toJSON());
+            - console.log("Turnos del paciente: ", turnos.map(t => t.toJSON()));
+            
+block content
+   
+
+    div
+        img(src="/images/atencion.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Atencion Paciente", "/icons/user-injured-solid.svg")
+    
+    +historiaPaciente(paciente, turnos)
+       
+    script.
+        function atencion(turnoId) {
+            // Redirigir a la ruta de atención
+            window.location.href = `/atencion/paciente/turno/${turnoId}`;
+        }
+        function ausente(turnoId) {
+            if(confirm("¿Está seguro que desea marcar este turno como ausente?")) {
+                fetch(`/atencion/ausente/${turnoId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => {
+                    if(response.redirected) {
+                        window.location.href = response.url;
+                    }
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                    alert("Ocurrió un error al marcar como ausente");
+                });
+            }
+        }
+        
+        
+        
+        
+    
