@@ -6,6 +6,9 @@ router.get("/", atencionController.index); // Vista principal de historia clinic
 router.get("/paciente/:dni", atencionController.atencionView); // Vista de historia clinica por dni
 router.get("/paciente/turno/:id", atencionController.filanlizarView);
 
+//ruta para guardar la atencion
+router.post("/guardarConsulta/:id", atencionController.guardarAtencion);
+
 //rutas api
 router.put("/ausente/:id", atencionController.ausente);
 

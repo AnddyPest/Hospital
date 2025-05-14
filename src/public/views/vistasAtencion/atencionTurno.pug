@@ -35,9 +35,9 @@ mixin historiaPaciente(paciente, turnos)
                                                 button#ausenteBtn.btn.btn-danger.ms-1(onclick=`event.preventDefault(); ausente(${turno.id})`) Ausente
                                 else
                                     h4 No hay turnos disponibles para este paciente
-                        
-            - console.log("Datos del paciente: ", paciente.toJSON());
-            - console.log("Turnos del paciente: ", turnos.map(t => t.toJSON()));
+                div.justify-content-center
+                    a.btn.btn-danger.mt-5.w-25(href="/atencion" class="custom-button2") Volver        
+          
             
 block content
    

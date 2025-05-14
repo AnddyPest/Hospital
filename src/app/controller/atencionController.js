@@ -144,5 +144,51 @@ const atencionController = {
       });
     }
   },
+  // guardar los resultados de la atencion
+  guardarAtencion: async (req, res) => {
+    try {
+      const { diagnostico, observaciones, afiliado, matricula } = req.body;
+      const turnoId = req.params.id;
+
+      const existeAtencion = await Atencion.findOne({
+        where: { turno_Id: turnoId },
+      });
+      let atencion;
+      if (existeAtencion) {
+        atencion = await Atencion.update(
+          { diagnostico, observaciones, afiliado, matricula },
+          {
+            where: { turno_Id: turnoId },
+          }
+        );
+      } else {
+        atencion = await Atencion.create({
+          diagnostico,
+          observaciones,
+          afiliado,
+          matricula,
+          turno_Id: turnoId,
+        });
+      }
+
+      await Turno.update(
+        { estado: "atendido" },
+        {
+          where: { id: turnoId },
+        }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Atención guardada correctamente",
+      });
+    } catch (error) {
+      console.error("Error al guardar la atención:", error);
+      res.status(500).render("error", {
+        message: "Error al procesar la atención del paciente",
+        error,
+      });
+    }
+  },
 };
 module.exports = atencionController;

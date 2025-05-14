@@ -30,7 +30,7 @@ mixin atencionPaciente(turno)
                                 
                                 div.col.mb-3.text-start
                                     label.fw-bold.me-2 DNI:
-                                    span.text-light #{turno.Paciente.dni}
+                                    span#dniPaciente.text-light #{turno.Paciente.dni}
                             hr.border-info.opacity-75.mt-1.mb-1    
                             div.d-flex.align-items-center
                                 div.mb-2
@@ -41,7 +41,7 @@ mixin atencionPaciente(turno)
                                     input#afiliado.form-control.bg-dark.text-light(
                                         type="text" 
                                         name="numeroAfiliado"
-                                        placeholder="Ingrese número de afiliado")
+                                        placeholder="Ingrese número de afiliado" required)
                             hr.border-info.opacity-75.mt-1.mb-1
                             div.row.mb-3
                                 div.row-md-5
@@ -51,8 +51,8 @@ mixin atencionPaciente(turno)
                         div.col-md-6.mb-2
                             
                             div.mb-3
-                                label.form-label Diagnosis:
-                                textarea#diagnosis.form-control.bg-dark.text-light(rows="10" name="diagnosis")
+                                label.form-label Diagnostico:
+                                textarea#diagnostico.form-control.bg-dark.text-light(rows="10" name="diagnostico" required)
                             div.col
                                 if turno.Medico
                                     div.d-flex.align-items-center.mb-3
@@ -63,9 +63,8 @@ mixin atencionPaciente(turno)
                                         div.input-group.ms-5(style="max-width: 300px;")
                                             span.input-group-text.bg-dark.text-light Matricula N°:
                                             input#matricula.form-control.bg-dark.text-light(
-                                                value=turno.Medico.matricula || ""
                                                 name="matricula"
-                                                
+                                                required
                                             )
                                                 
 
@@ -73,7 +72,12 @@ mixin atencionPaciente(turno)
                                     div.d-flex.align-items-center.mb-3
                                         label.fw-bold.me-2 Enf.:
                                         span.text-light #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
-                                    
+                                    div.input-group.ms-5(style="max-width: 300px;")
+                                            span.input-group-text.bg-dark.text-light Matricula N°:
+                                            input#matricula.form-control.bg-dark.text-light(
+                                                name="matricula"
+                                                required
+                                            )    
     
                             button#cleanForm.btn.btn-warning.me-5(onclick="event.preventDefault(); refreshPage();") Limpiar Formulario                                                        
                             button#saveForm.btn.btn-success(onclick="event.preventDefault(); guardarConsulta();") Guardar
@@ -87,7 +91,7 @@ mixin atencionPaciente(turno)
                         button#prescription.btn.btn-info(onclick="event.preventDefault(); prescripcion();") Prescripcion
                         button#intern.btn.btn-warning(onclick="event.preventDefault(); internar();") Internacion
                         button#emergency.btn.btn-danger.me-5(onclick="event.preventDefault(); emergencia();") Emergencia
-        a.btn.btn-secondary.mt-2(href="/atencion") Cancelar
+                        a#cancel.btn.btn-secondary.mt-2(href=`/atencion/paciente/${turno.Paciente.dni}`) Cancelar
 block content
    
 
@@ -98,26 +102,117 @@ block content
         
         +atencionPaciente(turno)
     script.
-        let idTurno = "#{turno.id}";
-        let idPaciente = "#{turno.Paciente.id}";
-        let idMedico = "#{turno.Medico ? turno.Medico.id : ''}";
-        let idEnfermero = "#{turno.Enfermero ? turno.Enfermero.id : ''}";
-        let nombrePaciente = "#{turno.Paciente.nombre} #{turno.Paciente.apellido}";
-        let dniPaciente = "#{turno.Paciente.dni}";
-        let fechaTurno = "#{turno.fecha}";
-        let horaTurno = "#{turno.hora}";
-        let numeroAfiliado = "#{turno.Paciente.numeroAfiliado || ''}";
-        let obraSocial = "#{turno.Paciente.obra_social || ''}";
-        let nombreMedico = "#{turno.Medico ? turno.Medico.nombre : ''} #{turno.Medico ? turno.Medico.apellido : ''}";
-        let nombreEnfermero = "#{turno.Enfermero ? turno.Enfermero.nombre : ''} #{turno.Enfermero ? turno.Enfermero.apellido : ''}";
-        let motivo = "#{turno.motivo}";
-        let estado = "#{turno.estado}";
-        let diagnostico = document.getElementById('diagnosis').value;
-        let observaciones = document.getElementById('observaciones').value;
-        let matricula = document.getElementById('matricula').value;
-        let afiliado = document.getElementById('afiliado').value;
-
+        document.addEventListener('DOMContentLoaded', initOptionPanel);
+        const turno_Id = '#{turno ? turno.id : ''}';
         // limpia el formulario
         function refreshPage()  {
             window.location.reload();
         }
+
+        async function guardarConsulta() {
+            const diagnostico = document.getElementById('diagnostico').value;
+            const observaciones = document.getElementById('observaciones').value;
+            const afiliado = document.getElementById('afiliado').value;
+            const matricula = document.getElementById('matricula').value;
+
+            let validacion = true;
+            const mensajeError = [];
+
+            if(!diagnostico) {
+                mensajeError.push('El campo diagnostico es obligatorio.');
+                validacion = false;
+            }
+            if(!afiliado) {
+                mensajeError.push('El campo afiliado es obligatorio.');
+                validacion = false;
+            }
+            if(!matricula) {
+                mensajeError.push('El campo matricula es obligatorio.');
+                validacion = false;
+            }
+            if(!validacion) {
+                alert(mensajeError.join('\n'));
+                return;
+            }
+                const datosFormulario = {
+                    diagnostico: diagnostico,
+                    observaciones: observaciones,
+                    afiliado: afiliado,
+                    matricula: matricula,
+                    turno_Id: turno_Id,
+                }
+                body = JSON.stringify(datosFormulario);
+                const response = await fetch(`/atencion/guardarConsulta/${turno_Id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: body
+                });
+                if(response.ok) {
+                    const data = await response.json();
+                    if (data.success) {
+                        optionpanel('Consulta guardada ¿Requiere acciones adicionales?', 'success');
+                        
+                    } else {
+                        alert('Error al guardar la consulta');
+                    }
+                } else {
+                    alert('Error en la respuesta del servidor');
+                    }
+                };
+        function initOptionPanel() {
+            const modal = document.createElement("div");
+            modal.className = "modal fade";
+            modal.id = "optionModal";
+            modal.tabIndex = "-1";
+            modal.innerHTML = `
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content bg-dark text-light">
+                    <div class="modal-header" border-info">
+                        <h5 class="modal-title">Atención!</h5>
+                    </div>
+                    <div class="modal-body">
+                        <p id="optionMessage"></p>
+                    </div>
+                    <div class="modal-footer border-info">
+                        <button type="button" class="btn btn-success" id="btnSi">Si</button>
+                        <button type="button" class="btn btn-danger" id="btnNo">No</button>
+                    </div>
+                </div>
+            </div>
+            `;
+            document.body.appendChild(modal);
+        };
+        
+        function optionpanel(message, type) {
+            return new Promise((resolve) => {
+                const modal = new bootstrap.Modal(document.getElementById('optionModal'));
+                document.getElementById('optionMessage').textContent = message;
+                let dni = document.getElementById('dniPaciente').textContent;
+                
+                const btnSi = document.getElementById('btnSi');
+                const btnNo = document.getElementById('btnNo');
+                
+                const handleYes = () => {
+                    btnSi.removeEventListener('click', handleYes);
+                    btnNo.removeEventListener('click', handleNo);
+                    modal.hide();
+                    resolve(true);
+                };
+                
+                const handleNo = () => {
+                    btnSi.removeEventListener('click', handleYes);
+                    btnNo.removeEventListener('click', handleNo);
+                    modal.hide();
+                    resolve(false);
+                    window.location.href = `/atencion/paciente/${dni}`;
+                };
+                
+                btnSi.addEventListener('click', handleYes);
+                btnNo.addEventListener('click', handleNo);
+                
+                modal.show();
+            });
+        };
+                

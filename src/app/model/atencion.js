@@ -9,15 +9,19 @@ const Atencion = sequelize.define(
       primaryKey: true,
       autoIncrement: true,
     },
-    detalle: {
+    diagnostico: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    resultado: {
+    observaciones: {
       type: DataTypes.STRING,
       allowNull: true,
     },
-    observaciones: {
+    afiliado: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    matricula: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -28,6 +32,20 @@ const Atencion = sequelize.define(
     interConsulta: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    internacion: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    situacion: {
+      type: DataTypes.ENUM("alta", "internado", "diagnosis", "fallecido"),
+      allowNull: true,
+    },
+    turno_Id: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+
+      unique: true,
     },
   },
   { tableName: "atencion", timestamps: true }
