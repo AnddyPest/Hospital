@@ -183,7 +183,7 @@ block content
             </div>
             `;
             document.body.appendChild(modal);
-        };
+        }
         
         function optionpanel(message, type) {
             return new Promise((resolve) => {
@@ -198,6 +198,7 @@ block content
                     btnSi.removeEventListener('click', handleYes);
                     btnNo.removeEventListener('click', handleNo);
                     modal.hide();
+                    
                     resolve(true);
                 };
                 
@@ -205,7 +206,20 @@ block content
                     btnSi.removeEventListener('click', handleYes);
                     btnNo.removeEventListener('click', handleNo);
                     modal.hide();
+                    const situacion = 'alta';
+                    const datosActualizacionSituacion = {
+                        situacion: situacion
+                    }
+                    body = JSON.stringify(datosActualizacionSituacion);
+                    fetch(`/atencion/actualizarSituacion/${turno_Id}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: body
+                    })
                     resolve(false);
+
                     window.location.href = `/atencion/paciente/${dni}`;
                 };
                 

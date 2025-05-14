@@ -190,5 +190,40 @@ const atencionController = {
       });
     }
   },
+  actualizarSituacion: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { situacion } = req.body;
+
+      const atencion = await Atencion.findOne({
+        where: { turno_Id: id },
+      });
+
+      if (!atencion) {
+        return res.status(404).json({
+          success: false,
+          message: "Atención no encontrada",
+        });
+      }
+
+      await Atencion.update(
+        { situacion },
+        {
+          where: { turno_Id: id },
+        }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: `Situación actualizada a "${situacion}" correctamente`,
+      });
+    } catch (error) {
+      console.error("Error al cambiar la situación de la atención:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error al cambiar la situación de la atención",
+      });
+    }
+  },
 };
 module.exports = atencionController;

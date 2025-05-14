@@ -8,6 +8,7 @@ router.get("/paciente/turno/:id", atencionController.filanlizarView);
 
 //ruta para guardar la atencion
 router.post("/guardarConsulta/:id", atencionController.guardarAtencion);
+router.post("/actualizarSituacion/:id", atencionController.actualizarSituacion);
 
 //rutas api
 router.put("/ausente/:id", atencionController.ausente);
