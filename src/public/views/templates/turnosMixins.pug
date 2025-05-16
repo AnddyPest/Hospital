@@ -11,19 +11,21 @@ mixin tablaTurnos(profesionalTypeOf, context)
               th.col(style="width: 15%") #{profesionalTypeOf}
               th.col(style="width: 10%") Hora
               th.col(style="width: 20%") Especialidad
+              th.col(style="width: 8%") Motivo
               th.col(style="width: 8%") Estado
               if context === "editar"
                 th.col(style="width: 5%") Editar
               else if context === "borrar"
                 th.col(style="width: 5%") Borrar
           else
-            tr
+            tr.table-info
               th.col(style="width: 10%") Fecha
               th.col(style="width: 20%") Paciente
               th.col(style="width: 15%") D.N.I.
               th.col(style="width: 15%") #{profesionalTypeOf}
               th.col(style="width: 10%") Hora
-              th.col(style="width: 10%") Estado
+              th.col(style="width: 8%") Motivo
+              th.col(style="width: 8%") Estado
               if context === "editar"
                 th.col(style="width: 5%") Editar
               else if context === "borrar"
@@ -44,10 +46,11 @@ mixin tablaTurnos(profesionalTypeOf, context)
                   if profesionalTypeOf === "Medico"
                     td= turno.Medico ? `${turno.Medico.nombre} ${turno.Medico.apellido}` : 'N/A'
                     td= turno.hora
-                    td= turno.Medico ? turno.Medico.especialidad : 'N/A'
+                    td= turno.Medico && turno.Medico.Especialidad ? turno.Medico.Especialidad.nombre : 'N/A'
                   else
                     td= turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}` : 'N/A'
                     td= turno.hora
+                  td= turno.Motivo ? turno.Motivo.nombre : 'N/A'
                   td= turno.estado
                   if context === "editar"
                     td
@@ -115,6 +118,8 @@ mixin tablaTurnos(profesionalTypeOf, context)
 
   script.
     let todasLasFilasTurnos = [];
+    let filasActualesTurnos = []; // Para mantener las filas actualmente filtradas
+    let filtrosActivos = {}; // Para registrar los filtros aplicados
     
     document.addEventListener('DOMContentLoaded', function() {
       if ($.fn.datepicker) {
@@ -129,10 +134,18 @@ mixin tablaTurnos(profesionalTypeOf, context)
       const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
       if (tbody) {
         todasLasFilasTurnos = Array.from(tbody.querySelectorAll('tr'));
+        filasActualesTurnos = [...todasLasFilasTurnos]; // Copia inicial
       }
       
       cargarDatosFiltros('#{profesionalTypeOf}');
       configurarEventosTeclas();
+      
+      // Añadir elemento para mostrar filtros activos
+      const filtrosContainer = document.createElement('div');
+      filtrosContainer.id = 'filtrosActivosContainer';
+      filtrosContainer.className = 'mt-2 mb-2';
+      filtrosContainer.style.display = 'none';
+      document.getElementById('filterButtons').after(filtrosContainer);
     });
     
     function mostrarFiltro(tipo) {
@@ -186,7 +199,7 @@ mixin tablaTurnos(profesionalTypeOf, context)
         // Mostrar estado de carga
         selectEsp.innerHTML = '<option value="0">Cargando especialidades...</option>';
         
-        const response = await fetch("/medicos/especialidades");
+        const response = await fetch("/especialidades/listado");
         
         if (!response.ok) {
           throw new Error(`Error ${response.status}: No se pudieron obtener las especialidades`);
@@ -199,8 +212,8 @@ mixin tablaTurnos(profesionalTypeOf, context)
         
         especialidades.forEach(esp => {
           const option = document.createElement("option");
-          option.value = esp;
-          option.textContent = esp;
+          option.value = esp.id;
+          option.textContent = esp.nombre;
           selectEsp.appendChild(option);
         });
         
@@ -213,7 +226,7 @@ mixin tablaTurnos(profesionalTypeOf, context)
     async function cargarDatosFiltros(profesionalTypeOf) {
       if (profesionalTypeOf === 'Medico') {
         try {
-          const responseEsp = await fetch("/medicos/especialidades");
+          const responseEsp = await fetch("/especialidades/listado");
           if (responseEsp.ok) {
             const especialidades = await responseEsp.json();
             
@@ -223,8 +236,8 @@ mixin tablaTurnos(profesionalTypeOf, context)
               
               especialidades.forEach(esp => {
                 const option = document.createElement("option");
-                option.value = esp;
-                option.textContent = esp;
+                option.value = esp.id;
+                option.textContent = esp.nombre;
                 selectEsp.appendChild(option);
               })
             }
@@ -274,12 +287,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
     }
     
     function filtrarTabla(tipo) {
-      const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
-      if (!tbody || todasLasFilasTurnos.length === 0) {
-        console.error('No hay tabla o filas para filtrar');
-        return;
-      }
-      
       let valorFiltro = '';
       let columnaFiltro = 0;
       
@@ -316,44 +323,137 @@ mixin tablaTurnos(profesionalTypeOf, context)
         alert('Por favor ingrese un valor para filtrar');
         return;
       }
+
+      // Registrar el filtro activo
+      filtrosActivos[tipo] = { valor: valorFiltro, columna: columnaFiltro };
+      actualizarFiltrosActivos();
       
+      // Filtrar desde las filas actuales (filtrado progresivo)
+      aplicarTodosFiltros();
+      
+      // Ocultar el panel de filtro actual
+      ocultarFiltros();
+    }
+    
+    function aplicarTodosFiltros() {
+      // Comenzar con todas las filas
+      filasActualesTurnos = [...todasLasFilasTurnos];
+      
+      // Aplicar cada filtro activo secuencialmente
+      for (const tipo in filtrosActivos) {
+        const { valor, columna } = filtrosActivos[tipo];
+        
+        // Filtrar solo las filas que ya pasaron filtros anteriores
+        filasActualesTurnos = filasActualesTurnos.filter(fila => {
+          const celda = fila.cells[columna];
+          return celda && celda.textContent.toLowerCase().includes(valor.toLowerCase());
+        });
+      }
+      
+      // Actualizar la tabla con las filas filtradas
+      const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
       tbody.innerHTML = '';
       
-      let coincidencias = false;
-      let contador = 0;
-      
-      todasLasFilasTurnos.forEach(fila => {
-        const celda = fila.cells[columnaFiltro];
-        if (celda && celda.textContent.toLowerCase().includes(valorFiltro.toLowerCase())) {
-          tbody.appendChild(fila.cloneNode(true));
-          coincidencias = true;
-          contador++;
-        }
-      });
-      
-      if (!coincidencias) {
+      if (filasActualesTurnos.length === 0) {
         const colspanValue = document.querySelectorAll(`#tabla#{profesionalTypeOf} thead th`).length;
         const filaNoData = document.createElement('tr');
         const celdaNoData = document.createElement('td');
         
-        celdaNoData.textContent = `No se encontraron resultados para "${valorFiltro}"`;
+        celdaNoData.textContent = 'No se encontraron resultados con los filtros aplicados';
         celdaNoData.className = 'text-center';
         celdaNoData.colSpan = colspanValue;
         
         filaNoData.appendChild(celdaNoData);
         tbody.appendChild(filaNoData);
       } else {
-        // Mostrar cuántos resultados se encontraron
-        alert(`Se encontraron ${contador} resultados para "${valorFiltro}"`);
+        filasActualesTurnos.forEach(fila => {
+          tbody.appendChild(fila.cloneNode(true));
+        });
       }
     }
     
-    function limpiarTodosFiltros() {
-      window.location.reload();
+    function actualizarFiltrosActivos() {
+      const container = document.getElementById('filtrosActivosContainer');
+      if (!container) return;
       
+      container.innerHTML = '';
+      container.style.display = Object.keys(filtrosActivos).length > 0 ? 'block' : 'none';
+      
+      if (Object.keys(filtrosActivos).length > 0) {
+        const titulo = document.createElement('div');
+        titulo.className = 'fw-bold mb-2';
+        titulo.textContent = 'Filtros activos:';
+        container.appendChild(titulo);
+        
+        for (const tipo in filtrosActivos) {
+          const badge = document.createElement('span');
+          badge.className = 'badge bg-info text-dark me-2 mb-2 p-2';
+          
+          const nombreFiltro = obtenerNombreFiltro(tipo);
+          badge.textContent = `${nombreFiltro}: ${filtrosActivos[tipo].valor}`;
+          
+          const btnEliminar = document.createElement('button');
+          btnEliminar.className = 'btn-close btn-close-white ms-2';
+          btnEliminar.setAttribute('aria-label', 'Quitar filtro');
+          btnEliminar.onclick = () => {
+            eliminarFiltro(tipo);
+          };
+          
+          badge.appendChild(btnEliminar);
+          container.appendChild(badge);
+        }
+      }
     }
     
+    function obtenerNombreFiltro(tipo) {
+      switch(tipo) {
+        case 'fecha': return 'Fecha';
+        case 'dni': return 'DNI';
+        case 'profesional': return 'Enfermero';
+        case 'medicoEspecialidad': 
+          if (filtrosActivos[tipo].columna === 3) return 'Médico';
+          return 'Especialidad';
+        default: return tipo;
+      }
+    }
+    
+    function eliminarFiltro(tipo) {
+      delete filtrosActivos[tipo];
+      actualizarFiltrosActivos();
+      aplicarTodosFiltros();
+    }
+    
+    function limpiarTodosFiltros() {
+      filtrosActivos = {};
+      const tbody = document.querySelector(`#tabla#{profesionalTypeOf} tbody`);
+      tbody.innerHTML = '';
       
+      todasLasFilasTurnos.forEach(fila => {
+        tbody.appendChild(fila.cloneNode(true));
+      });
+      
+      filasActualesTurnos = [...todasLasFilasTurnos];
+      
+      document.getElementById('filtrosActivosContainer').style.display = 'none';
+      document.getElementById('filtrosActivosContainer').innerHTML = '';
+      
+      // Limpiar los campos de filtro
+      const inputFecha = document.getElementById('inputFecha');
+      if (inputFecha) inputFecha.value = '';
+      
+      const inputDni = document.getElementById('inputDni');
+      if (inputDni) inputDni.value = '';
+      
+      const selectEsp = document.getElementById('inputEspecialidad');
+      if (selectEsp) selectEsp.selectedIndex = 0;
+      
+      const selectMed = document.getElementById('inputMed');
+      if (selectMed) selectMed.selectedIndex = 0;
+      
+      const selectProf = document.getElementById('inputProf');
+      if (selectProf) selectProf.selectedIndex = 0;
+    }
+    
     function configurarEventosTeclas() {
       const inputDni = document.getElementById('inputDni');
       if (inputDni) {
@@ -381,16 +481,14 @@ mixin tablaTurnos(profesionalTypeOf, context)
         const selectEsp = document.getElementById('inputEspecialidad');
         if (!selectEsp) return;
         
-        const especialidad = selectEsp.value;
+        const especialidad_Id = selectEsp.value;
         const selectProf = document.getElementById('inputMed');
         if (!selectProf) return;
         
-              
         // Mostrar estado de carga
         selectProf.innerHTML = '<option value="0">Cargando médicos...</option>';
         
-        // Hacer la petición para obtener médicos por especialidad
-        const response = await fetch(`/medicos/especialidades/${especialidad}`);
+        const response = await fetch(`/medicos/especialidades/${especialidad_Id}`);
         
         if (!response.ok) {
           throw new Error(`Error ${response.status}: No se pudieron obtener los médicos`);

@@ -35,7 +35,7 @@ mixin tablaGeneralEntidades(contexto)
                   td= medico.nombre
                   td= medico.apellido
                   td= medico.dni
-                  td= medico.especialidad
+                  td= medico.Especialidad ? medico.Especialidad.nombre : 'N/A'
                   td= medico.telefono
                   if contexto === "editar"
                     td
@@ -70,7 +70,7 @@ mixin tablaGeneralEntidades(contexto)
                   td= enfermero.apellido
                   td= enfermero.dni
                   td= enfermero.telefono
-                  td= enfermero.area
+                  td= enfermero.Area ? enfermero.Area.nombre : 'N/A'
                   if contexto === "editar"
                     td
                       button.btn.btn-warning.w-75.h-75(onclick=`editarEnfermero(${enfermero.id})`)
@@ -104,7 +104,7 @@ mixin tablaGeneralEntidades(contexto)
                   td= maestranza.apellido
                   td= maestranza.dni
                   td= maestranza.telefono
-                  td= maestranza.area
+                  td= maestranza.Area ? maestranza.Area.nombre : 'N/A'
                   if contexto === "editar"
                     td
                       button.btn.btn-warning.w-75.h-75(onclick=`editarMaestranza(${maestranza.id})`)
@@ -138,7 +138,7 @@ mixin tablaGeneralEntidades(contexto)
                   td= administrativo.apellido
                   td= administrativo.dni
                   td= administrativo.telefono
-                  td= administrativo.area
+                  td= administrativo.Area ? administrativo.Area.nombre : 'N/A'
                   if contexto === "editar"
                     td
                       button.btn.btn-warning.w-75.h-75(onclick=`editarAdministrativo(${administrativo.id})`)

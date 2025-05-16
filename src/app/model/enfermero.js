@@ -20,10 +20,7 @@ const Enfermero = sequelize.define("Enfermero", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  area: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+
   telefono: {
     type: DataTypes.STRING,
     allowNull: false,

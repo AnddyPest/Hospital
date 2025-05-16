@@ -1,4 +1,6 @@
+const Especialidad = require("../model/especialidad");
 const Medico = require("../model/medico");
+
 const sequelize = require("sequelize");
 
 //dentro de este controlador se encuentran los metodos para manejar las peticiones http para la tabla Medico
@@ -24,7 +26,19 @@ const medicoController = {
   // Vista para listar todos los médicos
   listarView: async (req, res) => {
     try {
-      const medicos = await Medico.findAll();
+      const medicos = await Medico.findAll({
+        include: [
+          {
+            model: Especialidad,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
+
       res.render("vistasMedicos/listarMedicos", {
         title: "Listar Médicos",
         medicos,
@@ -60,8 +74,10 @@ const medicoController = {
   // Vista de formulario para nuevo médico
   nuevoView: async (req, res) => {
     try {
+      const especialidades = await Especialidad.findAll();
       res.render("vistasMedicos/nuevoMedico", {
         title: "Nuevo Médico",
+        especialidades,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -77,11 +93,17 @@ const medicoController = {
   borrarView: async (req, res) => {
     try {
       const medicos = await Medico.findAll();
-      res.render("vistasMedicos/borrarMedico", {
-        title: "Borrar Médico",
-        medicos,
-        userType: req.session?.userType || "guest",
-      });
+      include: [
+        {
+          model: Especialidad,
+          attributes: ["id", "nombre"],
+        },
+      ],
+        res.render("vistasMedicos/borrarMedico", {
+          title: "Borrar Médico",
+          medicos,
+          userType: req.session?.userType || "guest",
+        });
     } catch (error) {
       console.error("Error en vista borrar médico:", error);
       res.status(500).render("error", {
@@ -98,7 +120,10 @@ const medicoController = {
       let medicoAEditar = null;
 
       if (id) {
-        medicoAEditar = await Medico.findByPk(id);
+        medicoAEditar = await Medico.findByPk(id, {
+          include: [{ model: Especialidad, attributes: ["id", "nombre"] }],
+        });
+
         if (!medicoAEditar) {
           return res.status(404).render("error", {
             message: "Médico no encontrado",
@@ -106,7 +131,14 @@ const medicoController = {
         }
       }
 
-      const medicos = await Medico.findAll();
+      const medicos = await Medico.findAll({
+        include: [
+          {
+            model: Especialidad,
+            attributes: ["id", "nombre"],
+          },
+        ],
+      });
       res.render("vistasMedicos/editarMedicos", {
         title: "Editar Médico",
         medicos,
@@ -125,20 +157,25 @@ const medicoController = {
   // Vista para seleccionar médico
   seleccionarView: async (req, res) => {
     try {
-      const medicos = await Medico.findAll();
-      const especialidades = await Medico.findAll({
-        attributes: [
-          [
-            sequelize.fn("DISTINCT", sequelize.col("especialidad")),
-            "especialidad",
-          ],
+      const medicos = await Medico.findAll({
+        include: [
+          {
+            model: Especialidad,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
         ],
       });
+
+      const especialidad = await Especialidad.findAll();
 
       res.render("vistasMedicos/seleccionarMedico", {
         title: "Seleccionar Médico",
         medicos,
-        especialidades: especialidades.map((e) => e.especialidad),
+        especialidad,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -154,12 +191,12 @@ const medicoController = {
   crearMedico: async (req, res) => {
     try {
       console.log("Creando nuevo medico:", req.body);
-      const { dni, nombre, apellido, especialidad, telefono } = req.body;
+      const { dni, nombre, apellido, especialidad_Id, telefono } = req.body;
       const nuevoMedico = await Medico.create({
         dni,
         nombre,
         apellido,
-        especialidad,
+        especialidad_Id,
         telefono,
       });
 
@@ -182,9 +219,9 @@ const medicoController = {
   editarMedico: async (req, res) => {
     try {
       const { id } = req.params;
-      const { dni, nombre, apellido, especialidad, telefono } = req.body;
+      const { dni, nombre, apellido, especialidad_Id, telefono } = req.body;
       const [updated] = await Medico.update(
-        { dni, nombre, apellido, especialidad, telefono },
+        { dni, nombre, apellido, especialidad_Id, telefono },
         { where: { id } }
       );
 
@@ -233,38 +270,21 @@ const medicoController = {
       });
     }
   },
-  // api para obtener especialidades
-  getEspecialidades: async (req, res) => {
-    try {
-      const especialidades = await Medico.findAll({
-        attributes: [
-          [
-            sequelize.fn("DISTINCT", sequelize.col("especialidad")),
-            "especialidad",
-          ],
-        ],
-        order: [[sequelize.col("especialidad"), "ASC"]],
-      });
-
-      // Devolver solo un array con las especialidades
-      const especialidadesArray = especialidades.map((e) => e.especialidad);
-      res.json(especialidadesArray);
-    } catch (error) {
-      console.error("Error al obtener especialidades:", error);
-      res.status(500).json({
-        error: "Error al obtener especialidades",
-        message: error.message,
-      });
-    }
-  },
+  // MÉTODOS DE API
 
   getMedicosPorEspecialidad: async (req, res) => {
     try {
-      const { especialidad } = req.params;
+      const { especialidad_Id } = req.params;
       const medicos = await Medico.findAll({
-        where: { especialidad },
-        attributes: ["id", "nombre", "apellido", "especialidad"],
-        distinct: true,
+        where: { especialidad_Id },
+        include: [
+          {
+            model: Especialidad,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        attributes: ["id", "nombre", "apellido"],
+
         order: [
           ["apellido", "ASC"],
           ["nombre", "ASC"],
@@ -284,7 +304,12 @@ const medicoController = {
   getAllMedicos: async (req, res) => {
     try {
       const medicos = await Medico.findAll({
-        attributes: ["id", "nombre", "apellido", "especialidad"],
+        include: [
+          {
+            model: Especialidad,
+            attributes: ["id", "nombre"],
+          },
+        ],
         order: [
           ["apellido", "ASC"],
           ["nombre", "ASC"],

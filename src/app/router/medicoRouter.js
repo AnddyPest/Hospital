@@ -19,9 +19,9 @@ router.delete("/borrar/:id", medicoController.borrarMedico);
 
 // rutas de api
 
-router.get("/especialidades", medicoController.getEspecialidades);
+//router.get("/especialidades", medicoController.getEspecialidades);
 router.get(
-  "/especialidades/:especialidad",
+  "/especialidades/:especialidad_Id",
   medicoController.getMedicosPorEspecialidad
 );
 router.get("/all", medicoController.getAllMedicos);

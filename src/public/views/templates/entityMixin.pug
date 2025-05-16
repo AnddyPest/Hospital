@@ -118,17 +118,19 @@ mixin entidadForm(entityURL, entityName, context, entityData)
           // Segunda fila para otras entidades: Especialidad/Área, Teléfono
           div.row.mb-3
             // Especialidad o Área
-            - const fieldName = entityURL === 'medicos' ? 'especialidad' : 'area'
+            - const fieldName = entityURL === 'medicos' ? 'especialidad_Id' : 'area_Id'
             - const fieldLabel = entityURL === 'medicos' ? 'Especialidad' : 'Área'
+            - const apiEndpoint = entityURL === 'medicos' ? '/especialidades/listado' : '/areas/listado'
             div.col-md-4
               div.form-floating
-                input.form-control(
-                  type="text" 
+                select.form-select(
                   id=fieldName 
                   name=fieldName 
-                  placeholder=fieldLabel 
                   required
-                  value=isEdit && entityData ? (entityURL === 'medicos' ? entityData.especialidad : entityData.area) : '')
+                  data-api-endpoint=apiEndpoint
+                  data-selected-value=isEdit && entityData ? (entityURL === 'medicos' ? entityData.especialidad_Id : entityData.area_Id) : '')
+                  option(value="" selected disabled) Seleccione #{fieldLabel}
+                  // Las opciones se cargarán dinámicamente con JavaScript
                 label(for=fieldName) #{fieldLabel}
             
             // Teléfono
@@ -192,5 +194,71 @@ mixin entidadForm(entityURL, entityName, context, entityData)
       } catch (error) {
         console.error("Error al enviar el formulario:", error);
         alert("Ha ocurrido un error inesperado");
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      // Encontrar todos los selects con data-api-endpoint
+      const dynamicSelects = document.querySelectorAll('select[data-api-endpoint]');
+      
+      for (const select of dynamicSelects) {
+        try {
+          // Obtener la URL de la API y el valor seleccionado si existe
+          const apiEndpoint = select.getAttribute('data-api-endpoint');
+          const selectedValue = select.getAttribute('data-selected-value');
+          
+          // Mostrar estado de carga
+          select.innerHTML = '<option>Cargando...</option>';
+          
+          // Cargar datos desde la API
+          const response = await fetch(apiEndpoint);
+          
+          if (!response.ok) {
+            throw new Error(`Error al cargar datos: ${response.status}`);
+          }
+          
+          const items = await response.json();
+          
+          // Limpiar opción de carga
+          select.innerHTML = '<option value="" disabled selected>Seleccione una opción</option>';
+          
+          // Agregar opciones al select
+          items.forEach(item => {
+            const option = document.createElement('option');
+            option.value = item.id;
+            option.textContent = item.nombre;
+            
+            // Seleccionar la opción si coincide con el valor seleccionado
+            if (selectedValue && item.id == selectedValue) {
+              option.selected = true;
+            }
+            
+            select.appendChild(option);
+          });
+          
+          console.log(`Opciones cargadas para ${select.id}`);
+        } catch (error) {
+          console.error(`Error al cargar opciones para ${select.id}:`, error);
+          select.innerHTML = '<option value="" disabled selected>Error al cargar opciones</option>';
+          
+          // Agregar opción para reintentar
+          const retryOption = document.createElement('option');
+          retryOption.value = "retry";
+          retryOption.textContent = "⟳ Reintentar carga";
+          select.appendChild(retryOption);
+          
+          // Manejar evento de reintento
+          select.addEventListener('change', async function() {
+            if (this.value === 'retry') {
+              // Recargar las opciones al seleccionar "Reintentar"
+              this.innerHTML = '<option>Cargando...</option>';
+              try {
+                await loadOptions(this);
+              } catch (error) {
+                console.error("Error al reintentar:", error);
+              }
+            }
+          });
+        }
       }
     });

@@ -35,7 +35,8 @@ block content
                         select.form-select.form-select-lg.w-100.h-100(id="hourpicker", name="hourpicker")
                             option.selected(value="Seleccione un horario") Seleccione un horario 
                     div.col.w-25
-                        input.form-control.form-control-lg.w-100(type="text" id="motivo" name="codigo" placeholder="Motivo" aria-label="Motivo" aria-describedby="basic-addon1")
+                        select#motivo.form-select.form-select-lg.w-100.h-100(name="motivo")
+                            option.selected(value="Seleccione un Motivo") Seleccione un Motivo
                     
                 div.row.align-items-center.mb-2
                     div.col.w-25
@@ -75,11 +76,13 @@ block content
             const idEnfermero = turno.enfermero_Id || null;
             let fechaTurno = ""; 
             let horaTurno = ""; 
-            const motivoTurno = turno.motivo || "";
+            let motivoTurno = turno.motivo_Id || "";
             const estadoTurno = turno.estado || "pendiente";
             const dniPaciente = turno.Paciente ? turno.Paciente.dni : '';
             const nombrePaciente = turno.Paciente ? turno.Paciente.nombre + ' ' + turno.Paciente.apellido : '';
-            const especialidadOriginal = turno.Medico ? turno.Medico.especialidad : (turno.Enfermero ? "Triage de Ingreso" : "");
+            const especialidadId = turno.Medico && turno.Medico.Especialidad ? 
+                turno.Medico.Especialidad.id : 
+                (turno.Enfermero && turno.Enfermero.Area ? turno.Enfermero.Area.id : null);
             const esTurnoEnfermero = turno.enfermero_Id ? true : false;
             
             // Elementos del DOM
@@ -103,6 +106,7 @@ block content
                 
                 // Cargar los datos del turno
                 await cargarDatosTurno();
+                await cargarMotivos();
                 
                 // Configurar event listeners
                 selectEsp.addEventListener('change', cargarProfesionales);
@@ -158,8 +162,8 @@ block content
                     
                     // Determinar la URL según el tipo de turno (médico o enfermero)
                     const url = esTurnoEnfermero 
-                        ? '/enfermeros/areas' 
-                        : '/medicos/especialidades';
+                        ? '/areas/listado' 
+                        : '/especialidades/listado';
                     
                     console.log("Obteniendo datos de:", url);
                     const response = await fetch(url);
@@ -178,11 +182,28 @@ block content
                     
                     especialidades.forEach(esp => {
                         const option = document.createElement('option');
-                        option.value = esp;
-                        option.textContent = esp;
-                        option.selected = esp === especialidadOriginal;
+                        option.value = esp.id;
+                        option.textContent = esp.nombre;
+                        
+                        // Si estamos editando un turno de médico, verificar especialidad
+                        if (!esTurnoEnfermero && turno.Medico && turno.Medico.Especialidad && 
+                            esp.id == turno.Medico.Especialidad.id) {
+                            option.selected = true;
+                        }
+                        // Si estamos editando un turno de enfermero, verificar área
+                        else if (esTurnoEnfermero && turno.Enfermero && turno.Enfermero.Area && 
+                                 esp.id == turno.Enfermero.Area.id) {
+                            option.selected = true;
+                        }
+                        
                         selectEsp.appendChild(option);
                     });
+
+                    if (selectEsp.selectedIndex > 0) {
+                        // Disparar el evento change manualmente para cargar los profesionales
+                        const event = new Event('change');
+                        selectEsp.dispatchEvent(event);
+                    }
                     
                 } catch (error) {
                     console.error("Error al cargar especialidades:", error);
@@ -204,8 +225,8 @@ block content
                     
                     // Determinar la URL según el tipo de turno
                     const url = esTurnoEnfermero 
-                        ? `/enfermeros/areas/${encodeURIComponent(especialidad)}` 
-                        : `/medicos/especialidades/${encodeURIComponent(especialidad)}`;
+                        ? `/enfermeros/areas/${especialidad}` 
+                        : `/medicos/especialidades/${especialidad}`;
                     
                     console.log("Obteniendo profesionales de:", url);
                     const response = await fetch(url);
@@ -237,7 +258,10 @@ block content
                     
                     // Si es la primera carga, automáticamente cargamos los horarios
                     if (seleccionarOriginal) {
-                        await cargarHorarios(true);
+                        // Esperar un momento para asegurarse que el DOM se actualice
+                        setTimeout(() => {
+                            cargarHorarios(true);
+                        }, 100);
                     }
                 } catch (error) {
                     console.error("Error al cargar profesionales:", error);
@@ -361,7 +385,21 @@ block content
                     selectHora.innerHTML = '<option value="">Error al cargar horarios</option>';
                 }
             }
-            
+            async function aceptarMotivo() {
+                const motivoSeleccionado = motivo.value;
+                if (motivoSeleccionado === "Seleccione un Motivo") {
+                    alert("Seleccione un Motivo");
+                } else {
+                    alert(`Motivo seleccionado: ${motivoSeleccionado}`);
+                    motivoTurno = motivo.value;
+                }
+            };
+
+            document.addEventListener("DOMContentLoaded", () => {
+                motivo.addEventListener("change", async () => {
+                    aceptarMotivo();
+                })
+            })
             // Función para actualizar el turno
             async function actualizarTurno() {
                 try {
@@ -380,10 +418,10 @@ block content
                         paciente_Id: idPaciente,
                         fecha: fechaFormateada,
                         hora: selectHora.value,
-                        motivo: inputMotivo.value,
+                        motivo_Id: inputMotivo.value,
                         estado: selectEstado.value
                     };
-                    
+                    console.log("Datos del turno a actualizar:", datosTurno);
                     // Agregar el ID del profesional según corresponda
                     if (esTurnoEnfermero) {
                         datosTurno.enfermero_Id = selectMedico.value;
@@ -393,7 +431,7 @@ block content
                         datosTurno.enfermero_Id = null;
                     }
                     
-                    console.log("Enviando datos:", datosTurno);
+                    
                     
                     // Enviar datos al servidor
                     const response = await fetch(`/turnos/editar/${turnoId}`, {
@@ -461,3 +499,42 @@ block content
                 
                 return true;
             }
+            async function cargarMotivos() {
+                try {
+                    const response = await fetch("/motivos/listado");
+                    if (!response.ok) {
+                        throw new Error("Error al cargar los motivos");
+                    }
+                    const motivos = await response.json();
+                    
+                    // Limpiar el selector de motivos
+                    motivo.innerHTML = "";
+                    
+                    // Opción por defecto
+                    const defaultOption = document.createElement("option");
+                    defaultOption.value = "";
+                    defaultOption.textContent = "Seleccione un Motivo";
+                    defaultOption.selected = true;
+                    defaultOption.disabled = true;
+                    motivo.appendChild(defaultOption);
+                    
+                    // Añadir cada motivo
+                    motivos.forEach(mot => {
+                        const option = document.createElement("option");
+                        option.value = mot.id;
+                        option.textContent = mot.nombre;
+
+                        if(mot.id == motivoTurno) {
+                            option.selected = true;
+                            defaultOption.selected = false;
+                            console.log("Motivo ORIGINAL seleccionado:", mot.nombre);
+                        }
+                        motivo.appendChild(option);
+                    });
+                    
+                } catch (error) {
+                    console.error("Error al cargar los motivos:", error);
+                }
+            }
+
+

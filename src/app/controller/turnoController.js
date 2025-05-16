@@ -2,6 +2,9 @@ const Turno = require("../model/turno");
 const Paciente = require("../model/paciente");
 const Medico = require("../model/medico");
 const Enfermero = require("../model/enfermero");
+const Motivos = require("../model/motivos");
+const Especialidad = require("../model/especialidad");
+const Area = require("../model/area");
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
@@ -32,11 +35,30 @@ const turnoController = {
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Medico,
-            attributes: ["id", "nombre", "apellido", "especialidad"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Especialidad,
+                as: "Especialidad",
+                attributes: ["id", "nombre"],
+              },
+            ],
           },
           {
             model: Enfermero,
-            attributes: ["id", "nombre", "apellido", "area"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Area,
+                as: "Area",
+                attributes: ["id", "nombre"],
+              },
+            ],
+          },
+          {
+            model: Motivos,
+            as: "Motivo",
+            attributes: ["id", "nombre"],
           },
         ],
         order: [
@@ -90,7 +112,14 @@ const turnoController = {
       });
 
       const medicos = await Medico.findAll({
-        attributes: ["id", "nombre", "apellido", "especialidad"],
+        attributes: ["id", "nombre", "apellido"],
+        include: [
+          {
+            model: Especialidad,
+            as: "Especialidad",
+            attributes: ["id", "nombre"],
+          },
+        ],
         order: [
           ["apellido", "ASC"],
           ["nombre", "ASC"],
@@ -98,11 +127,23 @@ const turnoController = {
       });
 
       const enfermeros = await Enfermero.findAll({
-        attributes: ["id", "nombre", "apellido", "area"],
+        attributes: ["id", "nombre", "apellido"],
+        include: [
+          {
+            model: Area,
+            as: "Area",
+            attributes: ["id", "nombre"],
+          },
+        ],
         order: [
           ["apellido", "ASC"],
           ["nombre", "ASC"],
         ],
+      });
+
+      const motivos = await Motivos.findAll({
+        attributes: ["id", "nombre"],
+        order: [["nombre", "ASC"]],
       });
 
       res.render("vistasTurnos/nuevoTurno", {
@@ -110,6 +151,7 @@ const turnoController = {
         pacientes,
         medicos,
         enfermeros,
+        motivoTurno: motivos,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -133,7 +175,19 @@ const turnoController = {
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Medico,
-            attributes: ["id", "nombre", "apellido", "especialidad"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Especialidad,
+                as: "Especialidad",
+                attributes: ["id", "nombre"],
+              },
+            ],
+          },
+          {
+            model: Motivos,
+            as: "Motivo",
+            attributes: ["id", "nombre"],
           },
         ],
         order: [
@@ -162,13 +216,25 @@ const turnoController = {
     try {
       const turnos = await Turno.findAll({
         where: {
-          enfermero_Id: { [Op.not]: null }, // Solo turnos con enfermero asignado
+          enfermero_Id: { [Op.not]: null },
         },
         include: [
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Enfermero,
-            attributes: ["id", "nombre", "apellido", "area"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Area,
+                as: "Area",
+                attributes: ["id", "nombre"],
+              },
+            ],
+          },
+          {
+            model: Motivos,
+            as: "Motivo",
+            attributes: ["id", "nombre"],
           },
         ],
         order: [
@@ -204,8 +270,16 @@ const turnoController = {
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Medico,
-            attributes: ["id", "nombre", "apellido", "especialidad"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Especialidad,
+                as: "Especialidad",
+                attributes: ["id", "nombre"],
+              },
+            ],
           },
+          { model: Motivos, attributes: ["id", "nombre"] },
         ],
         order: [
           ["fecha", "ASC"],
@@ -243,8 +317,16 @@ const turnoController = {
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Medico,
-            attributes: ["id", "nombre", "apellido", "especialidad"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Especialidad,
+                as: "Especialidad",
+                attributes: ["id", "nombre"],
+              },
+            ],
           },
+          { model: Motivos, attributes: ["id", "nombre"] },
         ],
         context: "editar",
         order: [
@@ -276,14 +358,19 @@ const turnoController = {
       const turnos = await Turno.findAll({
         include: [
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
-          {
-            model: Medico,
-            attributes: ["id", "nombre", "apellido", "especialidad"],
-          },
+
           {
             model: Enfermero,
-            attributes: ["id", "nombre", "apellido", "area"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Area,
+                as: "Area",
+                attributes: ["id", "nombre"],
+              },
+            ],
           },
+          { model: Motivos, attributes: ["id", "nombre"] },
         ],
         order: [
           ["fecha", "ASC"],
@@ -318,8 +405,16 @@ const turnoController = {
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Enfermero,
-            attributes: ["id", "nombre", "apellido", "area"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Area,
+                as: "Area",
+                attributes: ["id", "nombre"],
+              },
+            ],
           },
+          { model: Motivos, attributes: ["id", "nombre"] },
         ],
         order: [
           ["fecha", "ASC"],
@@ -354,8 +449,16 @@ const turnoController = {
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
             model: Enfermero,
-            attributes: ["id", "nombre", "apellido", "area"],
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Area,
+                as: "Area",
+                attributes: ["id", "nombre"],
+              },
+            ],
           },
+          { model: Motivos, attributes: ["id", "nombre"] },
         ],
         order: [
           ["fecha", "ASC"],
@@ -412,6 +515,29 @@ const turnoController = {
       });
     }
   },
+  // vista para generar turnos a partir de una derivación
+  nuevaInterconsultaView: async (req, res) => {
+    const dni = req.params.dni;
+    const atencionId = req.params.atencionId;
+    const paciente = await Paciente.findOne({
+      where: { dni },
+    });
+    try {
+      res.render("vistasInterconsultas/nuevaInterconsulta", {
+        title: "Nueva Interconsulta",
+        dni,
+        atencionId,
+        paciente,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista de nueva Interconsulta:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la vista de nueva Interconsulta",
+        error,
+      });
+    }
+  },
 
   // MÉTODOS PARA OPERACIONES CRUD
 
@@ -421,7 +547,7 @@ const turnoController = {
       const {
         fecha,
         hora,
-        motivo,
+        motivo_Id,
         estado,
         paciente_Id,
         medico_Id,
@@ -460,7 +586,7 @@ const turnoController = {
       const turno = await Turno.create({
         fecha,
         hora,
-        motivo,
+        motivo_Id,
         estado: estado || "Pendiente",
         paciente_Id,
         medico_Id,
@@ -497,7 +623,7 @@ const turnoController = {
       const {
         fecha,
         hora,
-        motivo,
+        motivo_Id,
         estado,
         paciente_Id,
         medico_Id,
@@ -518,7 +644,7 @@ const turnoController = {
         {
           fecha,
           hora,
-          motivo,
+          motivo_Id,
           estado,
           paciente_Id,
           medico_Id,
@@ -558,21 +684,36 @@ const turnoController = {
 
       // Buscar el turno con todas sus relaciones
       const turno = await Turno.findByPk(id, {
-        include: [{ model: Paciente }, { model: Medico }, { model: Enfermero }],
+        include: [
+          { model: Paciente },
+          {
+            model: Medico,
+            include: [
+              {
+                model: Especialidad,
+                as: "Especialidad",
+              },
+            ],
+          },
+          {
+            model: Enfermero,
+            include: [
+              {
+                model: Area,
+                as: "Area",
+              },
+            ],
+          },
+          {
+            model: Motivos,
+            as: "Motivo",
+          },
+        ],
       });
 
-      if (!turno) {
-        return res.status(404).render("vistasTurnos/mensajes", {
-          title: "Error",
-          message: "Turno no encontrado",
-          userType: req.session?.userType || "guest",
-        });
-      }
-
-      // Renderizar la vista con el nombre correcto de la variable
       res.render("vistasTurnos/edicionDeTodoTurno", {
         title: "Editar Turno",
-        turno, // Nombre correcto que usa la vista
+        turno,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -673,40 +814,5 @@ const turnoController = {
   },
 };
 // hooks
-Turno.afterCreate(async (turno, options) => {
-  try {
-    // Importar el modelo HistoriaClinica
-    const HistoriaClinica = require("../model/historiaClinica");
-
-    // Buscar la historia clínica existente del paciente
-    let historiaClinica = await HistoriaClinica.findOne({
-      where: { paciente_Id: turno.paciente_Id },
-    });
-
-    // Si no existe una historia clínica para este paciente, crearla
-    if (!historiaClinica) {
-      historiaClinica = await HistoriaClinica.create({
-        paciente_Id: turno.paciente_Id,
-        fecha: new Date(),
-        detalle: "Historia clínica creada automáticamente",
-      });
-    }
-
-    // Crear una entrada para este turno en la historia clínica
-    // Opción 1: Actualizar el turno para que apunte a la historia clínica
-    await turno.update(
-      {
-        historiaClinica_Id: historiaClinica.id,
-      },
-      { transaction: options.transaction }
-    );
-
-    console.log(
-      `Turno ID: ${turno.id} asociado a Historia Clínica ID: ${historiaClinica.id}`
-    );
-  } catch (error) {
-    console.error("Error al asociar turno con historia clínica:", error);
-  }
-});
 
 module.exports = turnoController;

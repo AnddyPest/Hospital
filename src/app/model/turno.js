@@ -19,10 +19,6 @@ const Turno = sequelize.define("Turno", {
     type: DataTypes.TIME,
     allowNull: false,
   },
-  motivo: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
   estado: {
     type: DataTypes.STRING,
     allowNull: false,

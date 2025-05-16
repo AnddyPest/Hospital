@@ -36,6 +36,12 @@ router.get("/editar/formulario", turnoController.editarTurnoFormView);
 router.put("/editar/:id", turnoController.editarTurno);
 router.delete("/borrar/:id", turnoController.borrarTurno);
 
+//ruta para interconsultas
+router.get(
+  "/interconsulta/paciente/:dni/atencion/:atencionId",
+  turnoController.nuevaInterconsultaView
+);
+
 // RUTAS DE API PARA AJAX
 router.get(
   "/listadohorarios/:medico_Id/:fecha",

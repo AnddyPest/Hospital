@@ -25,20 +25,15 @@ const Atencion = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
-    derivacion: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    interConsulta: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    internacion: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
     situacion: {
-      type: DataTypes.ENUM("alta", "internado", "diagnosis", "fallecido"),
+      type: DataTypes.ENUM(
+        "alta",
+        "internado",
+        "diagnosis",
+        "fallecido",
+        "interconsulta",
+        "derivado"
+      ),
       allowNull: true,
     },
     turno_Id: {

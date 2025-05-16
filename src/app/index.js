@@ -8,6 +8,10 @@ const maestranzaRouter = require("./router/maestranzaRouter"); // Maestranzas Ro
 const pacienteRouter = require("./router/pacienteRouter"); // Pacientes Router
 const turnoRouter = require("./router/turnoRouter"); // Turnos Router
 const camaRouter = require("./router/camasRouter"); // Camas Router
+const motivosRouter = require("./router/motivosRouter"); // Motivos Router
+const especialidadRouter = require("./router/especialidadRouter"); // Especialidades Router
+const areaRouter = require("./router/areaRouter"); // Area Router
+const HospitalesExternosRouter = require("./router/hospitalesExternosRouter"); // Hospitales Externos Router
 
 const atencionRouter = require("./router/atencionRouter"); // Atencion Router
 const path = require("path");
@@ -38,6 +42,10 @@ app.use("/pacientes", pacienteRouter);
 app.use("/turnos", turnoRouter);
 app.use("/camas", camaRouter);
 app.use("/atencion", atencionRouter);
+app.use("/motivos", motivosRouter);
+app.use("/especialidades", especialidadRouter);
+app.use("/areas", areaRouter);
+app.use("/hospitalesExternos", HospitalesExternosRouter);
 
 //rutas publicas
 app.use("/", router);

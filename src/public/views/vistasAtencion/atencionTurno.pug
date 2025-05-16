@@ -28,7 +28,7 @@ mixin historiaPaciente(paciente, turnos)
                                                 td #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
                                             td #{turno.fecha}
                                             td #{turno.hora}
-                                            td #{turno.motivo}
+                                            td #{turno.Motivo ? turno.Motivo.nombre : "Sin motivo"}
                                             td #{turno.estado}
                                             td
                                                 button#atencionBtn.btn.btn-success.me-1(onclick=`event.preventDefault(); atencion(${turno.id});`) Atender
@@ -45,7 +45,7 @@ block content
     div
         img(src="/images/atencion.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
         
-        +header("Atencion Paciente", "/icons/user-injured-solid.svg")
+        +header("Atencion Turno", "/icons/hospital-user-solid.svg")
     
     +historiaPaciente(paciente, turnos)
        

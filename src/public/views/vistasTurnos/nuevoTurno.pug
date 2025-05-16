@@ -32,10 +32,10 @@ block content
                             img(src="/icons/calendar-days-solid.svg" style="width: 20px; height: 20px;")
                 div.col.w-25
                     select.form-select.form-select-lg.w-100.h-100(id="hourpicker", name="hourpicker")
-                        option.selected(value="Seleccione un horario") Seleccione un horario 
+                        option.selected(value="Seleccione un horario") Seleccione un Horario 
                 div.col.w-25
-                    input.form-control.form-control-lg.w-100(type="text" id="motivo" name="codigo" placeholder="Motivo" aria-label="ID Turno" aria-describedby="basic-addon1")
-                 
+                    select#motivo.form-select.form-select-lg.w-100.h-100(name="motivo")
+                        option.selected(value="Seleccione un Motivo") Seleccione un Motivo                  
             div.row.align-items-center.mt-5
                 div.col.w-25
                     button.btn.w-50.btn-info(class="btn-secondary custom-button2" id="botonNext" onclick="event.preventDefault(); aceptarDatos();") Aceptar Datos
@@ -75,7 +75,7 @@ block content
         // Método mejorado para fijar el área del turno
         async function fijarTipo() {
             try {
-                // Limpiar y mostrar estado de carga en el selector de profesionales
+                // Limpiar y mostrar estado de carga
                 selectMedico.innerHTML = "";
                 const loadingOption = document.createElement("option");
                 loadingOption.textContent = "Cargando profesionales...";
@@ -83,13 +83,19 @@ block content
                 loadingOption.selected = true;
                 selectMedico.appendChild(loadingOption);
                 
-                if (selectEsp.value === "Triage de Ingreso") {
+                const selectedValue = selectEsp.value;
+                
+                // Determinar si es área o especialidad por el prefijo
+                if (selectedValue.startsWith("area_")) {
+                    const areaId = selectedValue.replace("area_", "");
+                    
                     // Verificar si ya tenemos los enfermeros en caché
                     if (cachedEnfermeros) {
                         poblarSelectorProfesionales(cachedEnfermeros, "Enfermero");
                     } else {
                         try {
-                            const response = await fetch(`/enfermeros/areas/Triage de Ingreso`);
+                            // Usar ID del área en lugar del nombre
+                            const response = await fetch(`/enfermeros/areas/${areaId}`);
                             if (!response.ok) {
                                 throw new Error(`Error ${response.status}: No se pudieron obtener los enfermeros`);
                             }
@@ -105,15 +111,16 @@ block content
                             manejarError(error, "enfermeros");
                         }
                     }
-                } else {
-                    const especialidad = selectEsp.value;
+                } else if (selectedValue.startsWith("esp_")) {
+                    const especialidadId = selectedValue.replace("esp_", "");
                     
                     // Verificar si ya tenemos los médicos de esta especialidad en caché
-                    if (cachedMedicos[especialidad]) {
-                        poblarSelectorProfesionales(cachedMedicos[especialidad], "Médico");
+                    if (cachedMedicos[especialidadId]) {
+                        poblarSelectorProfesionales(cachedMedicos[especialidadId], "Médico");
                     } else {
                         try {
-                            const response = await fetch(`/medicos/especialidades/${especialidad}`);
+                            // Usar ID de especialidad en lugar del nombre
+                            const response = await fetch(`/medicos/especialidades/${especialidadId}`);
                             if (!response.ok) {
                                 throw new Error(`Error ${response.status}: No se pudieron obtener los médicos`);
                             }
@@ -121,7 +128,7 @@ block content
                             const medicos = await response.json();
                             
                             // Guardar en caché
-                            cachedMedicos[especialidad] = medicos;
+                            cachedMedicos[especialidadId] = medicos;
                             
                             // Poblar el selector
                             poblarSelectorProfesionales(medicos, "Médico");
@@ -185,7 +192,7 @@ block content
             // Añadir opción para reintentar
             const retryOption = document.createElement("option");
             retryOption.value = "retry";
-            retryOption.textContent = "⟳ Reintentar";
+            retryOption.textContent = "Reintentar";
             selectMedico.appendChild(retryOption);
             
             // Escuchar eventos de cambio para detectar el reintento
@@ -198,35 +205,56 @@ block content
             selectMedico.addEventListener("change", handleRetry, { once: true });
         }
 
-        //aca cargamos las especialidades en el select, sin repetir
+        // Reemplazar este código para cargar especialidades
         document.addEventListener("DOMContentLoaded", async () => {
             try {
-                // Usamos el nuevo endpoint que devuelve JSON directamente
-                const response = await fetch("/medicos/especialidades");
-                if (!response.ok) {
+                // Cargar especialidades desde el nuevo endpoint
+                const responseEsp = await fetch("/especialidades/listado");
+                if (!responseEsp.ok) {
                     throw new Error("Error al obtener las especialidades");
                 }
-                const especialidades = await response.json();
+                const especialidades = await responseEsp.json();
                 
-                // Añadimos una opción de Triage para enfermeros
-                const option = document.createElement("option");
-                option.value = "Triage de Ingreso";
-                option.textContent = "Triage de Ingreso";
-                selectEsp.appendChild(option);
+                // Limpiar y configurar el selector de especialidades
+                selectEsp.innerHTML = "";
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Seleccione un Area";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                selectEsp.appendChild(defaultOption);
                 
-                // Añadimos las especialidades médicas
+                // Cargar áreas para enfermeros (Triage)
+                const responseAreas = await fetch("/areas/listado");
+                if (!responseAreas.ok) {
+                    throw new Error("Error al obtener las áreas");
+                }
+                const areas = await responseAreas.json();
+                
+                // Buscar el área de Triage
+                const areaTriage = areas.find(area => area.nombre.includes("Triage"));
+                if (areaTriage) {
+                    const option = document.createElement("option");
+                    option.value = `area_${areaTriage.id}`;  // Prefijo para distinguir área de especialidad
+                    option.textContent = areaTriage.nombre;
+                    selectEsp.appendChild(option);
+                }
+                
+                // Añadir las especialidades médicas
                 especialidades.forEach(esp => {
                     const option = document.createElement("option");
-                    option.value = esp;
-                    option.textContent = esp;
+                    option.value = `esp_${esp.id}`;  // Prefijo para distinguir especialidad de área
+                    option.textContent = esp.nombre;
                     selectEsp.appendChild(option);
                 });
                 
             } catch (error) {
-                console.error("Error al cargar las especialidades:", error);
+                console.error("Error al cargar especialidades/áreas:", error);
+                selectEsp.innerHTML = "<option disabled selected>Error al cargar datos</option>";
             }
         });
-            //aca cargamos las fechas en el datepicker
+
+        //aca cargamos las fechas en el datepicker
         $(document).ready(function() {
             $('#datepicker input').datepicker({
                 format: 'dd/mm/yyyy',
@@ -349,7 +377,7 @@ block content
         async function aceptarMedico() {
             if(selectMedico.value === "Seleccione un Profesional") {
                 alert("Seleccione un Profesional");
-            }else if (selectEsp.value === "Triage de Ingreso") {
+            }else if (selectEsp.value.startsWith("area_")) {
                 idEnfermero = selectMedico.value;
                 console.log(idEnfermero);
                 alert(`Enfermero seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
@@ -375,7 +403,7 @@ block content
             const fecha = document.getElementById("inputFecha").value;
             if (fecha === "") {
                 alert("Seleccione una fecha");
-                return; // Agregué un return aquí para evitar continuar si no hay fecha
+                return;
             }   
             
             try {
@@ -389,35 +417,40 @@ block content
                 let response;
                 let horarios;
                 
-                if (selectEsp.value === "Triage de Ingreso") {
+                // Determinar si es área o especialidad por el prefijo del valor seleccionado
+                if (selectEsp.value.startsWith("area_")) {
                     console.log("Enfermero ID:", idEnfermero);
                     console.log("Fecha en el front:", fechaFormateada);
                     
-                    // Usar la ruta correcta para enfermeros
                     response = await fetch(`/turnos/listadohorariosenfermeros/${idEnfermero}/${fechaFormateada}`);
                 } else {
                     console.log("Médico ID:", idMedico);
                     console.log("Fecha en el front:", fechaFormateada);
                     
-                    // Usar la ruta correcta para médicos
                     response = await fetch(`/turnos/listadohorarios/${idMedico}/${fechaFormateada}`);
                 }
                 
-                if(!response.ok) {
-                    throw new Error(`Error ${response.status}: No se pudieron obtener los horarios disponibles`);
+                if (!response.ok) {
+                    throw new Error(`Error al obtener horarios: ${response.status}`);
                 }
                 
                 horarios = await response.json();
-                cargarHorariosDisponibles(horarios, selectEsp.value === "Triage de Ingreso");
+                console.log("Horarios ocupados:", horarios);
+                
+                // Determinar si estamos trabajando con enfermero o médico
+                const esEnfermero = selectEsp.value.startsWith("area_");
+                
+                // Cargar los horarios disponibles
+                cargarHorariosDisponibles(horarios, esEnfermero);
                 
             } catch (error) {
-                console.error("Error al obtener horarios:", error);
-                alert("Error al cargar horarios disponibles: " + error.message);
+                console.error("Error al cargar horarios:", error);
+                alert(`Error: ${error.message || "No se pudieron cargar los horarios disponibles"}`);
                 
-                // Limpiar el selector de horarios y mostrar mensaje de error
+                // Resetear el selector de horarios
                 hourpicker.innerHTML = "";
                 const errorOption = document.createElement("option");
-                errorOption.textContent = "Error al cargar horarios. Intente nuevamente.";
+                errorOption.textContent = "Error al cargar horarios";
                 errorOption.disabled = true;
                 errorOption.selected = true;
                 hourpicker.appendChild(errorOption);
@@ -475,6 +508,22 @@ block content
                 aceptarHorario();
             })
         })
+
+        async function aceptarMotivo() {
+            const motivoSeleccionado = motivo.value;
+            if (motivoSeleccionado === "Seleccione un Motivo") {
+                alert("Seleccione un Motivo");
+            } else {
+                alert(`Motivo seleccionado: ${motivoSeleccionado}`);
+                motivoTurno = motivo.value;
+            }
+        };
+
+        document.addEventListener("DOMContentLoaded", () => {
+            motivo.addEventListener("change", async () => {
+                aceptarMotivo();
+            })
+        })
         
         async function aceptarHorario() {
             const hora = hourpicker.value;
@@ -504,7 +553,7 @@ block content
             const estado = "pendiente";
             
             try {
-                // damos formato a la fecha para que sea YYYY-MM-DD
+                // Formatear fecha y hora para base de datos
                 const partesFecha = fechaTurno.split("/");
                 const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
                 const horaFormateada = `${horaTurno}:00`;
@@ -512,11 +561,11 @@ block content
                 console.log("Datos Enviados:", {
                     fechaFormateada,
                     horaFormateada,
-                    motivoTurno,
+                    motivo_Id: motivoTurno, // Cambiado a motivo_Id para claridad
                     estado,
-                    idPaciente,
-                    idMedico,
-                    idEnfermero,
+                    paciente_Id: idPaciente,
+                    medico_Id: idMedico,
+                    enfermero_Id: idEnfermero,
                 });
                 
                 const response = await fetch("/turnos/admin/new", {
@@ -528,7 +577,7 @@ block content
                         estado: estado,
                         fecha: fechaFormateada,
                         hora: horaFormateada,
-                        motivo: motivoTurno,
+                        motivo_Id: motivoTurno, // Aseguramos que se envía el ID del motivo
                         paciente_Id: idPaciente,
                         medico_Id: idMedico,
                         enfermero_Id: idEnfermero,
@@ -555,7 +604,7 @@ block content
                     if (response.ok) {
                         alert("Turno creado con éxito");
                         // Redirigir según el tipo de turno
-                        if (selectEsp.value === "Triage de Ingreso") {
+                        if (selectEsp.value.startsWith("area_")) {
                             window.location.href = "/turnos/admin/seleccionar/triages";
                         } else {
                             window.location.href = "/turnos/admin/seleccionar/turnos";
@@ -571,6 +620,37 @@ block content
                 alert(`Error: ${error.message || "No se pudo crear el turno"}`);
             }
         };
-
+        async function cargarMotivos() {
+            try {
+                const response = await fetch("/motivos/listado");
+                if (!response.ok) {
+                    throw new Error("Error al cargar los motivos");
+                }
+                const motivos = await response.json();
+                
+                // Limpiar el selector de motivos
+                motivo.innerHTML = "";
+                
+                // Opción por defecto
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Seleccione un Motivo";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                motivo.appendChild(defaultOption);
+                
+                // Añadir cada motivo
+                motivos.forEach(mot => {
+                    const option = document.createElement("option");
+                    option.value = mot.id;
+                    option.textContent = mot.nombre;
+                    motivo.appendChild(option);
+                });
+                
+            } catch (error) {
+                console.error("Error al cargar los motivos:", error);
+            }
+        }
+        cargarMotivos();
 
 

@@ -20,10 +20,7 @@ const Maestranza = sequelize.define("Maestranza", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-  area: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
+
   telefono: {
     type: DataTypes.STRING,
     allowNull: false,

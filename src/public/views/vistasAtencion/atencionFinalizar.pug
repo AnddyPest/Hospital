@@ -87,10 +87,11 @@ mixin atencionPaciente(turno)
                             //- botones ver de agregar lo que haga falta
                     hr.border-info.opacity-75.mt-1.mb-1
                     div.d-flex.justify-content-between.mt-4
-                        button#derivation.btn.btn-primary(onclick="event.preventDefault(); derivarPaciente();") Derivacion
-                        button#prescription.btn.btn-info(onclick="event.preventDefault(); prescripcion();") Prescripcion
-                        button#intern.btn.btn-warning(onclick="event.preventDefault(); internar();") Internacion
-                        button#emergency.btn.btn-danger.me-5(onclick="event.preventDefault(); emergencia();") Emergencia
+                        button#interconsulta.btn.btn-primary(onclick="event.preventDefault(); interconsulta();" disabled) Inter Consulta
+                        button#prescription.btn.btn-info(onclick="event.preventDefault(); prescripcion();" disabled) Prescripcion
+                        button#intern.btn.btn-warning(onclick="event.preventDefault(); internar();" disabled) Internacion
+                        button#derivation.btn-btn-light(onclick="event.preventDefault(); derivacion();" disabled) Derivacion
+                        button#emergency.btn.btn-danger.me-5(onclick="event.preventDefault(); emergencia();" disabled) Emergencia
                         a#cancel.btn.btn-secondary.mt-2(href=`/atencion/paciente/${turno.Paciente.dni}`) Cancelar
 block content
    
@@ -104,6 +105,8 @@ block content
     script.
         document.addEventListener('DOMContentLoaded', initOptionPanel);
         const turno_Id = '#{turno ? turno.id : ''}';
+        let atencionId;
+        const dni = document.getElementById('dniPaciente').textContent;
         // limpia el formulario
         function refreshPage()  {
             window.location.reload();
@@ -152,6 +155,8 @@ block content
                 if(response.ok) {
                     const data = await response.json();
                     if (data.success) {
+                        atencionId = data.atencionId;
+                        console.log("ID DE ATENCION: ", atencionId);
                         optionpanel('Consulta guardada ¿Requiere acciones adicionales?', 'success');
                         
                     } else {
@@ -189,12 +194,23 @@ block content
             return new Promise((resolve) => {
                 const modal = new bootstrap.Modal(document.getElementById('optionModal'));
                 document.getElementById('optionMessage').textContent = message;
-                let dni = document.getElementById('dniPaciente').textContent;
+               
                 
                 const btnSi = document.getElementById('btnSi');
                 const btnNo = document.getElementById('btnNo');
                 
                 const handleYes = () => {
+                    document.getElementById('interconsulta').disabled = false;
+                    document.getElementById('prescription').disabled = false;
+                    document.getElementById('intern').disabled = false;
+                    document.getElementById('emergency').disabled = false;
+                    document.getElementById('derivation').disabled = false;
+                    document.getElementById('saveForm').disabled = true;
+                    document.getElementById('cleanForm').disabled = true;
+                    document.getElementById('diagnostico').disabled = true;
+                    document.getElementById('afiliado').disabled = true;
+                    document.getElementById('matricula').disabled = true;
+                    document.getElementById('observaciones').disabled = true;
                     btnSi.removeEventListener('click', handleYes);
                     btnNo.removeEventListener('click', handleNo);
                     modal.hide();
@@ -206,8 +222,8 @@ block content
                     btnSi.removeEventListener('click', handleYes);
                     btnNo.removeEventListener('click', handleNo);
                     modal.hide();
-                    const situacion = 'alta';
-                    const datosActualizacionSituacion = {
+                    let situacion = 'alta';
+                    let datosActualizacionSituacion = {
                         situacion: situacion
                     }
                     body = JSON.stringify(datosActualizacionSituacion);
@@ -229,4 +245,42 @@ block content
                 modal.show();
             });
         };
+        // hacer las vistas, modelos y controladores para derivacion, prescripcion, internacion y emergencia
+        // derivacion en la tabla de atencion sera clave secundaria importada de la tabla derivaciones
+        // cada derivacion hasOne o hasMany con atencion?
+        function interconsulta() {
+            const dni = document.getElementById('dniPaciente').textContent;
+            let situacion = 'interconsulta';
+            let datosActualizacionSituacion = {
+                situacion: situacion
+            }
+            body = JSON.stringify(datosActualizacionSituacion);
+            fetch(`/atencion/actualizarSituacion/${turno_Id}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: body
+            })
+            window.location.href = `/turnos/interconsulta/paciente/${dni}/atencion/${atencionId}`;
+
+        }
+
+        function derivacion() {
+            const dni = document.getElementById('dniPaciente').textContent;
+            window.location.href = `/derivacion/paciente/${dni}/atencion/${atencionId}`;
+        }
+        function prescripcion() {
+            const dni = document.getElementById('dniPaciente').textContent;
+            window.location.href = `/prescripcion/paciente/${dni}/atencion/${atencionId}`;
+        }
+        function internar() {
+            const dni = document.getElementById('dniPaciente').textContent;
+            window.location.href = `/internacion/paciente/${dni}/atencion/${atencionId}`;
+        }
+        function emergencia() {
+            const dni = document.getElementById('dniPaciente').textContent;
+            window.location.href = `/emergencia/paciente/${dni}/atencion/${atencionId}`;
+        }
+
                 

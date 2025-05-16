@@ -1,4 +1,5 @@
 const Enfermero = require("../model/enfermero");
+const Area = require("../model/area");
 const sequelize = require("sequelize");
 
 //dentro de este controlador se encuentran los métodos para manejar las peticiones http para la tabla Enfermero
@@ -24,7 +25,18 @@ const enfermeroController = {
   // Vista para listar todos los enfermeros
   listarView: async (req, res) => {
     try {
-      const enfermeros = await Enfermero.findAll();
+      const enfermeros = await Enfermero.findAll({
+        include: [
+          {
+            model: Area,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
       res.render("vistasEnfermeros/listarEnfermeros", {
         title: "Listar Enfermeros",
         enfermeros,
@@ -60,8 +72,12 @@ const enfermeroController = {
   // Vista de formulario para nuevo enfermero
   nuevoView: async (req, res) => {
     try {
+      const areas = await Area.findAll({
+        attributes: ["id", "nombre"],
+      });
       res.render("vistasEnfermeros/nuevoEnfermero", {
         title: "Nuevo Enfermero",
+        areas,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -76,7 +92,18 @@ const enfermeroController = {
   // Vista para borrar enfermeros
   borrarView: async (req, res) => {
     try {
-      const enfermeros = await Enfermero.findAll();
+      const enfermeros = await Enfermero.findAll({
+        include: [
+          {
+            model: Area,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
       res.render("vistasEnfermeros/borrarEnfermero", {
         title: "Borrar Enfermero",
         enfermeros,
@@ -98,7 +125,14 @@ const enfermeroController = {
       let enfermeroAEditar = null;
 
       if (id) {
-        enfermeroAEditar = await Enfermero.findByPk(id);
+        enfermeroAEditar = await Enfermero.findByPk(id, {
+          include: [
+            {
+              model: Area,
+              attributes: ["id", "nombre"],
+            },
+          ],
+        });
         if (!enfermeroAEditar) {
           return res.status(404).render("error", {
             message: "Enfermero no encontrado",
@@ -106,7 +140,18 @@ const enfermeroController = {
         }
       }
 
-      const enfermeros = await Enfermero.findAll();
+      const enfermeros = await Enfermero.findAll({
+        include: [
+          {
+            model: Area,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
       res.render("vistasEnfermeros/editarEnfermeros", {
         title: "Editar Enfermero",
         enfermeros,
@@ -125,15 +170,24 @@ const enfermeroController = {
   // Vista para seleccionar enfermero
   seleccionarView: async (req, res) => {
     try {
-      const enfermeros = await Enfermero.findAll();
-      const areas = await Enfermero.findAll({
-        attributes: [[sequelize.fn("DISTINCT", sequelize.col("area")), "area"]],
+      const enfermeros = await Enfermero.findAll({
+        include: [
+          {
+            model: Area,
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
       });
+      const areas = await Area.findAll();
 
       res.render("vistasEnfermeros/seleccionarEnfermero", {
         title: "Seleccionar Enfermero",
         enfermeros,
-        areas: areas.map((e) => e.area),
+        areas,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -151,12 +205,12 @@ const enfermeroController = {
   crearEnfermero: async (req, res) => {
     try {
       console.log("Creando nuevo enfermero:", req.body);
-      const { dni, nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area_Id, telefono } = req.body;
       const nuevoEnfermero = await Enfermero.create({
         dni,
         nombre,
         apellido,
-        area,
+        area_Id,
         telefono,
       });
 
@@ -179,9 +233,9 @@ const enfermeroController = {
   editarEnfermero: async (req, res) => {
     try {
       const { id } = req.params;
-      const { dni, nombre, apellido, area, telefono } = req.body;
+      const { dni, nombre, apellido, area_Id, telefono } = req.body;
       const [updated] = await Enfermero.update(
-        { dni, nombre, apellido, area, telefono },
+        { dni, nombre, apellido, area_Id, telefono },
         { where: { id } }
       );
 
@@ -231,32 +285,20 @@ const enfermeroController = {
     }
   },
 
-  // Método para obtener todas las áreas de enfermeros
-  obtenerAreas: async (req, res) => {
-    try {
-      const areas = await Enfermero.findAll({
-        attributes: [[sequelize.fn("DISTINCT", sequelize.col("area")), "area"]],
-      });
-
-      const listaAreas = areas.map((item) => item.area);
-      res.json(listaAreas);
-    } catch (error) {
-      console.error("Error al obtener áreas:", error);
-      res.status(500).json({
-        message: "Error al obtener áreas",
-        error: error.message,
-      });
-    }
-  },
-
   // Método para obtener enfermeros por área
   obtenerEnfermerosPorArea: async (req, res) => {
     try {
-      const { area } = req.params;
+      const { area_Id } = req.params;
 
       const enfermeros = await Enfermero.findAll({
-        where: { area },
-        attributes: ["id", "nombre", "apellido", "area"],
+        where: { area_Id },
+        attributes: ["id", "nombre", "apellido"],
+        include: [
+          {
+            model: Area,
+            attributes: ["id", "nombre"],
+          },
+        ],
       });
 
       if (enfermeros.length === 0) {
@@ -278,7 +320,13 @@ const enfermeroController = {
   getAllEnfermeros: async (req, res) => {
     try {
       const enfermeros = await Enfermero.findAll({
-        attributes: ["id", "nombre", "apellido", "area"],
+        attributes: ["id", "nombre", "apellido"],
+        include: [
+          {
+            model: Area,
+            attributes: ["id", "nombre"],
+          },
+        ],
         order: [
           ["apellido", "ASC"],
           ["nombre", "ASC"],

@@ -4,6 +4,7 @@ const Paciente = require("../model/paciente");
 const Turno = require("../model/turno");
 const Medico = require("../model/medico");
 const Enfermero = require("../model/enfermero");
+const Motivo = require("../model/motivos");
 
 const atencionController = {
   index: async (req, res) => {
@@ -60,10 +61,14 @@ const atencionController = {
             model: Enfermero,
             required: false,
           },
+          {
+            model: Motivo,
+            attributes: ["id", "nombre"],
+          },
         ],
         order: [
-          ["fecha", "DESC"],
-          ["hora", "DESC"],
+          ["fecha", "ASC"],
+          ["hora", "ASC"],
         ],
       });
 
@@ -161,6 +166,9 @@ const atencionController = {
             where: { turno_Id: turnoId },
           }
         );
+        atencion = await Atencion.findOne({
+          where: { turno_Id: turnoId },
+        });
       } else {
         atencion = await Atencion.create({
           diagnostico,
@@ -181,6 +189,7 @@ const atencionController = {
       return res.status(200).json({
         success: true,
         message: "Atención guardada correctamente",
+        atencionId: atencion.id,
       });
     } catch (error) {
       console.error("Error al guardar la atención:", error);
