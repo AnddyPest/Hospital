@@ -37,7 +37,7 @@ const hospitalesExternosController = {
   // Vista para crear un nuevo hospital externo
   nuevoView: async (req, res) => {
     try {
-      res.render("vistasHospitalesExternos/nuevoHospitalExterno", {
+      res.render("vistasDatos/nuevaHospExternos", {
         title: "Nuevo Hospital Externo",
         userType: req.session?.userType || "guest",
       });
@@ -52,18 +52,18 @@ const hospitalesExternosController = {
   // Vista para editar un hospital externo
   editarView: async (req, res) => {
     try {
-      const hospitalExternoId = req.params.id;
-      const hospitalExterno = await HospitalesExternos.findByPk(
-        hospitalExternoId
-      );
-      if (!hospitalExterno) {
+      const hospitales_externos = await HospitalesExternos.findAll({
+        attributes: ["id", "nombre", "complejidad"],
+        order: [["nombre", "ASC"]],
+      });
+      if (!hospitales_externos) {
         return res.status(404).render("error", {
           message: "Hospital externo no encontrado",
         });
       }
-      res.render("vistasHospitalesExternos/editarHospitalExterno", {
+      res.render("vistasDatos/editarHospExternos", {
         title: "Editar Hospital Externo",
-        hospitalExterno,
+        hospitales_externos,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -77,18 +77,18 @@ const hospitalesExternosController = {
   // Vista para eliminar un hospital externo
   eliminarView: async (req, res) => {
     try {
-      const hospitalExternoId = req.params.id;
-      const hospitalExterno = await HospitalesExternos.findByPk(
-        hospitalExternoId
-      );
-      if (!hospitalExterno) {
+      const hospitales_externos = await HospitalesExternos.findAll({
+        attributes: ["id", "nombre", "complejidad"],
+        order: [["nombre", "ASC"]],
+      });
+      if (!hospitales_externos) {
         return res.status(404).render("error", {
           message: "Hospital externo no encontrado",
         });
       }
-      res.render("vistasHospitalesExternos/eliminarHospitalExterno", {
+      res.render("vistasDatos/borrarHospExternos", {
         title: "Eliminar Hospital Externo",
-        hospitalExterno,
+        hospitales_externos,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -100,15 +100,14 @@ const hospitalesExternosController = {
     }
   },
   // Crear un nuevo hospital externo
-  crearHospitalExterno: async (req, res) => {
+  crear: async (req, res) => {
     try {
-      const { nombre, direccion, telefono } = req.body;
+      const { nombre, complejidad } = req.body;
       await HospitalesExternos.create({
         nombre,
-        direccion,
-        telefono,
+        complejidad,
       });
-      res.redirect("/hospitalesExternos/listar");
+      res.redirect("/hospitalesExternos/listado");
     } catch (error) {
       console.error("Error al crear hospital externo:", error);
       res.status(500).render("error", {
@@ -118,51 +117,82 @@ const hospitalesExternosController = {
     }
   },
   // Editar un hospital externo
-  editarHospitalExterno: async (req, res) => {
+  editar: async (req, res) => {
     try {
-      const hospitalExternoId = req.params.id;
-      const { nombre, direccion, telefono } = req.body;
-      const hospitalExterno = await HospitalesExternos.findByPk(
-        hospitalExternoId
-      );
-      if (!hospitalExterno) {
-        return res.status(404).render("error", {
-          message: "Hospital externo no encontrado",
+      const externoId = req.params.id;
+      const { nombre, complejidad } = req.body;
+
+      // Buscar el área
+      const hospitales_externos = await HospitalesExternos.findByPk(externoId);
+
+      if (!hospitales_externos) {
+        return res.status(404).json({
+          success: false,
+          message: "Externo no encontrada",
         });
       }
-      await HospitalesExternos.update(
-        { nombre, direccion, telefono },
-        { where: { id: hospitalExternoId } }
-      );
-      res.redirect("/hospitalesExternos/listar");
+
+      // Actualizar el Externo
+      await hospitales_externos.update({ nombre, complejidad });
+
+      // Devolver respuesta JSON de éxito
+      return res.status(200).json({
+        success: true,
+        message: "Externo actualizada correctamente",
+        data: {
+          id: hospitales_externos.id,
+          nombre: hospitales_externos.nombre,
+          complejidad: hospitales_externos.complejidad,
+        },
+      });
     } catch (error) {
-      console.error("Error al editar hospital externo:", error);
-      res.status(500).render("error", {
-        message: "Error al editar el hospital externo",
-        error,
+      console.error("Error al editar Externo:", error);
+
+      // Devolver respuesta JSON de error
+      return res.status(500).json({
+        success: false,
+        message: "Error al editar el Externo",
+        error: error.message,
       });
     }
   },
   // Eliminar un hospital externo
-  eliminarHospitalExterno: async (req, res) => {
+  eliminar: async (req, res) => {
     try {
-      const hospitalExternoId = req.params.id;
-      const hospitalExterno = await HospitalesExternos.findByPk(
-        hospitalExternoId
-      );
-      if (!hospitalExterno) {
+      const externoId = req.params.id;
+      const hospital_externo = await HospitalesExternos.findByPk(externoId);
+      if (!hospital_externo) {
         return res.status(404).render("error", {
-          message: "Hospital externo no encontrado",
+          message: "Externo no encontrada",
         });
       }
-      await HospitalesExternos.destroy({ where: { id: hospitalExternoId } });
-      res.redirect("/hospitalesExternos/listar");
+      await hospital_externo.destroy();
+      res.redirect("/hospitalesExternos/listado");
     } catch (error) {
-      console.error("Error al eliminar hospital externo:", error);
+      console.error("Error al eliminar externo:", error);
       res.status(500).render("error", {
-        message: "Error al eliminar el hospital externo",
+        message: "Error al eliminar el Externo",
         error,
       });
+    }
+  },
+  listar: async (req, res) => {
+    try {
+      const hospitales_externos = await HospitalesExternos.findAll({
+        attributes: ["id", "nombre", "complejidad"],
+        order: [["nombre", "ASC"]],
+      });
+
+      res.render("vistasDatos/listarHospExternos", {
+        title: "Listado de Externos",
+        hospitales_externos,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al listar Externos", error);
+      res
+        .status(500)
+        .json({ error: "Error al listar Externos", message: error.message });
     }
   },
 };

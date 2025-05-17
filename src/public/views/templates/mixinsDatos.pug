@@ -150,3 +150,155 @@ mixin listadoDatos(entityName, context, entityURL, items = [])
             });
           });
         });
+
+mixin listadoDatosHospital(entityName, context, entityURL, items = [])
+  div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.w-75(id="adminControl")
+    
+    // Formulario para añadir nuevo hospital
+    if context === 'nuevo'
+      div.card.bg-dark.text-light.p-4.mb-4.border.border-info
+        h4.mb-3 Agregar nuevo #{entityName}
+        form(action=`/${entityURL}/crear` method="POST")
+          div.form-group.mb-3
+            label(for="nombre") Nombre
+            input.form-control(type="text" name="nombre" required placeholder=`Nombre del ${entityName}...`)
+          div.form-group.mb-3
+            label(for="complejidad") Complejidad
+            select.form-control(name="complejidad" required)
+              option(value="Alta") Alta
+              option(value="Media") Media
+              option(value="Baja") Baja
+          button.btn.btn-success.w-100(type="submit")
+            i.fas.fa-plus.me-2
+            | Agregar
+
+    // Tabla para listar/editar/borrar hospitales
+    if context !== 'nuevo'
+      div.table-container(style="max-height: 60vh; overflow-y: auto; border: 1px solid #0dcaf0; border-radius: 10px;")
+        table.table.table-hover.table-dark.table-bordered.border-info
+          thead.sticky-top.bg-dark
+            tr
+              th.text-light ID
+              th.text-light Nombre
+              th.text-light Complejidad
+              if context === 'editar' || context === 'borrar'
+                th.text-light Acciones
+          tbody
+            if items && items.length > 0
+              each item in items
+                tr(id=`row-${item.id}`)
+                  td #{item.id}
+                  td(class=`name-cell-${item.id}`) #{item.nombre}
+                  td(class=`complexity-cell-${item.id}`) #{item.complejidad}
+                  if context === 'editar'
+                    td
+                      button.btn.btn-warning.btn-sm.edit-inline(type="button" data-id=item.id)
+                        i.fas.fa-pen.me-1
+                        | Editar
+                  if context === 'borrar'
+                    td
+                      form(action=`/${entityURL}/eliminar/${item.id}` method="POST" onsubmit="return confirm('¿Está seguro que desea eliminar este elemento?');")
+                        button.btn.btn-danger.btn-sm(type="submit")
+                          i.fas.fa-trash.me-1
+                          | Eliminar
+            else
+              tr
+                td(colspan=context === 'editar' || context === 'borrar' ? 4 : 3).text-center No hay datos disponibles
+
+    // Botón para volver
+    div.mt-4
+      a.btn.btn-info(href=`/${entityURL}`)
+        i.fas.fa-arrow-left.me-2
+        | Volver
+
+    // Script mejorado para edición en línea con campo complejidad
+    if context === 'editar'
+      script.
+        const entityURL = "#{entityURL}";
+        document.addEventListener('DOMContentLoaded', function() {
+          const editButtons = document.querySelectorAll('.edit-inline');
+          
+          editButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+              e.preventDefault();
+              const id = this.getAttribute('data-id');
+              const nameCell = document.querySelector(`.name-cell-${id}`);
+              const complexityCell = document.querySelector(`.complexity-cell-${id}`);
+              const currentName = nameCell.textContent.trim();
+              const currentComplexity = complexityCell.textContent.trim();
+              
+              // Reemplazar el contenido de la celda de nombre
+              nameCell.innerHTML = `
+                <input class="form-control" type="text" id="edit-name-${id}" value="${currentName}" required>
+              `;
+              
+              // Reemplazar el contenido de la celda de complejidad
+              complexityCell.innerHTML = `
+                <div class="d-flex">
+                  <select class="form-control" id="edit-complexity-${id}">
+                    <option value="Alta" ${currentComplexity === 'Alta' ? 'selected' : ''}>Alta</option>
+                    <option value="Media" ${currentComplexity === 'Media' ? 'selected' : ''}>Media</option>
+                    <option value="Baja" ${currentComplexity === 'Baja' ? 'selected' : ''}>Baja</option>
+                  </select>
+                  <button class="btn btn-success ms-2 save-btn" data-id="${id}">
+                    <i class="fas fa-save"></i>
+                  </button>
+                  <button class="btn btn-danger ms-2 cancel-btn" data-id="${id}">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              `;
+              
+              // Ocultar el botón de editar
+              this.style.display = 'none';
+              
+              // Agregar evento al botón de guardar
+              const saveBtn = complexityCell.querySelector('.save-btn');
+              saveBtn.addEventListener('click', function() {
+                const newName = document.getElementById(`edit-name-${id}`).value.trim();
+                const newComplexity = document.getElementById(`edit-complexity-${id}`).value;
+                
+                if (!newName) {
+                  alert('El nombre no puede estar vacío');
+                  return;
+                }
+                
+                fetch(`/${entityURL}/editar/${id}`, {
+                  method: 'POST', 
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ 
+                    nombre: newName,
+                    complejidad: newComplexity
+                  })
+                })
+                .then(response => {
+                  if (response.ok) {
+                    return response.json();
+                  }
+                  throw new Error('Error al actualizar');
+                })
+                .then(data => {
+                  // Actualizar las celdas
+                  nameCell.textContent = newName;
+                  complexityCell.textContent = newComplexity;
+                  button.style.display = 'inline-block';
+                  alert('Actualización exitosa');
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('Error al actualizar. Intente de nuevo.');
+                });
+              });
+              
+              // Agregar evento al botón de cancelar
+              const cancelBtn = complexityCell.querySelector('.cancel-btn');
+              cancelBtn.addEventListener('click', function() {
+                nameCell.textContent = currentName;
+                complexityCell.textContent = currentComplexity;
+                button.style.display = 'inline-block';
+              });
+            });
+          });
+        });

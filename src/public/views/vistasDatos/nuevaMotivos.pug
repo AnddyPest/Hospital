@@ -1,0 +1,16 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+include ../templates/mixinsDatos.pug
+
+block content
+        
+        
+        
+    div
+        img(src="/images/datos.png" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh);  object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Administrar Motivos", "/icons/user-notes-medical-solid.svg")
+        
+        +listadoDatos("Motivo", "nuevo", "motivos", motivos)
+
