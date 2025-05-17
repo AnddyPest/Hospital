@@ -87,10 +87,10 @@ mixin atencionPaciente(turno)
                             //- botones ver de agregar lo que haga falta
                     hr.border-info.opacity-75.mt-1.mb-1
                     div.d-flex.justify-content-between.mt-4
-                        button#interconsulta.btn.btn-primary(onclick="event.preventDefault(); interconsulta();" disabled) Inter Consulta
+                        button#interconsulta.btn.btn-primary(onclick="event.preventDefault(); interconsultaFn();" disabled) Inter Consulta
                         button#prescription.btn.btn-info(onclick="event.preventDefault(); prescripcion();" disabled) Prescripcion
                         button#intern.btn.btn-warning(onclick="event.preventDefault(); internar();" disabled) Internacion
-                        button#derivation.btn-btn-light(onclick="event.preventDefault(); derivacion();" disabled) Derivacion
+                        button#derivation.btn.btn-light(onclick="event.preventDefault(); derivacion();" disabled) Derivacion
                         button#emergency.btn.btn-danger.me-5(onclick="event.preventDefault(); emergencia();" disabled) Emergencia
                         a#cancel.btn.btn-secondary.mt-2(href=`/atencion/paciente/${turno.Paciente.dni}`) Cancelar
 block content
@@ -157,7 +157,7 @@ block content
                     if (data.success) {
                         atencionId = data.atencionId;
                         console.log("ID DE ATENCION: ", atencionId);
-                        optionpanel('Consulta guardada ¿Requiere acciones adicionales?', 'success');
+                        optionpanel('Consulta guardada', 'success');
                         
                     } else {
                         alert('Error al guardar la consulta');
@@ -168,21 +168,28 @@ block content
                 };
         function initOptionPanel() {
             const modal = document.createElement("div");
-            modal.className = "modal fade";
+            modal.className = "modal fade ";
             modal.id = "optionModal";
+            modal.setAttribute("data-bs-backdrop", "static");
+            modal.setAttribute("data-bs-keyboard", "false");
             modal.tabIndex = "-1";
             modal.innerHTML = `
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content bg-dark text-light">
                     <div class="modal-header" border-info">
-                        <h5 class="modal-title">Atención!</h5>
+                        <h5 class="modal-title">CONFIRME DATOS</h5>
                     </div>
                     <div class="modal-body">
                         <p id="optionMessage"></p>
+                        <p><strong>Afiliado N°:</strong> <span id="modalAfiliado"></span></p>
+                        <p><strong>Matrícula N°:</strong> <span id="modalMatricula"></span></p>
+                        <p>Si los datos no son correctos Presionar <strong>Cancelar.</strong></p>
+                        <p>Si los datos son correctos Presionar <strong>Si</strong> o <strong>Dar Alta</strong> segun sea necesario.</strong></p>
                     </div>
                     <div class="modal-footer border-info">
                         <button type="button" class="btn btn-success" id="btnSi">Si</button>
-                        <button type="button" class="btn btn-danger" id="btnNo">No</button>
+                        <button type="button" class="btn btn-info" id="btnNo">Dar Alta</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
                     </div>
                 </div>
             </div>
@@ -194,7 +201,13 @@ block content
             return new Promise((resolve) => {
                 const modal = new bootstrap.Modal(document.getElementById('optionModal'));
                 document.getElementById('optionMessage').textContent = message;
-               
+
+                const afiliado = document.getElementById('afiliado').value;
+                const matricula = document.getElementById('matricula').value;
+
+                document.getElementById('modalAfiliado').textContent = afiliado;
+                document.getElementById('modalMatricula').textContent = matricula;
+                document.getElementById('optionMessage').textContent = message;
                 
                 const btnSi = document.getElementById('btnSi');
                 const btnNo = document.getElementById('btnNo');
@@ -248,7 +261,7 @@ block content
         // hacer las vistas, modelos y controladores para derivacion, prescripcion, internacion y emergencia
         // derivacion en la tabla de atencion sera clave secundaria importada de la tabla derivaciones
         // cada derivacion hasOne o hasMany con atencion?
-        function interconsulta() {
+        function interconsultaFn() {
             const dni = document.getElementById('dniPaciente').textContent;
             let situacion = 'interconsulta';
             let datosActualizacionSituacion = {
