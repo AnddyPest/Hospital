@@ -1,0 +1,152 @@
+mixin adminDatos(entityURL, entityName)
+    div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.w-75(id="adminControl")
+        div.d-flex.justify-content-center.align-items-center.gap-4.mt-5
+            a.btn.btn-info(href=`/${entityURL}/listado` type="button", id="listar" class="custom-button2" style="width: 350px;") 
+                span() Listar #{entityName}
+                img(src="/icons/rectangle-list-solid.svg", alt=`Agregar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+            a.btn.btn-success(href=`/${entityURL}/new` type="button", id="agregar" class="custom-button2" style="width: 350px;") 
+                span() Add #{entityName}
+                img(src="/icons/user-plus-solid.svg", alt=`Agregar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+            a.btn.btn-warning(href=`/${entityURL}/seleccionar`, type="button", id="editar" class="custom-button2" style="width: 350px;") 
+                span() Editar #{entityName}
+                img(src="/icons/user-pen-solid.svg", alt=`Editar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+        div.d-flex.justify-content-center.align-items-center.gap-4.mt-5    
+            a.btn.btn-danger.me-4(href=`/${entityURL}/borrar`, type="button", id="borrar" class="custom-button2" style="width: 350px;") 
+                span() Borrar #{entityName}
+                img(src="/icons/user-slash-solid.svg", alt=`Borrar ${entityName}`, class="ms-4", style="width: 40px; height: 40px; opacity: 0.8;")
+            a.btn.btn-danger.ms-4(href=`/datos` type="button", class="custom-button2" style="width: 50px; padding:5px;") 
+                img(src="/icons/backward-solid.svg", alt="Volver", style="width: 35px; height: 35px;")
+
+mixin listadoDatos(entityName, context, entityURL, items = [])
+  div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.w-75(id="adminControl")
+    
+    // Formulario para añadir nuevo elemento
+    if context === 'nuevo'
+      div.card.bg-dark.text-light.p-4.mb-4.border.border-info
+        h4.mb-3 Agregar nuevo #{entityName}
+        form(action=`/${entityURL}/crear` method="POST")
+          div.input-group.mb-3
+            input.form-control(type="text" name="nombre" required placeholder=`Nombre del ${entityName}...`)
+            button.btn.btn-success(type="submit")
+              i.fas.fa-plus.me-2
+              | Agregar
+    
+    // Tabla para listar/editar/borrar
+    if context !== 'nuevo'
+      div.table-container(style="max-height: 60vh; overflow-y: auto; border: 1px solid #0dcaf0; border-radius: 10px;")
+        table.table.table-hover.table-dark.table-bordered.border-info
+          thead.sticky-top.bg-dark
+            tr
+              th.text-light ID
+              th.text-light Nombre
+              if context === 'editar' || context === 'borrar'
+                th.text-light Acciones
+          tbody
+            if items && items.length > 0
+              each item in items
+                tr(id=`row-${item.id}`)
+                  td #{item.id}
+                  td(class=`name-cell-${item.id}`) #{item.nombre}
+                  if context === 'editar'
+                    td
+                      button.btn.btn-warning.btn-sm.edit-inline(type="button" data-id=item.id)
+                        i.fas.fa-pen.me-1
+                        | Editar
+                  if context === 'borrar'
+                    td
+                      form(action=`/${entityURL}/eliminar/${item.id}` method="POST" onsubmit="return confirm('¿Está seguro que desea eliminar este elemento?');")
+                        button.btn.btn-danger.btn-sm(type="submit")
+                          i.fas.fa-trash.me-1
+                          | Eliminar
+            else
+              tr
+                td(colspan=context === 'editar' || context === 'borrar' ? 3 : 2).text-center No hay datos disponibles
+
+    // Botón para volver
+    div.mt-4
+      a.btn.btn-info(href=`/${entityURL}`)
+        i.fas.fa-arrow-left.me-2
+        | Volver
+
+    // Script mejorado para edición en línea
+    if context === 'editar'
+      script.
+        const entityURL = "#{entityURL}";
+        document.addEventListener('DOMContentLoaded', function() {
+          // Encontrar todos los botones de edición
+          const editButtons = document.querySelectorAll('.edit-inline');
+          
+          editButtons.forEach(button => {
+            button.addEventListener('click', function(e) {
+              e.preventDefault();
+              const id = this.getAttribute('data-id');
+              const nameCell = document.querySelector(`.name-cell-${id}`);
+              const currentName = nameCell.textContent.trim();
+              
+              // Reemplazar el contenido de la celda con un formulario de edición
+              nameCell.innerHTML = `
+                <div class="d-flex">
+                  <input class="form-control" type="text" id="edit-name-${id}" value="${currentName}" required>
+                  <button class="btn btn-success ms-2 save-btn" data-id="${id}">
+                    <i class="fas fa-save"></i>
+                  </button>
+                  <button class="btn btn-danger ms-2 cancel-btn" data-id="${id}">
+                    <i class="fas fa-times"></i>
+                  </button>
+                </div>
+              `;
+              
+              // Ocultar el botón de editar mientras se está editando
+              this.style.display = 'none';
+              
+              // Agregar evento al botón de guardar
+              const saveBtn = nameCell.querySelector('.save-btn');
+              saveBtn.addEventListener('click', function() {
+                const newName = document.getElementById(`edit-name-${id}`).value.trim();
+                if (!newName) {
+                  alert('El nombre no puede estar vacío');
+                  return;
+                }
+                
+                // Enviar los datos mediante fetch (PUT/PATCH)
+                fetch(`/${entityURL}/editar/${id}`, {
+                  method: 'POST', 
+                  headers: {
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ 
+                    nombre: newName,
+                    
+                  })
+                })
+                .then(response => {
+                  if (response.ok) {
+                    return response.json();
+                  }
+                  throw new Error('Error al actualizar');
+                })
+                .then(data => {
+                  // Actualizar la celda con el nuevo nombre
+                  nameCell.textContent = newName;
+                  // Mostrar el botón de editar de nuevo
+                  button.style.display = 'inline-block';
+                  // Mostrar mensaje de éxito
+                  alert('Actualización exitosa');
+                })
+                .catch(error => {
+                  console.error('Error:', error);
+                  alert('Error al actualizar. Intente de nuevo.');
+                });
+              });
+              
+              // Agregar evento al botón de cancelar
+              const cancelBtn = nameCell.querySelector('.cancel-btn');
+              cancelBtn.addEventListener('click', function() {
+                // Restaurar el contenido original
+                nameCell.textContent = currentName;
+                // Mostrar el botón de editar de nuevo
+                button.style.display = 'inline-block';
+              });
+            });
+          });
+        });

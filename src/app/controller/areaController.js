@@ -5,7 +5,7 @@ const areaController = {
   // Vista principal de áreas
   index: async (req, res) => {
     try {
-      res.render("vistasArea/portadaArea", {
+      res.render("vistasDatos/vistaAreas", {
         title: "Áreas",
         userType: req.session?.userType || "guest",
       });
@@ -37,7 +37,7 @@ const areaController = {
   // Vista para crear una nueva área
   nuevoView: async (req, res) => {
     try {
-      res.render("vistasArea/nuevaArea", {
+      res.render("vistasDatos/nuevaAreas", {
         title: "Nueva Área",
         userType: req.session?.userType || "guest",
       });
@@ -52,16 +52,12 @@ const areaController = {
   // Vista para editar un área
   editarView: async (req, res) => {
     try {
-      const areaId = req.params.id;
-      const area = await Area.findByPk(areaId);
-      if (!area) {
-        return res.status(404).render("error", {
-          message: "Área no encontrada",
-        });
-      }
-      res.render("vistasArea/editarArea", {
+      const areas = await Area.findAll({
+        order: [["nombre", "ASC"]],
+      });
+      res.render("vistasDatos/editarAreas", {
         title: "Editar Área",
-        area,
+        areas,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -75,16 +71,13 @@ const areaController = {
   // Vista para eliminar un área
   eliminarView: async (req, res) => {
     try {
-      const areaId = req.params.id;
-      const area = await Area.findByPk(areaId);
-      if (!area) {
-        return res.status(404).render("error", {
-          message: "Área no encontrada",
-        });
-      }
-      res.render("vistasArea/eliminarArea", {
+      const areas = await Area.findAll({
+        order: [["nombre", "ASC"]],
+      });
+
+      res.render("vistasDatos/borrarAreas", {
         title: "Eliminar Área",
-        area,
+        areas,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -100,7 +93,7 @@ const areaController = {
     try {
       const { nombre } = req.body;
       const nuevaArea = await Area.create({ nombre });
-      res.redirect("/areas/listar");
+      res.redirect("/areas/listado");
     } catch (error) {
       console.error("Error al crear área:", error);
       res.status(500).render("error", {
@@ -114,19 +107,37 @@ const areaController = {
     try {
       const areaId = req.params.id;
       const { nombre } = req.body;
+
+      // Buscar el área
       const area = await Area.findByPk(areaId);
+
       if (!area) {
-        return res.status(404).render("error", {
+        return res.status(404).json({
+          success: false,
           message: "Área no encontrada",
         });
       }
+
+      // Actualizar el área
       await area.update({ nombre });
-      res.redirect("/areas/listar");
+
+      // Devolver respuesta JSON de éxito
+      return res.status(200).json({
+        success: true,
+        message: "Área actualizada correctamente",
+        data: {
+          id: area.id,
+          nombre: area.nombre,
+        },
+      });
     } catch (error) {
       console.error("Error al editar área:", error);
-      res.status(500).render("error", {
+
+      // Devolver respuesta JSON de error
+      return res.status(500).json({
+        success: false,
         message: "Error al editar el área",
-        error,
+        error: error.message,
       });
     }
   },
@@ -141,7 +152,7 @@ const areaController = {
         });
       }
       await area.destroy();
-      res.redirect("/areas/listar");
+      res.redirect("/areas/listado");
     } catch (error) {
       console.error("Error al eliminar área:", error);
       res.status(500).render("error", {
@@ -157,7 +168,11 @@ const areaController = {
         order: [["nombre", "ASC"]],
       });
 
-      res.json(areas);
+      res.render("vistasDatos/listarAreas", {
+        title: "Listado de Áreas",
+        areas,
+        userType: req.session?.userType || "guest",
+      });
     } catch (error) {
       console.error("Error al listar áreas:", error);
       res

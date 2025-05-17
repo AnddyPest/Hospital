@@ -12,6 +12,7 @@ const motivosRouter = require("./router/motivosRouter"); // Motivos Router
 const especialidadRouter = require("./router/especialidadRouter"); // Especialidades Router
 const areaRouter = require("./router/areaRouter"); // Area Router
 const HospitalesExternosRouter = require("./router/hospitalesExternosRouter"); // Hospitales Externos Router
+const dataRouter = require("./router/dataRouter"); // Datos Router
 
 const atencionRouter = require("./router/atencionRouter"); // Atencion Router
 const path = require("path");
@@ -46,6 +47,7 @@ app.use("/motivos", motivosRouter);
 app.use("/especialidades", especialidadRouter);
 app.use("/areas", areaRouter);
 app.use("/hospitalesExternos", HospitalesExternosRouter);
+app.use("/datos", dataRouter);
 
 //rutas publicas
 app.use("/", router);

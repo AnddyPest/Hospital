@@ -5,8 +5,10 @@ const especialidadController = {
   // Vista principal de especialidades
   index: async (req, res) => {
     try {
-      res.render("vistasEspecialidad/portadaEspecialidad", {
+      const especialidades = await Especialidad.findAll();
+      res.render("vistasDatos/vistaEspecialidades", {
         title: "Especialidades",
+        especialidades,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -37,7 +39,7 @@ const especialidadController = {
   // Vista para crear una nueva especialidad
   nuevoView: async (req, res) => {
     try {
-      res.render("vistasEspecialidad/nuevaEspecialidad", {
+      res.render("vistasDatos/nuevaEspecialidad", {
         title: "Nueva Especialidad",
         userType: req.session?.userType || "guest",
       });
@@ -52,16 +54,14 @@ const especialidadController = {
   //ambl vista para editar una especialidad
   editarView: async (req, res) => {
     try {
-      const especialidadId = req.params.id;
-      const especialidad = await Especialidad.findByPk(especialidadId);
-      if (!especialidad) {
-        return res.status(404).render("error", {
-          message: "Especialidad no encontrada",
-        });
-      }
-      res.render("vistasEspecialidad/editarEspecialidad", {
+      const especialidades = await Especialidad.findAll({
+        order: [["nombre", "ASC"]],
+      });
+
+      res.render("vistasDatos/editarEspecialidades", {
         title: "Editar Especialidad",
-        especialidad,
+        especialidades,
+
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -75,16 +75,14 @@ const especialidadController = {
   // Vista para eliminar una especialidad
   eliminarView: async (req, res) => {
     try {
-      const especialidadId = req.params.id;
-      const especialidad = await Especialidad.findByPk(especialidadId);
-      if (!especialidad) {
-        return res.status(404).render("error", {
-          message: "Especialidad no encontrada",
-        });
-      }
-      res.render("vistasEspecialidad/eliminarEspecialidad", {
+      const especialidades = await Especialidad.findAll({
+        order: [["nombre", "ASC"]],
+      });
+
+      res.render("vistasDatos/borrarEspecialidades", {
         title: "Eliminar Especialidad",
-        especialidad,
+        especialidades,
+        order: [["nombre", "ASC"]],
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -100,7 +98,7 @@ const especialidadController = {
     try {
       const { nombre } = req.body;
       const nuevaEspecialidad = await Especialidad.create({ nombre });
-      res.redirect("/especialidades/listar");
+      res.redirect("/especialidades/listado");
     } catch (error) {
       console.error("Error al crear especialidad:", error);
       res.status(500).render("error", {
@@ -114,19 +112,37 @@ const especialidadController = {
     try {
       const especialidadId = req.params.id;
       const { nombre } = req.body;
+
+      // Buscar el área
       const especialidad = await Especialidad.findByPk(especialidadId);
+
       if (!especialidad) {
-        return res.status(404).render("error", {
-          message: "Especialidad no encontrada",
+        return res.status(404).json({
+          success: false,
+          message: "Área no encontrada",
         });
       }
+
+      // Actualizar el área
       await especialidad.update({ nombre });
-      res.redirect("/especialidades/listar");
+
+      // Devolver respuesta JSON de éxito
+      return res.status(200).json({
+        success: true,
+        message: "Especialidad actualizada correctamente",
+        data: {
+          id: especialidad.id,
+          nombre: especialidad.nombre,
+        },
+      });
     } catch (error) {
       console.error("Error al editar especialidad:", error);
-      res.status(500).render("error", {
-        message: "Error al editar la especialidad",
-        error,
+
+      // Devolver respuesta JSON de error
+      return res.status(500).json({
+        success: false,
+        message: "Error al editar el especialidad",
+        error: error.message,
       });
     }
   },
@@ -141,7 +157,7 @@ const especialidadController = {
         });
       }
       await especialidad.destroy();
-      res.redirect("/especialidades/listar");
+      res.redirect("/especialidades/listado");
     } catch (error) {
       console.error("Error al eliminar especialidad:", error);
       res.status(500).render("error", {
@@ -156,15 +172,17 @@ const especialidadController = {
         attributes: ["id", "nombre"],
         order: [["nombre", "ASC"]],
       });
-      res.json(especialidades);
+      res.render("vistasDatos/listarEspecialidades", {
+        title: "Listado de Especialidades",
+        especialidades,
+        userType: req.session?.userType || "guest",
+      });
     } catch (error) {
       console.error("Error al listar especialidades:", error);
-      res
-        .status(500)
-        .json({
-          error: "Error al listar especialidades",
-          message: error.message,
-        });
+      res.status(500).json({
+        error: "Error al listar especialidades",
+        message: error.message,
+      });
     }
   },
 };

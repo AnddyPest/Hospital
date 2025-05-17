@@ -6,7 +6,7 @@ const motivosController = {
   // Vista principal de motivos
   index: async (req, res) => {
     try {
-      res.render("vistasMotivos/portadaMotivos", {
+      res.render("vistasDatos/vistaMotivos", {
         title: "Motivos",
         userType: req.session?.userType || "guest",
       });

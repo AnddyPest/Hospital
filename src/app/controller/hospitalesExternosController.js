@@ -5,7 +5,7 @@ const hospitalesExternosController = {
   // Vista principal de hospitales externos
   index: async (req, res) => {
     try {
-      res.render("vistasHospitalesExternos/portadaHospitalesExternos", {
+      res.render("vistasDatos/vistaHospExternos", {
         title: "Hospitales Externos",
         userType: req.session?.userType || "guest",
       });
