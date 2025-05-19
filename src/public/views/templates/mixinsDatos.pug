@@ -33,14 +33,14 @@ mixin listadoDatos(entityName, context, entityURL, items = [])
     
     // Tabla para listar/editar/borrar
     if context !== 'nuevo'
-      div.table-container(style="max-height: 60vh; overflow-y: auto; border: 1px solid #0dcaf0; border-radius: 10px;")
-        table.table.table-hover.table-dark.table-bordered.border-info
-          thead.sticky-top.bg-dark
-            tr
-              th.text-light ID
-              th.text-light Nombre
+      div.table-container(style="max-height: 40vh; overflow-y: auto; border: 1px solid #0dcaf0; border-radius: 10px;")
+        table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+          thead
+            tr.table-info
+              th.text-black ID
+              th.text-black Nombre
               if context === 'editar' || context === 'borrar'
-                th.text-light Acciones
+                th.text-black Acciones
           tbody
             if items && items.length > 0
               each item in items
@@ -175,14 +175,14 @@ mixin listadoDatosHospital(entityName, context, entityURL, items = [])
     // Tabla para listar/editar/borrar hospitales
     if context !== 'nuevo'
       div.table-container(style="max-height: 60vh; overflow-y: auto; border: 1px solid #0dcaf0; border-radius: 10px;")
-        table.table.table-hover.table-dark.table-bordered.border-info
-          thead.sticky-top.bg-dark
-            tr
-              th.text-light ID
-              th.text-light Nombre
-              th.text-light Complejidad
+        table.table.table-hover.table-dark.table-bordered.border-info.table-striped
+          thead
+            tr.table-info
+              th.text-black ID
+              th.text-black Nombre
+              th.text-black Complejidad
               if context === 'editar' || context === 'borrar'
-                th.text-light Acciones
+                th.text-black Acciones
           tbody
             if items && items.length > 0
               each item in items

@@ -316,7 +316,7 @@ const medicoController = {
         ],
       });
 
-      res.json(medicos);
+      return res.json(medicos);
     } catch (error) {
       console.error("Error al obtener todos los médicos:", error);
       res.status(500).json({

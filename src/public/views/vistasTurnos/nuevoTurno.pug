@@ -333,6 +333,8 @@ block content
             
             // Función para actualizar el estado visual del DNI
             function updateDniStatus(status, patientName = "") {
+                dniSpan.removeEventListener("click", redirectANuevoPaciente);
+                dniSpan.style.cursor = "default"
                 switch (status) {
                     case "empty":
                         dniSpan.style.backgroundColor = "#0d6efd"; // Azul
@@ -352,7 +354,9 @@ block content
                         break;
                     case "not-found":
                         dniSpan.style.backgroundColor = "#dc3545"; // Rojo
-                        dniSpan.title = "Paciente no encontrado";
+                        dniSpan.title = "Paciente no encontrado. Haz clic par cargar sus datos";
+                        dniSpan.style.cursor = "pointer";
+                        dniSpan.addEventListener("click", redirectANuevoPaciente);
                         break;
                     case "error":
                         dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
@@ -650,6 +654,9 @@ block content
             } catch (error) {
                 console.error("Error al cargar los motivos:", error);
             }
+        }
+        function redirectANuevoPaciente() {
+            window.location.href = "/pacientes/admin/new";
         }
         cargarMotivos();
 

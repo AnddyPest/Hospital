@@ -54,7 +54,7 @@ app.use("/", router);
 //app.use("/auth", authRouter);
 
 // Conexión y sincronización con la base de datos
-sequelize
+/*sequelize
   .authenticate()
   .then(() => {
     return sequelize.sync({ force: false }); // esto asegra que las tablas sean correctas
@@ -67,6 +67,6 @@ sequelize
       "Error al conectar o sincronizar la base de datos:",
       error.message
     );
-  });
+  });*/
 
 module.exports = app;

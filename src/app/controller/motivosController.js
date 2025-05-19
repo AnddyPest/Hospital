@@ -171,11 +171,7 @@ const motivosController = {
         order: [["nombre", "ASC"]],
       });
 
-      res.render("vistasDatos/listarMotivos", {
-        title: "Listado de Motivos",
-        motivos,
-        userType: req.session?.userType || "guest",
-      });
+      res.json(motivos);
     } catch (error) {
       console.error("Error al listar motivos:", error);
       res

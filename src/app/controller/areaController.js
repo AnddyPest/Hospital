@@ -168,11 +168,7 @@ const areaController = {
         order: [["nombre", "ASC"]],
       });
 
-      res.render("vistasDatos/listarAreas", {
-        title: "Listado de Áreas",
-        areas,
-        userType: req.session?.userType || "guest",
-      });
+      res.json(areas);
     } catch (error) {
       console.error("Error al listar áreas:", error);
       res

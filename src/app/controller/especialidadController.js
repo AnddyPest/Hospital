@@ -172,11 +172,7 @@ const especialidadController = {
         attributes: ["id", "nombre"],
         order: [["nombre", "ASC"]],
       });
-      res.render("vistasDatos/listarEspecialidades", {
-        title: "Listado de Especialidades",
-        especialidades,
-        userType: req.session?.userType || "guest",
-      });
+      res.json(especialidades);
     } catch (error) {
       console.error("Error al listar especialidades:", error);
       res.status(500).json({
