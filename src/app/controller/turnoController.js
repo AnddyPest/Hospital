@@ -812,6 +812,21 @@ const turnoController = {
       res.status(500).json({ error: "Error al obtener los horarios" });
     }
   },
+  // Vista para derivaciones
+  derivacionesView: async (req, res) => {
+    try {
+      res.render("vistasTurnos/derivaciones", {
+        title: "Derivaciones",
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en vista de derivaciones:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la vista de derivaciones",
+        error,
+      });
+    }
+  },
 };
 // hooks
 

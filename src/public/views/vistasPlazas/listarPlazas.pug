@@ -1,0 +1,398 @@
+extends ../templates/layout
+include ../templates/mixins.pug
+
+block content
+    div
+        img(src="/images/habitacion.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh); object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Gestión de Plazas", "/icons/bed-solid.svg")
+        
+        div.position-absolute.top-50.start-50.translate-middle.text-center(style="width: 80%;")
+            // Selector de Ala - Se oculta al mostrar resultados
+            div#filtroContainer.d-flex.w-100.justify-content-center.flex-column.align-items-center
+                div.card.bg-dark.text-white.border.border-info.mb-4.rounded-3.shadow.w-75
+                    div.card-body
+                        form#formFiltro.row.align-items-center
+                            div.col-md-8
+                                label.form-label.me-3(for="alaFiltro") Seleccionar Ala: 
+                                select#alaFiltro.form-select.form-select-lg.rounded-pill
+                                    option(value="" selected disabled) Seleccione un ala para ver habitaciones
+                                    option(value="Comun") Común
+                                    option(value="Terapia Intermedia") Terapia Intermedia
+                                    option(value="Terapia Intensiva") Terapia Intensiva
+                                    option(value="Pre Quirurgico") Pre Quirúrgico
+                            div.col-md-4
+                                button.btn.btn-info.w-100.rounded-pill.shadow-sm(type="button" onclick="cargarHabitaciones()")
+                                    i.fas.fa-filter.me-2
+                                    | Mostrar Habitaciones
+                
+                // Botón para volver - debajo del selector
+                div.mt-2(style="max-width: 500px;")
+                    button.btn.btn-danger.shadow-sm(type="button" class="custom-button2" onclick="window.location.href='/habitacion'" title="Volver a la gestión de plazas")
+                        i.fas.fa-arrow-left.me-2
+                        | Volver a Gestión
+            
+            // Mensaje de carga
+            div#cargando.spinner-border.text-info.d-none(role="status")
+                span.visually-hidden Cargando...
+            
+            // Mensaje de error o sin resultados
+            div#mensajeError.alert.alert-warning.rounded-3.shadow.d-none(role="alert")
+                i.fas.fa-exclamation-triangle.me-2
+                span#textoError
+            
+            // Contenedor para la cuadrícula de habitaciones (oculto inicialmente)
+            div#resultadosContainer.d-none(style="margin-top: 10vh")
+                div.card.bg-dark.text-white.border.border-info.rounded-3.shadow.mb-4
+                    div.card-header.bg-info.text-dark
+                        h5.m-0#tituloHabitaciones Habitaciones y Camas
+                    
+                    // Cuadrícula de habitaciones con altura limitada para mostrar aprox. 2 habitaciones
+                    div.card-body(style="max-height: 250px; overflow-y: auto;")
+                        // Cuadrícula de habitaciones
+                        div#habitacionesGrid.row.row-cols-2.row-cols-md-3.row-cols-lg-4.g-1
+                    
+                    // Leyenda de colores al pie del contenedor
+                    div.card-footer.py-1.d-flex.justify-content-center.flex-wrap.gap-3.small.bg-dark.border-top.border-info
+                        div.d-flex.align-items-center
+                            div.btn.btn-success.btn-sm.me-1.rounded-circle(style="width:15px;height:15px")
+                            | Libre
+                        div.d-flex.align-items-center
+                            div.btn.btn-warning.btn-sm.me-1.rounded-circle(style="width:15px;height:15px")
+                            | Limpieza
+                        div.d-flex.align-items-center
+                            div.cama-masculino.btn-sm.me-1.rounded-circle(style="width:15px;height:15px")
+                            | Masc
+                        div.d-flex.align-items-center
+                            div.cama-femenino.btn-sm.me-1.rounded-circle(style="width:15px;height:15px")
+                            | Fem
+                div#habitacionesBotones.d-flex.justify-content-center
+                    // Botón para volver - ahora debajo del cuadro
+                    div.text-center.mt-3
+                        button.btn.btn-danger.shadow-sm(class="custom-button2" onclick="volverAFiltro()")
+                            i.fas.fa-arrow-left.me-2
+                            | Volver a selección de ala
+
+                    // Botón Ver Camas Ocupadas
+                    div.text-center.mt-3.ms-3
+                        button#verOcupadasBtn.btn.btn-success.shadow-sm(class="custom-button2" onclick="toggleCamasOcupadas()")
+                            i.fas.fa-list-ul.me-2
+                            | Ver Camas Ocupadas
+
+            // Contenedor del listado de camas ocupadas (inicialmente oculto)
+            div#camasOcupadasContainer.card.bg-dark.text-white.border.border-success.rounded-3.shadow.mb-4.d-none
+                div.card-header.bg-success.text-dark
+                    h5.m-0#tituloCamasOcupadas Listado de Camas Ocupadas
+                
+                // Contenedor de tabla con scroll y cabecera fija
+                div.card-body.p-0
+                    div.table-responsive(style="max-height: 50vh; position: relative;")
+                        table.table.table-dark.table-striped.table-hover.mb-0
+                            thead.sticky-top
+                                tr.bg-dark
+                                    th Habitación
+                                    th Cama
+                                    th Paciente
+                                    th DNI
+                                    th Sexo
+                            tbody#camasOcupadasBody
+                                // Se llenará dinámicamente
+                
+                div.card-footer.bg-dark.border-top.border-success.py-2.d-flex.justify-content-between
+                    small.text-muted.align-self-center Total: 
+                        span#totalCamasOcupadas 0
+                        |  camas ocupadas
+
+            // Botones debajo de la tabla
+            div#botonesAcciones.d-flex.justify-content-center.mt-2.d-none
+                button.btn.btn-success.shadow-sm(class="custom-button2" onclick="toggleCamasOcupadas()")
+                    i.fas.fa-th.me-2
+                    | Volver a Habitaciones
+                
+                button.btn.btn-danger.shadow-sm.ms-3(class="custom-button2" onclick="volverAFiltro()")
+                    i.fas.fa-arrow-left.me-2
+                    | Volver a selección de ala
+
+        style.
+            .habitacion-card {
+                background-color: #333;
+                border: 2px solid #17a2b8;
+                border-radius: 10px;
+                margin-bottom: 5px;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.16);
+                width: auto;
+                min-width: 120px;
+                max-width: 100%;
+                margin: 0 auto 5px;
+            }
+            
+            .habitacion-header {
+                background-color: #17a2b8;
+                color: #212529;
+                padding: 8px 10px;
+                font-weight: bold;
+                font-size: 1em;
+                border-top-left-radius: 8px;
+                border-top-right-radius: 8px;
+            }
+            
+            .camas-container {
+                padding: 8px;
+                display: flex;
+                flex-wrap: wrap;
+                justify-content: center;
+                gap: 4px;
+            }
+            
+            /* Estilos para los botones de estado */
+            .btn-cama {
+                min-width: 45px;
+                position: relative;
+                border-radius: 8px;
+                padding: 4px;
+            }
+            
+            .cama-masculino {
+                background: linear-gradient(to right, #dc3545 50%, #007bff 50%);
+                color: white;
+            }
+            
+            .cama-femenino {
+                background: linear-gradient(to right, #dc3545 50%,rgb(214, 152, 181) 50%);
+                color: white;
+            }
+            
+        script.
+            // Funciones de navegación
+            function cargarHabitaciones() {
+                const alaSeleccionada = document.getElementById('alaFiltro').value;
+                
+                if (!alaSeleccionada) {
+                    alert("Por favor seleccione un ala para continuar");
+                    return;
+                }
+                
+                // Mostrar indicador de carga
+                document.getElementById('cargando').classList.remove('d-none');
+                document.getElementById('mensajeError').classList.add('d-none');
+                document.getElementById('resultadosContainer').classList.add('d-none');
+                
+                // Redirigir a la página con el filtro aplicado
+                window.location.href = `/habitacion/listar?ala=${alaSeleccionada}`;
+            }
+            
+            function volverAFiltro() {
+                window.location.href = '/habitacion/listar';
+            }
+            
+            function verDetalleCama(camaId) {
+                window.location.href = `/camas/detalle/${camaId}`;
+            }
+            
+            function toggleCamasOcupadas() {
+                const camasContainer = document.getElementById('camasOcupadasContainer');
+                const botonesAcciones = document.getElementById('botonesAcciones');
+                const habitacionesContainer = document.querySelector('#resultadosContainer .card');
+                const habitacionesBotones = document.getElementById('habitacionesBotones'); // Botones de habitaciones
+                const btn = document.getElementById('verOcupadasBtn');
+                
+                // Alternar visibilidad de los contenedores
+                if (camasContainer.classList.contains('d-none')) {
+                    // Mostrar camas ocupadas y sus botones
+                    camasContainer.classList.remove('d-none');
+                    botonesAcciones.classList.remove('d-none');
+                    
+                    // Ocultar el contenedor de habitaciones Y SUS BOTONES
+                    habitacionesContainer.classList.add('d-none');
+                    habitacionesBotones.classList.add('d-none'); // OCULTAR los botones de habitaciones
+                    
+                    btn.innerHTML = '<i class="fas fa-th me-2"></i> Volver a Habitaciones';
+                    cargarCamasOcupadas(); // Cargar datos de camas ocupadas
+                } else {
+                    // Ocultar camas ocupadas y sus botones
+                    camasContainer.classList.add('d-none');
+                    botonesAcciones.classList.add('d-none');
+                    
+                    // Mostrar el contenedor de habitaciones Y SUS BOTONES
+                    habitacionesContainer.classList.remove('d-none');
+                    habitacionesBotones.classList.remove('d-none'); // MOSTRAR los botones de habitaciones
+                    
+                    btn.innerHTML = '<i class="fas fa-list-ul me-2"></i> Ver Camas Ocupadas';
+                }
+            }
+            
+            function cargarCamasOcupadas() {
+                // Obtener el ala seleccionada desde los parámetros URL
+                const urlParams = new URLSearchParams(window.location.search);
+                const alaSeleccionada = urlParams.get('ala');
+                
+                // Actualizar el título con el ala seleccionada
+                const tituloCamas = document.getElementById('tituloCamasOcupadas');
+                if (tituloCamas && alaSeleccionada) {
+                    tituloCamas.textContent = `Listado de Camas Ocupadas: Ala ${alaSeleccionada}`;
+                }
+                
+                // Usar los datos reales de habitaciones de la página
+                const habitaciones = !{JSON.stringify(habitaciones || [])};
+                
+                const tbody = document.getElementById('camasOcupadasBody');
+                tbody.innerHTML = ''; // Limpiar contenido previo
+                
+                let totalCamasOcupadas = 0;
+                let camasOcupadas = [];
+                
+                // Recorrer todas las habitaciones para encontrar camas ocupadas
+                habitaciones.forEach(habitacion => {
+                    if (habitacion.Camas && habitacion.Camas.length > 0) {
+                        habitacion.Camas.forEach(cama => {
+                            const estadoCama = cama.estado ? cama.estado.toLowerCase() : '';
+                            
+                            // Verificar si la cama está ocupada y tiene un paciente asignado
+                            if (estadoCama.includes('ocupa') && cama.Paciente) {
+                                camasOcupadas.push({
+                                    habitacion: habitacion.numero,
+                                    cama: cama.numeroCama.split('-')[1] || cama.numeroCama,
+                                    paciente: `${cama.Paciente.nombre} ${cama.Paciente.apellido}`,
+                                    dni: cama.Paciente.dni || 'No disponible',
+                                    sexo: cama.Paciente.sexo || cama.Paciente.genero || 'No especificado'
+                                });
+                                totalCamasOcupadas++;
+                            }
+                        });
+                    }
+                });
+                
+                // Actualizar total
+                document.getElementById('totalCamasOcupadas').textContent = totalCamasOcupadas;
+                
+                // Si no hay camas ocupadas, mostrar mensaje
+                if (camasOcupadas.length === 0) {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `<td colspan="5" class="text-center">No hay camas ocupadas en este momento</td>`;
+                    tbody.appendChild(tr);
+                    return;
+                }
+                
+                // Generar filas de la tabla con datos reales
+                camasOcupadas.forEach(cama => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${cama.habitacion}</td>
+                        <td>${cama.cama}</td>
+                        <td>${cama.paciente}</td>
+                        <td>${cama.dni}</td>
+                        <td>${cama.sexo}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+            
+            // Inicialización y renderizado
+            document.addEventListener('DOMContentLoaded', function() {
+                // Verificar si ya hay un ala seleccionada (venimos de una redirección)
+                const urlParams = new URLSearchParams(window.location.search);
+                const alaSeleccionada = urlParams.get('ala');
+                
+                if (alaSeleccionada) {
+                    // Actualizar el título con el ala seleccionada
+                    document.getElementById('tituloHabitaciones').textContent = `Habitaciones Ala: ${alaSeleccionada}`;
+                    
+                    // Establecer el valor seleccionado
+                    document.getElementById('alaFiltro').value = alaSeleccionada;
+                    
+                    // Ocultar el filtro al mostrar resultados
+                    document.getElementById('filtroContainer').classList.add('d-none');
+                    
+                    // Mostrar el contenedor de resultados si tenemos habitaciones
+                    if (!#{habitaciones && habitaciones.length}) {
+                        document.getElementById('mensajeError').classList.remove('d-none');
+                        document.getElementById('textoError').textContent = 'No hay habitaciones disponibles en el ala seleccionada';
+                        return;
+                    }
+                    
+                    document.getElementById('resultadosContainer').classList.remove('d-none');
+                    
+                    // RENDERIZAR HABITACIONES
+                    const habitacionesGrid = document.getElementById('habitacionesGrid');
+                    habitacionesGrid.innerHTML = ''; // Limpiar contenido previo
+                    
+                    // Crear una representación segura de los datos para usarlos con JavaScript
+                    const habitaciones = !{JSON.stringify(habitaciones || [])};
+                    
+                    // Recorrer cada habitación y crear su card
+                    habitaciones.forEach(habitacion => {
+                        const habitacionEl = document.createElement('div');
+                        habitacionEl.className = 'col mb-1';
+                        
+                        // Header de la habitación
+                        let habitacionHTML = `
+                            <div class="habitacion-card shadow">
+                                <div class="habitacion-header">
+                                    Hab. ${habitacion.numero}
+                                </div>
+                                <div class="camas-container">
+                        `;
+                        
+                        // Si no hay camas, mostrar mensaje
+                        if (!habitacion.Camas || habitacion.Camas.length === 0) {
+                            habitacionHTML += '<p class="text-muted small">Sin camas</p>';
+                        } else {
+                            // Recorrer las camas y crear botones con el color adecuado
+                            habitacion.Camas.forEach(cama => {
+                                // Convertir el estado a minúsculas para evitar problemas de mayúsculas
+                                const estadoCama = cama.estado ? cama.estado.toLowerCase() : '';
+                                let btnClass = 'btn-success'; // Por defecto: libre
+                                let title = 'Cama libre';
+                                
+                                // Debugging - opcional para verificar valores
+                                console.log('Estado de cama:', cama.estado, 'Paciente:', cama.Paciente);
+                                
+                                // Usar includes para mayor flexibilidad en la comparación
+                                if (estadoCama.includes('limpieza')) {
+                                    btnClass = 'btn-warning';
+                                    title = 'En limpieza';
+                                } else if (estadoCama.includes('ocupa')) {
+                                    if (cama.Paciente) {
+                                        // Verificar campo de género del paciente (revisar si es sexo o genero)
+                                        const genero = cama.Paciente.sexo || cama.Paciente.genero || '';
+                                        
+                                        if (genero.toUpperCase() === 'M') {
+                                            btnClass = 'cama-masculino';
+                                            title = `Paciente: ${cama.Paciente.nombre} ${cama.Paciente.apellido} (M)`;
+                                        } else if (genero.toUpperCase() === 'F') {
+                                            btnClass = 'cama-femenino';
+                                            title = `Paciente: ${cama.Paciente.nombre} ${cama.Paciente.apellido} (F)`;
+                                        } else {
+                                            btnClass = 'btn-danger'; // Género no especificado
+                                            title = `Paciente: ${cama.Paciente.nombre} ${cama.Paciente.apellido}`;
+                                        }
+                                    } else {
+                                        btnClass = 'btn-danger'; // Ocupada sin información de paciente
+                                        title = 'Ocupada';
+                                    }
+                                }
+                                
+                                // Extraer solo el número de la cama (después del guión)
+                                const numeroCama = cama.numeroCama.split('-')[1] || cama.numeroCama;
+                                
+                                habitacionHTML += `
+                                    <button class="btn btn-cama ${btnClass} shadow-sm" 
+                                        title="${title}"
+                                        onclick="verDetalleCama(${cama.id})">
+                                        <i class="fas fa-bed"></i> ${numeroCama}
+                                    </button>
+                                `;
+                            });
+                        }
+                        
+                        // Cerrar los divs
+                        habitacionHTML += `
+                                </div>
+                            </div>
+                        `;
+                        
+                        habitacionEl.innerHTML = habitacionHTML;
+                        habitacionesGrid.appendChild(habitacionEl);
+                    });
+                }
+            });

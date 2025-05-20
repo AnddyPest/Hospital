@@ -1,0 +1,100 @@
+extends ../templates/layout
+
+include ../templates/mixins.pug
+
+block content
+    div
+        img(src="/images/habitacion.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh); object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Nueva Habitación", "/icons/bed-solid.svg")
+        
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5
+            div.card.bg-dark.text-white.border.border-info.shadow(style="min-width: 400px;")
+                div.card-header.bg-info.text-dark
+                    h4.m-0 Registrar Nueva Habitación
+                
+                div.card-body
+                    form#formHabitacion
+                        // Selector de Ala
+                        div.mb-3
+                            label.form-label(for="ala") Ala
+                            select#ala.form-select(name="ala" required)
+                                option(value="" selected disabled) Seleccione un ala
+                                option(value="Comun") Común
+                                option(value="Terapia Intermedia") Terapia Intermedia
+                                option(value="Terapia Intensiva") Terapia Intensiva
+                                option(value="Pre Quirurgico") Pre Quirúrgico
+                        
+                        // Número de Habitación
+                        div.mb-3
+                            label.form-label(for="numero") Número de Habitación
+                            input#numero.form-control(type="number" name="numero" min="1" required)
+                        
+                        // Cantidad de Camas
+                        div.mb-3
+                            label.form-label(for="cantidadCamas") Cantidad de Camas
+                            input#cantidadCamas.form-control(type="number" name="cantidadCamas" min="1" max="10" required)
+                            small.form-text.text-light Se crearán camas numeradas automáticamente
+                        
+                        // Botones
+                        div.d-flex.gap-2.justify-content-between.mt-4
+                            button.btn.btn-danger(type="button" onclick="window.location.href='/habitacion/admin'")
+                                i.fas.fa-arrow-left.me-2
+                                | Cancelar
+                            
+                            button.btn.btn-primary(type="submit")
+                                i.fas.fa-save.me-2
+                                | Guardar
+            
+            // Mensaje de resultado
+            div#mensaje.alert.mt-3.d-none(role="alert")
+    
+    script.
+        document.getElementById('formHabitacion').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            
+            const ala = document.getElementById('ala').value;
+            const numero = parseInt(document.getElementById('numero').value);
+            const cantidadCamas = parseInt(document.getElementById('cantidadCamas').value);
+            
+            try {
+                const response = await fetch('/habitacion/crear', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        ala,
+                        numero,
+                        cantidadCamas
+                    })
+                });
+                
+                const resultado = await response.json();
+                
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.classList.remove('d-none', 'alert-success', 'alert-danger');
+                
+                if (response.ok) {
+                    mensajeDiv.classList.add('alert-success');
+                    mensajeDiv.textContent = resultado.message;
+                    if(resultado.info) {
+                        mensajeDiv.innerHTML = `${resultado.message}<br><small>${resultado.info}</small>`;
+                    }
+                    setTimeout(() => {
+                        window.location.href = '/habitacion/listar';
+                    }, 5500);
+                } else {
+                    mensajeDiv.classList.add('alert-danger');
+                    mensajeDiv.textContent = resultado.message || 'Error al crear la habitación';
+                }
+                
+                mensajeDiv.classList.remove('d-none');
+            } catch (error) {
+                console.error('Error:', error);
+                const mensajeDiv = document.getElementById('mensaje');
+                mensajeDiv.classList.remove('d-none', 'alert-success');
+                mensajeDiv.classList.add('alert-danger');
+                mensajeDiv.textContent = 'Error de conexión al servidor';
+            }
+        });

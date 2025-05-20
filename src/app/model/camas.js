@@ -8,26 +8,18 @@ const Camas = sequelize.define("Camas", {
     primaryKey: true,
     autoIncrement: true,
   },
-  ala: {
-    type: DataTypes.ENUM(
-      "Comun",
-      "Terapia Intermedia",
-      "Terapia Intensiva",
-      "Pre Quirurgico"
-    ),
-    allowNull: false,
-  },
+
   numeroCama: {
-    type: DataTypes.INTEGER,
+    type: DataTypes.STRING,
     allowNull: false,
   },
   estado: {
-    type: DataTypes.ENUM("Libre", "Ocupada", "En Limpieza"),
+    type: DataTypes.ENUM("Disponible", "Ocupada", "En Limpieza"),
     allowNull: false,
   },
   fechaIngreso: {
     type: DataTypes.DATEONLY,
-    allowNull: false,
+    allowNull: true,
   },
   fechaEgreso: {
     type: DataTypes.DATEONLY,

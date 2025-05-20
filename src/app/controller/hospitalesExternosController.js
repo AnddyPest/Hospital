@@ -20,10 +20,13 @@ const hospitalesExternosController = {
   // Vista para listar todos los hospitales externos
   listarView: async (req, res) => {
     try {
-      const hospitalesExternos = await HospitalesExternos.findAll();
-      res.render("vistasHospitalesExternos/listarHospitalesExternos", {
+      const hospitales_externos = await HospitalesExternos.findAll({
+        attributes: ["id", "nombre", "complejidad"],
+        order: [["nombre", "ASC"]],
+      });
+      res.render("vistasDatos/listarHospExternos", {
         title: "Listar Hospitales Externos",
-        hospitalesExternos,
+        hospitales_externos,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
@@ -107,7 +110,7 @@ const hospitalesExternosController = {
         nombre,
         complejidad,
       });
-      res.redirect("/hospitalesExternos/listado");
+      res.redirect("/hospitalesExternos/listar");
     } catch (error) {
       console.error("Error al crear hospital externo:", error);
       res.status(500).render("error", {
@@ -167,7 +170,7 @@ const hospitalesExternosController = {
         });
       }
       await hospital_externo.destroy();
-      res.redirect("/hospitalesExternos/listado");
+      res.redirect("/hospitalesExternos/listar");
     } catch (error) {
       console.error("Error al eliminar externo:", error);
       res.status(500).render("error", {
@@ -183,11 +186,7 @@ const hospitalesExternosController = {
         order: [["nombre", "ASC"]],
       });
 
-      res.render("vistasDatos/listarHospExternos", {
-        title: "Listado de Externos",
-        hospitales_externos,
-        userType: req.session?.userType || "guest",
-      });
+      res.json(hospitales_externos);
     } catch (error) {
       console.error("Error al listar Externos", error);
       res

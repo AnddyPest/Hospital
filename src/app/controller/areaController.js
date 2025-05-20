@@ -21,7 +21,7 @@ const areaController = {
   listarView: async (req, res) => {
     try {
       const areas = await Area.findAll();
-      res.render("vistasArea/listarArea", {
+      res.render("vistasDatos/listarAreas", {
         title: "Listar Áreas",
         areas,
         userType: req.session?.userType || "guest",
@@ -93,7 +93,7 @@ const areaController = {
     try {
       const { nombre } = req.body;
       const nuevaArea = await Area.create({ nombre });
-      res.redirect("/areas/listado");
+      res.redirect("/areas/listar");
     } catch (error) {
       console.error("Error al crear área:", error);
       res.status(500).render("error", {
@@ -152,7 +152,7 @@ const areaController = {
         });
       }
       await area.destroy();
-      res.redirect("/areas/listado");
+      res.redirect("/areas/listar");
     } catch (error) {
       console.error("Error al eliminar área:", error);
       res.status(500).render("error", {

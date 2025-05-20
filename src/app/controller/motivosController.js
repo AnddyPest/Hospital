@@ -24,7 +24,7 @@ const motivosController = {
       // Simplemente cargar todos los motivos sin filtrar
       const motivos = await Motivos.findAll();
 
-      res.render("vistasMotivos/listarMotivos", {
+      res.render("vistasDatos/listarMotivos", {
         title: "Listar Motivos",
         motivos,
         userType: req.session?.userType || "guest",
@@ -96,7 +96,7 @@ const motivosController = {
     try {
       const { nombre } = req.body;
       const nuevoMotivo = await Motivos.create({ nombre });
-      res.redirect("/motivos/listado");
+      res.redirect("/motivos/listar");
     } catch (error) {
       console.error("Error al crear motivo:", error);
       res.status(500).render("error", {
@@ -155,7 +155,7 @@ const motivosController = {
         });
       }
       await motivo.destroy();
-      res.redirect("/motivos/listado");
+      res.redirect("/motivos/listar");
     } catch (error) {
       console.error("Error al eliminar Motivo:", error);
       res.status(500).render("error", {

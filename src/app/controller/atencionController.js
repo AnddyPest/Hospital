@@ -5,6 +5,7 @@ const Turno = require("../model/turno");
 const Medico = require("../model/medico");
 const Enfermero = require("../model/enfermero");
 const Motivo = require("../model/motivos");
+const HospitalExterno = require("../model/hospitalesExternos");
 
 const atencionController = {
   index: async (req, res) => {
@@ -234,5 +235,85 @@ const atencionController = {
       });
     }
   },
+  //controllers de derivacion, vista y guardar
+  derivacionView: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      // Buscar la atención correctamente
+      const atencion = await Atencion.findByPk(id, {
+        include: [
+          {
+            model: Turno,
+            include: [
+              {
+                model: Paciente,
+                attributes: ["id", "nombre", "apellido", "dni"],
+              },
+              { model: Medico, required: false },
+              { model: Enfermero, required: false },
+              { model: Motivo, attributes: ["nombre"] },
+            ],
+          },
+        ],
+      });
+
+      const hospitalesExternos = await HospitalExterno.findAll({
+        attributes: ["id", "nombre", "complejidad"],
+      });
+
+      res.render("vistasAtencion/derivacionesTurno", {
+        title: "Derivación",
+        userType: req.session?.userType || "guest",
+        atencion: atencion,
+        turno: atencion.Turno,
+        paciente: atencion.Turno?.Paciente,
+        hospitalesExternos: hospitalesExternos,
+      });
+    } catch (error) {
+      console.error("Error al obtener la atención:", error);
+      // Usar render en lugar de json para mantener consistencia
+      res.message("Error al procesar la derivación del paciente");
+    }
+  },
+  guardarDerivacion: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { observaciones, hospitalExternoId } = req.body;
+
+      // Verificar si la atención existe
+      const atencion = await Atencion.findByPk(id);
+      if (!atencion) {
+        return res.status(404).json({
+          success: false,
+          message: "Atención no encontrada",
+        });
+      }
+
+      // Actualizar la atención con el motivo y el hospital externo
+      await Atencion.update(
+        {
+          observaciones,
+          hospitalesExternos_Id: hospitalExternoId,
+          situacion: "derivado",
+        },
+        {
+          where: { id },
+        }
+      );
+
+      return res.status(200).json({
+        success: true,
+        message: "Derivación guardada correctamente",
+      });
+    } catch (error) {
+      console.error("Error al guardar la derivación:", error);
+      res.status(500).json({
+        success: false,
+        message: "Error al guardar la derivación",
+      });
+    }
+  },
 };
+
 module.exports = atencionController;

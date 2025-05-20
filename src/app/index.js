@@ -13,6 +13,7 @@ const especialidadRouter = require("./router/especialidadRouter"); // Especialid
 const areaRouter = require("./router/areaRouter"); // Area Router
 const HospitalesExternosRouter = require("./router/hospitalesExternosRouter"); // Hospitales Externos Router
 const dataRouter = require("./router/dataRouter"); // Datos Router
+const habitacionRouter = require("./router/habitacionRouter"); // Habitaciones Router
 
 const atencionRouter = require("./router/atencionRouter"); // Atencion Router
 const path = require("path");
@@ -48,6 +49,7 @@ app.use("/especialidades", especialidadRouter);
 app.use("/areas", areaRouter);
 app.use("/hospitalesExternos", HospitalesExternosRouter);
 app.use("/datos", dataRouter);
+app.use("/habitacion", habitacionRouter);
 
 //rutas publicas
 app.use("/", router);

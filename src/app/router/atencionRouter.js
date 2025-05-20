@@ -13,4 +13,8 @@ router.post("/actualizarSituacion/:id", atencionController.actualizarSituacion);
 //rutas api
 router.put("/ausente/:id", atencionController.ausente);
 
+//rutas para derivacion
+router.get("/derivacion/:id", atencionController.derivacionView);
+router.post("/derivacion/guardar/:id", atencionController.guardarDerivacion);
+
 module.exports = router;

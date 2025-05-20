@@ -23,7 +23,7 @@ const especialidadController = {
   listarView: async (req, res) => {
     try {
       const especialidades = await Especialidad.findAll();
-      res.render("vistasEspecialidad/listarEspecialidad", {
+      res.render("vistasDatos/listarEspecialidades", {
         title: "Listar Especialidades",
         especialidades,
         userType: req.session?.userType || "guest",
@@ -98,7 +98,7 @@ const especialidadController = {
     try {
       const { nombre } = req.body;
       const nuevaEspecialidad = await Especialidad.create({ nombre });
-      res.redirect("/especialidades/listado");
+      res.redirect("/especialidades/listar");
     } catch (error) {
       console.error("Error al crear especialidad:", error);
       res.status(500).render("error", {
@@ -157,7 +157,7 @@ const especialidadController = {
         });
       }
       await especialidad.destroy();
-      res.redirect("/especialidades/listado");
+      res.redirect("/especialidades/listar");
     } catch (error) {
       console.error("Error al eliminar especialidad:", error);
       res.status(500).render("error", {

@@ -36,6 +36,7 @@ const Atencion = sequelize.define(
       ),
       allowNull: true,
     },
+
     turno_Id: {
       type: DataTypes.INTEGER,
       allowNull: false,
