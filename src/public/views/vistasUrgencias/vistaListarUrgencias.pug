@@ -1,0 +1,95 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+include ../templates/turnosMixins.pug
+
+block content
+    div
+        img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh); object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Listado de Urgencias", "/icons/triangle-exclamation-solid.svg")
+        
+        div.position-absolute.top-50.start-50.translate-middle(style="width: 95%")
+            div.card.shadow-lg.rounded-3.bg-dark.text-white.border.border-danger.mt-5
+                div.card-header.bg-danger
+                    div.d-flex.justify-content-between.align-items-center
+                        h4.text-center.mb-0 Triages de Urgencias
+                        a.btn.btn-outline-light(href="/turnos/urgencias/triage") 
+                            i.fas.fa-plus-circle.me-1
+                            | Nuevo Triage
+                
+                div.card-body.table-responsive
+                    // Control de filtro
+                    div.d-flex.justify-content-end.mb-3
+                        div.form-check.form-switch
+                            input.form-check-input(type="checkbox" id="togglePendientes" checked)
+                            label.form-check-label.text-light(for="togglePendientes") 
+                                i.fas.fa-filter.me-1
+                                | Mostrar solo pendientes
+
+                    if turnos && turnos.length > 0
+                        table.table.table-hover.table-dark.align-middle#tablaTurnos
+                            thead
+                                tr
+                                    th # Orden
+                                    th Fecha
+                                    th Paciente
+                                    th DNI
+                                    th Enfermero
+                                    // Columna de Área eliminada
+                                    th Motivo
+                                    th Estado
+                                    th Acción
+                            tbody
+                                each turno in turnos
+                                    tr(class=turno.estado === 'pendiente' ? 'table-danger' : turno.estado === 'atendido' ? 'table-success' : '' data-estado=turno.estado)
+                                        td.fw-bold #{turno.orden || 'N/A'}
+                                        td #{new Date(turno.fecha).toLocaleDateString('es-ES')}
+                                        td #{turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : 'Sin datos'}
+                                        td #{turno.Paciente ? turno.Paciente.dni : 'Sin datos'}
+                                        td #{turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}` : 'Sin asignar'}
+                                        // Columna de Área eliminada
+                                        td #{turno.Motivo ? turno.Motivo.nombre : 'Sin especificar'}
+                                        td
+                                            span(class=`badge ${turno.estado === 'pendiente' ? 'bg-danger' : turno.estado === 'atendido' ? 'bg-success' : turno.estado === 'en proceso' ? 'bg-warning' : 'bg-secondary'}`)
+                                                | #{turno.estado.toUpperCase()}
+                                        td
+                                            if turno.estado === 'pendiente'
+                                                a.btn.btn-danger.w-100(href=`/atencion/paciente/turno/${turno.id}`)
+                                                    i.fas.fa-hand-holding-medical.me-2
+                                                    | Atender
+                                            else
+                                                span.badge.bg-secondary Ya atendido
+                    else
+                        div.alert.alert-warning.text-center
+                            i.fas.fa-exclamation-triangle.me-2
+                            | No hay triages de urgencia registrados
+
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleSwitch = document.getElementById('togglePendientes');
+            
+            // Aplicar filtro inicial (por defecto, mostrar solo pendientes)
+            aplicarFiltro(toggleSwitch.checked);
+            
+            // Escuchar cambios en el toggle
+            toggleSwitch.addEventListener('change', function() {
+                aplicarFiltro(this.checked);
+            });
+        });
+        
+        function aplicarFiltro(mostrarSoloPendientes) {
+            const filas = document.querySelectorAll('#tablaTurnos tbody tr');
+            
+            filas.forEach(fila => {
+                const estado = fila.getAttribute('data-estado');
+                
+                if (mostrarSoloPendientes && estado !== 'pendiente') {
+                    fila.style.display = 'none';
+                } else {
+                    fila.style.display = '';
+                }
+            });
+        }
+
+

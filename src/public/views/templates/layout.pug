@@ -192,10 +192,6 @@ html(lang="en")
                   span
                     | Historia Clinica
                   img(src="/icons/file-waveform-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                button(htype="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
-                  span
-                    | Derivaciones
-                  img(src="/icons/circle-down-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 a(href="/turnos", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Turnos
@@ -211,21 +207,36 @@ html(lang="en")
               
         div.accordion-item.bg-azul-claro
           h2.accordion-header
+            button.accordion-button.collapsed.urgencias-btn(type="button", data-bs-toggle="collapse", data-bs-target="#collapseUrgencias", aria-expanded="false", aria-controls="collapseUrgencias")
+              | Urgencias
+              img(src="/icons/truck-medical-solid.svg", alt="Prescripciones", class="ms-3", style="width: 25px; height: 25px;")
+          div.collapse#collapseUrgencias(data-bs-parent="#accordionSidebar")
+            div.accordion-body
+              ul.list-group
+                a(href="/urgencias", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Adminitrar Urgencias
+                  img(src="/icons/triangle-exclamation-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+                button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                  span
+                    | Atender Urgencia
+                  img(src="/icons/notes-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
+        div.accordion-item.bg-azul-claro
+          h2.accordion-header
             button.accordion-button.collapsed.emergencias-btn(type="button", data-bs-toggle="collapse", data-bs-target="#collapseEmergencias", aria-expanded="false", aria-controls="collapseEmergencias")
               | Emergencias
               img(src="/icons/truck-medical-solid.svg", alt="Prescripciones", class="ms-3", style="width: 25px; height: 25px;")
           div.collapse#collapseEmergencias(data-bs-parent="#accordionSidebar")
             div.accordion-body
               ul.list-group
-                a(href="/pacientes", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
+                a(href="/emergencias", type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
-                    | Ver Emergencias
+                    | Administrar Emergencias
                   img(src="/icons/triangle-exclamation-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
                 button(type="button", class="btn btn-light w-100 d-flex align-items-center justify-content-between" style="margin-bottom: 5px;")
                   span
                     | Asignar Equipo
-                  img(src="/icons/notes-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")
-                
+                  img(src="/icons/notes-medical-solid.svg", alt="Prescripciones", class="ms-2", style="width: 20px; height: 20px;")        
     // Área de trabajo
     div.workspace
       div.p-4
@@ -293,7 +304,7 @@ html(lang="en")
         collapsePersonal.classList.add("show");
         botonPersonal.setAttribute("aria-expanded", "true");
         botonPersonal.classList.remove("collapsed");
-      } else if(["/camas", "/diagnosis", "/tratamiento", "/cirugias", "/equipos", "/farmacia", "/proveedores"].some(path => currentPath.startsWith(path))) {
+      } else if(["/habitacion", "/camas", "/diagnosis", "/tratamiento", "/cirugias", "/equipos", "/farmacia", "/proveedores"].some(path => currentPath.startsWith(path))) {
         collapseGestion.classList.add("show");
         botonGestion.setAttribute("aria-expanded", "true");
         botonGestion.classList.remove("collapsed");
@@ -301,6 +312,18 @@ html(lang="en")
         collapsePacientes.classList.add("show");
         botonPacientes.setAttribute("aria-expanded", "true");
         botonPacientes.classList.remove("collapsed");
+      } else if(["/urgencias"].some(path => currentPath.startsWith(path))) {
+        const collapseUrgencias = document.querySelector("#collapseUrgencias");
+        const botonUrgencias = collapseUrgencias.previousElementSibling.querySelector("button");
+        collapseUrgencias.classList.add("show");
+        botonUrgencias.setAttribute("aria-expanded", "true");
+        botonUrgencias.classList.remove("collapsed");
+      } else if(["/emergencias"].some(path => currentPath.startsWith(path))) {
+        const collapseEmergencias = document.querySelector("#collapseEmergencias");
+        const botonEmergencias = collapseEmergencias.previousElementSibling.querySelector("button");
+        collapseEmergencias.classList.add("show");
+        botonEmergencias.setAttribute("aria-expanded", "true");
+        botonEmergencias.classList.remove("collapsed");
       }
 
       //const token = localStorage.getItem("token");
@@ -491,9 +514,8 @@ html(lang="en")
         ojoConfirm.src = "/icons/eye-solid.svg";
       }*/
     //};
-    }); 
-  
-   
-  
-    
-     
+    });
+
+
+
+

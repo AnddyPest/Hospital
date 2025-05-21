@@ -126,21 +126,6 @@ const turnoController = {
         ],
       });
 
-      const enfermeros = await Enfermero.findAll({
-        attributes: ["id", "nombre", "apellido"],
-        include: [
-          {
-            model: Area,
-            as: "Area",
-            attributes: ["id", "nombre"],
-          },
-        ],
-        order: [
-          ["apellido", "ASC"],
-          ["nombre", "ASC"],
-        ],
-      });
-
       const motivos = await Motivos.findAll({
         attributes: ["id", "nombre"],
         order: [["nombre", "ASC"]],
@@ -150,7 +135,7 @@ const turnoController = {
         title: "Nuevo Turno",
         pacientes,
         medicos,
-        enfermeros,
+
         motivoTurno: motivos,
         userType: req.session?.userType || "guest",
       });
@@ -823,6 +808,173 @@ const turnoController = {
       console.error("Error en vista de derivaciones:", error);
       res.status(500).render("error", {
         message: "Error al cargar la vista de derivaciones",
+        error,
+      });
+    }
+  },
+
+  // metodos para urgencias
+  // Vista para nuevo triage de urgencia
+  urgenciaView: async (req, res) => {
+    try {
+      // Obtener datos para los desplegables
+      const pacientes = await Paciente.findAll({
+        attributes: ["id", "nombre", "apellido", "dni"],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
+
+      const enfermeros = await Enfermero.findAll({
+        attributes: ["id", "nombre", "apellido"],
+        include: [
+          {
+            model: Area,
+            as: "Area",
+            attributes: ["id", "nombre"],
+          },
+        ],
+        order: [
+          ["apellido", "ASC"],
+          ["nombre", "ASC"],
+        ],
+      });
+
+      const motivos = await Motivos.findAll({
+        attributes: ["id", "nombre"],
+        order: [["nombre", "ASC"]],
+      });
+
+      // Obtener la fecha actual en formato YYYY-MM-DD
+      const fechaActual = new Date().toISOString().split("T")[0];
+
+      // Obtener el siguiente número de orden
+      const siguienteOrden = await turnoController._obtenerSiguienteOrden();
+
+      res.render("vistasUrgencias/nuevaUrgencia", {
+        title: "Triage de Urgencia",
+        pacientes,
+        enfermeros,
+        motivoTurno: motivos,
+        siguienteOrden,
+        fechaActual,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error en formulario triage de urgencia:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar el formulario de urgencias",
+        error,
+      });
+    }
+  },
+
+  // Método para crear un triage de urgencia
+  crearTriage: async (req, res) => {
+    try {
+      const { fecha, motivo_Id, estado, paciente_Id, enfermero_Id } = req.body;
+
+      // Validación básica
+      if (!paciente_Id || !enfermero_Id) {
+        return res.status(400).render("vistasUrgencias/portadaUrgencias", {
+          title: "Triage de Urgencia",
+          error: "El paciente y el enfermero son obligatorios",
+          formData: req.body,
+          userType: req.session?.userType || "guest",
+        });
+      }
+
+      // Obtener el siguiente número de orden
+      const orden = await turnoController._obtenerSiguienteOrden();
+
+      // Crear el turno de triage sin hora específica, solo con orden
+      const turno = await Turno.create({
+        fecha,
+        orden,
+        motivo_Id,
+        estado: estado || "Pendiente",
+        paciente_Id,
+        enfermero_Id,
+      });
+
+      res.redirect(
+        "/urgencias/admin?success=true&message=Triage+creado+correctamente"
+      );
+    } catch (error) {
+      console.error("Error al crear el triage:", error);
+
+      // Recargar los datos para los desplegables
+      const pacientes = await Paciente.findAll();
+      const enfermeros = await Enfermero.findAll();
+      const motivos = await Motivos.findAll();
+
+      res.status(500).render("vistasUrgencias/portadaUrgencias", {
+        title: "Triage de Urgencia",
+        error: "Error al crear el triage: " + error.message,
+        pacientes,
+        enfermeros,
+        motivoTurno: motivos,
+        formData: req.body,
+        userType: req.session?.userType || "guest",
+      });
+    }
+  },
+
+  // Método privado para obtener el siguiente número de orden
+  // El guión bajo indica que es un método auxiliar interno
+  _obtenerSiguienteOrden: async function () {
+    try {
+      // Buscar el turno con el mayor número de orden para enfermeros
+      const ultimoTurno = await Turno.findOne({
+        where: {
+          enfermero_Id: { [Op.not]: null }, // Solo turnos de enfermeros
+          orden: { [Op.not]: null }, // Que tengan número de orden
+        },
+        order: [["orden", "DESC"]],
+      });
+
+      // Si existe, retorna el siguiente número, si no, comienza en 1
+      return ultimoTurno ? ultimoTurno.orden + 1 : 1;
+    } catch (error) {
+      console.error("Error al obtener siguiente número de orden:", error);
+      return 1; // Valor por defecto en caso de error
+    }
+  },
+  // render de vista para listado de urgencias
+  listarUrgenciasView: async (req, res) => {
+    try {
+      const turnos = await Turno.findAll({
+        where: {
+          orden: { [Op.not]: null }, // Solo turnos con orden
+        },
+        include: [
+          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
+          {
+            model: Enfermero,
+            attributes: ["id", "nombre", "apellido"],
+            include: [
+              {
+                model: Area,
+                as: "Area",
+                attributes: ["id", "nombre"],
+              },
+            ],
+          },
+          { model: Motivos, attributes: ["id", "nombre"] },
+        ],
+        order: [["orden", "ASC"]],
+      });
+
+      res.render("vistasUrgencias/vistaListarUrgencias", {
+        title: "Listar Urgencias",
+        turnos,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al listar urgencias:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la lista de urgencias",
         error,
       });
     }

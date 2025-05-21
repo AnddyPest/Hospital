@@ -20,8 +20,15 @@ mixin atencionPaciente(turno)
                                 
                                 div.col.text-start
                                     div.mb-1
-                                        label.fw-bold.me-2 Hora:
-                                        span.text-light #{turno ? turno.hora : new Date().toLocaleTimeString()}
+                                        if turno && turno.hora
+                                            label.fw-bold.me-2 Hora:
+                                            span.text-light #{turno.hora}
+                                        else if turno && turno.orden
+                                            label.fw-bold.me-2 Orden:
+                                            span.text-light #{turno.orden}
+                                        else
+                                            label.fw-bold.me-2 Hora:
+                                            span.text-light #{new Date().toLocaleTimeString()}
                             hr.border-info.opacity-75.mt-1.mb-1
                             div.row.mb-1
                                 div.col.mb-3.text-start
@@ -296,4 +303,3 @@ block content
             window.location.href = `/emergencia/paciente/${dni}/atencion/${atencionId}`;
         }
 
-                

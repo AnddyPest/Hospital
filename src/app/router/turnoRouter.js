@@ -22,13 +22,17 @@ router.get("/admin/borrar/turno", turnoController.borrarTurnosMedicosView);
 router.get("/medicos", turnoController.listarTurnosMedicosView);
 
 // VISTAS DE TRIAGES (ENFERMEROS)
-router.get("/listar/triages", turnoController.listarTriagesView);
+router.get("/urgencias/triage", turnoController.urgenciaView);
+router.get("/listar/urgencias", turnoController.listarUrgenciasView);
 router.get(
   "/admin/seleccionar/edit/triages",
   turnoController.editarTriagesView
 );
 router.get("/admin/borrar/triage", turnoController.borrarTriagesView);
 router.get("/enfermeros", turnoController.listarTurnosEnfermerosView);
+
+// crear triage
+router.post("/urgencias/triage/crear", turnoController.crearTriage);
 
 // RUTAS DE OPERACIONES CRUD
 router.post("/admin/new", turnoController.crearTurno);

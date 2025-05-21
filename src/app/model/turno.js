@@ -17,7 +17,11 @@ const Turno = sequelize.define("Turno", {
   },
   hora: {
     type: DataTypes.TIME,
-    allowNull: false,
+    allowNull: true,
+  },
+  orden: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
   },
   estado: {
     type: DataTypes.STRING,
@@ -26,13 +30,6 @@ const Turno = sequelize.define("Turno", {
   },
 });
 
-//estas son las relaciones entre los modelos
-// Paciente tiene muchos Turnos
-// Turno pertenece a un Paciente
-// Medico tiene muchos Turnos
-// Turno pertenece a un Medico
-// Enfermero tiene muchos Turnos
-// Turno pertenece a un Enfermero
 Paciente.hasMany(Turno, { foreignKey: "paciente_Id" });
 Turno.belongsTo(Paciente, { foreignKey: "paciente_Id" });
 Medico.hasMany(Turno, { foreignKey: "medico_Id" });

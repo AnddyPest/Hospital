@@ -3,37 +3,23 @@ mixin tablaTurnos(profesionalTypeOf, context)
     div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
       table.table.table-hover.table-dark.table-bordered.border-info.table-striped
         thead(style="position: sticky; top: 0;")
-          if profesionalTypeOf === "Medico"
-            tr.table-info
-              th.col(style="width: 10%") Fecha
-              th.col(style="width: 20%") Paciente
-              th.col(style="width: 12%") D.N.I.
-              th.col(style="width: 15%") #{profesionalTypeOf}
-              th.col(style="width: 10%") Hora
-              th.col(style="width: 20%") Especialidad
-              th.col(style="width: 8%") Motivo
-              th.col(style="width: 8%") Estado
-              if context === "editar"
-                th.col(style="width: 5%") Editar
-              else if context === "borrar"
-                th.col(style="width: 5%") Borrar
-          else
-            tr.table-info
-              th.col(style="width: 10%") Fecha
-              th.col(style="width: 20%") Paciente
-              th.col(style="width: 15%") D.N.I.
-              th.col(style="width: 15%") #{profesionalTypeOf}
-              th.col(style="width: 10%") Hora
-              th.col(style="width: 8%") Motivo
-              th.col(style="width: 8%") Estado
-              if context === "editar"
-                th.col(style="width: 5%") Editar
-              else if context === "borrar"
-                th.col(style="width: 5%") Borrar
+          tr.table-info
+            th.col(style="width: 10%") Fecha
+            th.col(style="width: 20%") Paciente
+            th.col(style="width: 12%") D.N.I.
+            th.col(style="width: 15%") #{profesionalTypeOf}
+            th.col(style="width: 10%") Hora
+            th.col(style="width: 20%") Especialidad
+            th.col(style="width: 8%") Motivo
+            th.col(style="width: 8%") Estado
+            if context === "editar"
+              th.col(style="width: 5%") Editar
+            else if context === "borrar"
+              th.col(style="width: 5%") Borrar
         tbody
           if turnos && turnos.length > 0
             each turno in turnos
-              if (profesionalTypeOf === "Medico" && turno.medico_Id) || (profesionalTypeOf === "Enfermero" && turno.enfermero_Id)
+              if turno.medico_Id
                 - var fechaFormateada = turno.fecha
                 if turno.fecha && turno.fecha.includes('-')
                   - var partesFecha = turno.fecha.split('-')
@@ -43,13 +29,9 @@ mixin tablaTurnos(profesionalTypeOf, context)
                   td= fechaFormateada
                   td= turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : 'N/A'
                   td= turno.Paciente ? turno.Paciente.dni : 'N/A'
-                  if profesionalTypeOf === "Medico"
-                    td= turno.Medico ? `${turno.Medico.nombre} ${turno.Medico.apellido}` : 'N/A'
-                    td= turno.hora
-                    td= turno.Medico && turno.Medico.Especialidad ? turno.Medico.Especialidad.nombre : 'N/A'
-                  else
-                    td= turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}` : 'N/A'
-                    td= turno.hora
+                  td= turno.Medico ? `${turno.Medico.nombre} ${turno.Medico.apellido}` : 'N/A'
+                  td= turno.hora
+                  td= turno.Medico && turno.Medico.Especialidad ? turno.Medico.Especialidad.nombre : 'N/A'
                   td= turno.Motivo ? turno.Motivo.nombre : 'N/A'
                   td= turno.estado
                   if context === "editar"
@@ -58,7 +40,7 @@ mixin tablaTurnos(profesionalTypeOf, context)
                         img(src="/icons/user-pen-solid.svg", alt="Editar", style="width: 25px; height: 25px;")
                   else if context === "borrar"
                     td
-                      button.btn.btn-danger.w-75.h-75(onclick=`confirmarBorrarTurno(${turno.id}, '${profesionalTypeOf.toLowerCase()}')`)
+                      button.btn.btn-danger.w-75.h-75(onclick=`confirmarBorrarTurno(${turno.id}, 'medico')`)
                         img(src="/icons/user-slash-solid.svg", alt="Borrar", style="width: 25px; height: 25px;")
           else
             tr
@@ -67,15 +49,12 @@ mixin tablaTurnos(profesionalTypeOf, context)
     div.mt-3.filter-buttons#filterButtons
       button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('fecha');") Filtrar por Fecha
       button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('dni');") Filtrar por DNI
-      if profesionalTypeOf === "Medico"
-        button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('medicoEspecialidad');") Filtrar por Médico
-      else
-        button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('profesional');") Filtrar por Profesional
+      button.btn.btn-info.me-2(onclick="event.preventDefault(); mostrarFiltro('medicoEspecialidad');") Filtrar por Médico
       button.btn.btn-warning.me-2(onclick="event.preventDefault(); limpiarTodosFiltros();") Limpiar Filtros
       button.btn.btn-danger(onclick=`window.location.href='${
-        context === "borrar" ? "/turnos/admin/seleccionar/borrar" : 
-        context === "editar" ? "/turnos/admin/seleccionar/edit" : 
-        "/turnos/listar"
+        context === "borrar" ? "/turnos/admin" : 
+        context === "editar" ? "/turnos/admin" : 
+        "/turnos"
       }'`) Volver
     
     div.mt-3#filtroFechaContainer(style="display: none;")
@@ -93,28 +72,20 @@ mixin tablaTurnos(profesionalTypeOf, context)
         button.btn.btn-info.ms-2(onclick="filtrarTabla('dni')") Filtrar
         button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
     
-    div.mt-3#filtroProfesionalContainer(style="display: none;")
-      div.d-flex.align-items-center.justify-content-center
-        select.form-select(id="inputProf", style="width: 400px;")
-          option(value="0") Seleccione Profesional
-        button.btn.btn-info.ms-2(onclick="filtrarTabla('profesional')") Filtrar
-        button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
-    
-    if profesionalTypeOf === "Medico"
-      div.mt-3#filtroMedicoEspecialidadContainer(style="display: none;")
-        div.d-flex.flex-column.align-items-center.justify-content-center
-          div.d-flex.flex-row.justify-content-center.mb-3.gap-4(style="width: 100%;")
-            div.d-flex.flex-column(style="width: 250px;")
-              label.form-label.fw-bold.text-black.mb-2(for="inputEspecialidad") ESPECIALIDAD:
-              select.form-select(id="inputEspecialidad", onchange="cargarMedicosPorEspecialidad()")
-                option(value="0") Seleccione Especialidad
-            div.d-flex.flex-column(style="width: 250px;")
-              label.form-label.fw-bold.text-black.mb-2(for="inputMed") MÉDICO:
-              select.form-select(id="inputMed")
-                option(value="0") Seleccione Médico
-          div.mt-2
-            button.btn.btn-info.me-2(onclick="filtrarTabla('medicoEspecialidad')") Filtrar
-            button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
+    div.mt-3#filtroMedicoEspecialidadContainer(style="display: none;")
+      div.d-flex.flex-column.align-items-center.justify-content-center
+        div.d-flex.flex-row.justify-content-center.mb-3.gap-4(style="width: 100%;")
+          div.d-flex.flex-column(style="width: 250px;")
+            label.form-label.fw-bold.text-black.mb-2(for="inputEspecialidad") ESPECIALIDAD:
+            select.form-select(id="inputEspecialidad", onchange="cargarMedicosPorEspecialidad()")
+              option(value="0") Seleccione Especialidad
+          div.d-flex.flex-column(style="width: 250px;")
+            label.form-label.fw-bold.text-black.mb-2(for="inputMed") MÉDICO:
+            select.form-select(id="inputMed")
+              option(value="0") Seleccione Médico
+        div.mt-2
+          button.btn.btn-info.me-2(onclick="filtrarTabla('medicoEspecialidad')") Filtrar
+          button.btn.btn-danger.ms-2(onclick="ocultarFiltros()") Volver
 
   script.
     let todasLasFilasTurnos = [];
@@ -154,7 +125,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
       const filtros = [
         'filtroFechaContainer', 
         'filtroDniContainer', 
-        'filtroProfesionalContainer', 
         'filtroMedicoEspecialidadContainer'
       ];
       
@@ -167,8 +137,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
         document.getElementById('filtroFechaContainer').style.display = 'block';
       } else if (tipo === 'dni') {
         document.getElementById('filtroDniContainer').style.display = 'block';
-      } else if (tipo === 'profesional') {
-        document.getElementById('filtroProfesionalContainer').style.display = 'block';
       } else if (tipo === 'medicoEspecialidad') {
         document.getElementById('filtroMedicoEspecialidadContainer').style.display = 'block';
         cargarEspecialidades(); // Cargar especialidades cuando se muestra este filtro
@@ -179,7 +147,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
       const filtros = [
         'filtroFechaContainer', 
         'filtroDniContainer', 
-        'filtroProfesionalContainer', 
         'filtroMedicoEspecialidadContainer'
       ];
       
@@ -224,65 +191,42 @@ mixin tablaTurnos(profesionalTypeOf, context)
     }
     
     async function cargarDatosFiltros(profesionalTypeOf) {
-      if (profesionalTypeOf === 'Medico') {
-        try {
-          const responseEsp = await fetch("/especialidades/listado");
-          if (responseEsp.ok) {
-            const especialidades = await responseEsp.json();
-            
-            const selectEsp = document.getElementById("inputEspecialidad");
-            if (selectEsp) {
-              selectEsp.innerHTML = '<option value="0">Seleccione Especialidad</option>';
-              
-              especialidades.forEach(esp => {
-                const option = document.createElement("option");
-                option.value = esp.id;
-                option.textContent = esp.nombre;
-                selectEsp.appendChild(option);
-              })
-            }
-          }
+      try {
+        const responseEsp = await fetch("/especialidades/listado");
+        if (responseEsp.ok) {
+          const especialidades = await responseEsp.json();
           
-          const responseMed = await fetch("/medicos/all");
-          if (responseMed.ok) {
-            const medicos = await responseMed.json();
-            console.log(medicos); 
-            const selectProf = document.getElementById("inputMed");
-            if (selectProf) {
-              selectProf.innerHTML = '<option value="0">Seleccione Médico</option>';
-              
-              medicos.forEach(medico => {
-                const option = document.createElement("option");
-                option.value = medico.id;
-                option.textContent = `${medico.nombre} ${medico.apellido}`;
-                selectProf.appendChild(option);
-              });
-            }
+          const selectEsp = document.getElementById("inputEspecialidad");
+          if (selectEsp) {
+            selectEsp.innerHTML = '<option value="0">Seleccione Especialidad</option>';
+            
+            especialidades.forEach(esp => {
+              const option = document.createElement("option");
+              option.value = esp.id;
+              option.textContent = esp.nombre;
+              selectEsp.appendChild(option);
+            })
           }
-        } catch (error) {
-          console.error("Error al cargar datos para filtros:", error);
         }
-      } else if (profesionalTypeOf === 'Enfermero') {
-        try {
-          const response = await fetch("/enfermeros/all");
-          if (response.ok) {
-            const enfermeros = await response.json();
-                
-            const selectProf = document.getElementById("inputProf");
-            if (selectProf) {
-              selectProf.innerHTML = '<option value="0">Seleccione Enfermero</option>';
-              
-              enfermeros.forEach(enfermero => {
-                const option = document.createElement("option");
-                option.value = enfermero.id;
-                option.textContent = `${enfermero.nombre} ${enfermero.apellido}`;
-                selectProf.appendChild(option);
-              });
-            }
+        
+        const responseMed = await fetch("/medicos/all");
+        if (responseMed.ok) {
+          const medicos = await responseMed.json();
+          console.log(medicos); 
+          const selectProf = document.getElementById("inputMed");
+          if (selectProf) {
+            selectProf.innerHTML = '<option value="0">Seleccione Médico</option>';
+            
+            medicos.forEach(medico => {
+              const option = document.createElement("option");
+              option.value = medico.id;
+              option.textContent = `${medico.nombre} ${medico.apellido}`;
+              selectProf.appendChild(option);
+            });
           }
-        } catch (error) {
-          console.error("Error al cargar enfermeros:", error);
         }
+      } catch (error) {
+        console.error("Error al cargar datos para filtros:", error);
       }
     }
     
@@ -296,10 +240,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
       } else if (tipo === 'dni') {
         valorFiltro = document.getElementById('inputDni').value.trim().toLowerCase();
         columnaFiltro = 2;
-      } else if (tipo === 'profesional') {
-        const selectProf = document.getElementById('inputProf');
-        valorFiltro = selectProf.options[selectProf.selectedIndex]?.textContent.trim().toLowerCase() || '';
-        columnaFiltro = 3;
       } else if (tipo === 'medicoEspecialidad') {
         // Comprobar si se seleccionó un médico específico
         const selectProf = document.getElementById('inputMed');
@@ -409,7 +349,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
       switch(tipo) {
         case 'fecha': return 'Fecha';
         case 'dni': return 'DNI';
-        case 'profesional': return 'Enfermero';
         case 'medicoEspecialidad': 
           if (filtrosActivos[tipo].columna === 3) return 'Médico';
           return 'Especialidad';
@@ -449,9 +388,6 @@ mixin tablaTurnos(profesionalTypeOf, context)
       
       const selectMed = document.getElementById('inputMed');
       if (selectMed) selectMed.selectedIndex = 0;
-      
-      const selectProf = document.getElementById('inputProf');
-      if (selectProf) selectProf.selectedIndex = 0;
     }
     
     function configurarEventosTeclas() {

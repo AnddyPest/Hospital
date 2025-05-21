@@ -105,3 +105,22 @@ button.emergencias-btn[aria-expanded="true"] {
 button.emergencias-btn[aria-expanded="true"]:hover {
   background-color: #d34700;
 }
+
+.urgencias-btn {
+  background-color: #dcb835;
+  color: white;
+}
+
+.urgencias-btn:hover {
+  background-color: #a18115;
+  color: white;
+}
+
+button.urgencias-btn[aria-expanded="true"] {
+  background-color: #d38900;
+  color: white;
+}
+
+button.urgencias-btn[aria-expanded="true"]:hover {
+  background-color: #d37000;
+}

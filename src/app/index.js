@@ -14,6 +14,8 @@ const areaRouter = require("./router/areaRouter"); // Area Router
 const HospitalesExternosRouter = require("./router/hospitalesExternosRouter"); // Hospitales Externos Router
 const dataRouter = require("./router/dataRouter"); // Datos Router
 const habitacionRouter = require("./router/habitacionRouter"); // Habitaciones Router
+const urgenciasRouter = require("./router/urgenciasRouter"); // Urgencias Router
+const emergenciasRouter = require("./router/emergenciasRouter"); // Emergencias Router
 
 const atencionRouter = require("./router/atencionRouter"); // Atencion Router
 const path = require("path");
@@ -50,6 +52,8 @@ app.use("/areas", areaRouter);
 app.use("/hospitalesExternos", HospitalesExternosRouter);
 app.use("/datos", dataRouter);
 app.use("/habitacion", habitacionRouter);
+app.use("/urgencias", urgenciasRouter);
+app.use("/emergencias", emergenciasRouter);
 
 //rutas publicas
 app.use("/", router);
