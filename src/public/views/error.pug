@@ -1,0 +1,15 @@
+extends templates/layout.pug
+
+block content
+  div.container.mt-5
+    div.card.border-danger
+      div.card-header.bg-danger.text-white
+        h3 Error: #{message}
+      div.card-body
+        if error
+          h4 #{error.status || 500} - #{error.message || "Error del servidor"}
+          if error.stack && process.env.NODE_ENV !== 'production'
+            pre.bg-dark.text-light.p-3.rounded #{error.stack}
+      div.card-footer
+        a.btn.btn-primary(href="/") Volver al inicio
+        a.btn.btn-secondary.ms-2(href="javascript:history.back()") Volver atrás

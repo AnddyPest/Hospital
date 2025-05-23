@@ -20,25 +20,28 @@ router.get(
 );
 router.get("/admin/borrar/turno", turnoController.borrarTurnosMedicosView);
 router.get("/medicos", turnoController.listarTurnosMedicosView);
-
-// VISTAS DE TRIAGES (ENFERMEROS)
-router.get("/urgencias/triage", turnoController.urgenciaView);
-router.get("/listar/urgencias", turnoController.listarUrgenciasView);
-router.get(
-  "/admin/seleccionar/edit/triages",
-  turnoController.editarTriagesView
-);
-router.get("/admin/borrar/triage", turnoController.borrarTriagesView);
-router.get("/enfermeros", turnoController.listarTurnosEnfermerosView);
-
-// crear triage
-router.post("/urgencias/triage/crear", turnoController.crearTriage);
-
 // RUTAS DE OPERACIONES CRUD
 router.post("/admin/new", turnoController.crearTurno);
 router.get("/editar/formulario", turnoController.editarTurnoFormView);
 router.put("/editar/:id", turnoController.editarTurno);
 router.delete("/borrar/:id", turnoController.borrarTurno);
+
+// VISTAS DE TRIAGES (ENFERMEROS)
+router.get("/urgencias/triage", turnoController.urgenciaView); // ok
+router.get("/listar/urgencias", turnoController.listarTriagesView);
+router.get("/atender/urgencias", turnoController.listarUrgenciasView);
+
+router.post(
+  "/atencion/actualizarHora/:id",
+  turnoController.actualizarHoraTurno
+);
+router.get(
+  "/urgencias/paciente/:dni/atencion/:atencionId",
+  turnoController.turnoUrgenciaView
+);
+
+// crear triage
+router.post("/urgencias/triage/crear", turnoController.crearTriage); //ok
 
 //ruta para interconsultas
 router.get(
@@ -55,5 +58,6 @@ router.get(
   "/listadohorariosenfermeros/:enfermero_Id/:fecha",
   turnoController.getHorariosEnfermeros
 );
+// ruta para ver las urgencias a antender
 
 module.exports = router;

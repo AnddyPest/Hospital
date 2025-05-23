@@ -3,6 +3,7 @@ mixin entidadForm(entityURL, entityName, context, entityData)
   - const actionText = isEdit ? 'Actualizar' : 'Guardar'
   - const formId = `form${entityName}`
   - const isPaciente = entityURL === 'pacientes'
+  - const isMedico = entityURL === 'medicos'
   - const actionUrl = isEdit && entityData ? `/${entityURL}/editar/${entityData.id}` : `/${entityURL}/admin/new`
 
   div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rounded-3(style="width: 80%;" id=`formulario${entityName}`)
@@ -145,8 +146,21 @@ mixin entidadForm(entityURL, entityName, context, entityData)
                   value=isEdit && entityData ? entityData.telefono : '')
                 label(for="telefono") Teléfono
             
-            // Columna vacía para mantener la disposición
-            div.col-md-4
+            // Campo Matrícula solo para médicos
+            if isMedico
+              div.col-md-4
+                div.form-floating
+                  input.form-control(
+                    type="text" 
+                    id="matricula" 
+                    name="matricula" 
+                    placeholder="Matrícula" 
+                    required
+                    value=isEdit && entityData ? entityData.matricula : '')
+                  label(for="matricula") Matrícula
+            else
+              // Columna vacía para otras entidades
+              div.col-md-4
         
         // Botones de acción
         input(type="hidden" name="_method" value=isEdit ? "PUT" : "POST")

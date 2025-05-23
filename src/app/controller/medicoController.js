@@ -191,13 +191,15 @@ const medicoController = {
   crearMedico: async (req, res) => {
     try {
       console.log("Creando nuevo medico:", req.body);
-      const { dni, nombre, apellido, especialidad_Id, telefono } = req.body;
+      const { dni, nombre, apellido, especialidad_Id, telefono, matricula } =
+        req.body;
       const nuevoMedico = await Medico.create({
         dni,
         nombre,
         apellido,
         especialidad_Id,
         telefono,
+        matricula,
       });
 
       res.redirect(
@@ -219,9 +221,10 @@ const medicoController = {
   editarMedico: async (req, res) => {
     try {
       const { id } = req.params;
-      const { dni, nombre, apellido, especialidad_Id, telefono } = req.body;
+      const { dni, nombre, apellido, especialidad_Id, telefono, matricula } =
+        req.body;
       const [updated] = await Medico.update(
-        { dni, nombre, apellido, especialidad_Id, telefono },
+        { dni, nombre, apellido, especialidad_Id, telefono, matricula },
         { where: { id } }
       );
 
@@ -283,7 +286,7 @@ const medicoController = {
             attributes: ["id", "nombre"],
           },
         ],
-        attributes: ["id", "nombre", "apellido"],
+        attributes: ["id", "nombre", "apellido", "matricula"],
 
         order: [
           ["apellido", "ASC"],

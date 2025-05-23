@@ -11,7 +11,7 @@ const Atencion = sequelize.define(
     },
     diagnostico: {
       type: DataTypes.STRING,
-      allowNull: false,
+      allowNull: true,
     },
     observaciones: {
       type: DataTypes.STRING,
@@ -32,11 +32,15 @@ const Atencion = sequelize.define(
         "diagnosis",
         "fallecido",
         "interconsulta",
-        "derivado"
+        "derivado",
+        "urgencia"
       ),
       allowNull: true,
     },
-
+    prioridadAsignada: {
+      type: DataTypes.ENUM("alta", "media", "baja"),
+      allowNull: true,
+    },
     turno_Id: {
       type: DataTypes.INTEGER,
       allowNull: false,

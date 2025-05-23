@@ -20,15 +20,8 @@ mixin atencionPaciente(turno)
                                 
                                 div.col.text-start
                                     div.mb-1
-                                        if turno && turno.hora
-                                            label.fw-bold.me-2 Hora:
-                                            span.text-light #{turno.hora}
-                                        else if turno && turno.orden
-                                            label.fw-bold.me-2 Orden:
-                                            span.text-light #{turno.orden}
-                                        else
-                                            label.fw-bold.me-2 Hora:
-                                            span.text-light #{new Date().toLocaleTimeString()}
+                                        label.fw-bold.me-2 Hora:
+                                        span.text-light #{turno && turno.hora ? turno.hora : new Date().toLocaleTimeString()}
                             hr.border-info.opacity-75.mt-1.mb-1
                             div.row.mb-1
                                 div.col.mb-3.text-start
@@ -65,26 +58,17 @@ mixin atencionPaciente(turno)
                                     div.d-flex.align-items-center.mb-3
                                         div.me-3
                                             label.fw-bold.ms-2.me-2 Dr./Dra.:
-                                            span.text-light #{turno.Medico.nombre} #{turno.Medico.apellido}
-                                        
-                                        div.input-group.ms-5(style="max-width: 300px;")
-                                            span.input-group-text.bg-dark.text-light Matricula N°:
-                                            input#matricula.form-control.bg-dark.text-light(
-                                                name="matricula"
-                                                required
-                                            )
-                                                
-
-                                else if turno.Enfermero
+                                            span.text-light #{turno.Medico.nombre} #{turno.Medico.apellido} 
+                                            label.fw-bold.ms-2.me-2 Mat:
+                                            span.text-light #{turno.Medico.matricula}
+                                        // Campo oculto para enviar la matrícula sin requerir entrada manual
+                                        input#matricula(type="hidden" name="matricula" value=turno.Medico.matricula)
+                                else
                                     div.d-flex.align-items-center.mb-3
-                                        label.fw-bold.me-2 Enf.:
-                                        span.text-light #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
-                                    div.input-group.ms-5(style="max-width: 300px;")
-                                            span.input-group-text.bg-dark.text-light Matricula N°:
-                                            input#matricula.form-control.bg-dark.text-light(
-                                                name="matricula"
-                                                required
-                                            )    
+                                        label.fw-bold.me-2 Profesional:
+                                        span.text-light Sin profesional asignado
+                                        // Campo oculto como fallback
+                                        input#matricula(type="hidden" name="matricula" value="")
     
                             button#cleanForm.btn.btn-warning.me-5(onclick="event.preventDefault(); refreshPage();") Limpiar Formulario                                                        
                             button#saveForm.btn.btn-success(onclick="event.preventDefault(); guardarConsulta();") Guardar
@@ -294,9 +278,38 @@ block content
             const dni = document.getElementById('dniPaciente').textContent;
             window.location.href = `/prescripcion/paciente/${dni}/atencion/${atencionId}`;
         }
-        function internar() {
-            const dni = document.getElementById('dniPaciente').textContent;
-            window.location.href = `/internacion/paciente/${dni}/atencion/${atencionId}`;
+        async function internar() {
+            try {
+                // Primero guardar la consulta si no está guardada
+                if (!atencionId) {
+                    await guardarConsulta();
+                    if (!atencionId) {
+                        alert('Debe guardar la consulta antes de internar al paciente');
+                        return;
+                    }
+                }
+                
+                // Actualizar situación a internado
+                const response = await fetch(`/atencion/actualizarSituacion/${turno_Id}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        situacion: 'internado'
+                    })
+                });
+                
+                if (response.ok) {
+                    // Redirigir a la página de asignación de cama
+                    window.location.href = `/internacion/asignar/${atencionId}`;
+                } else {
+                    alert('Error al actualizar la situación a internado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar la internación');
+            }
         }
         function emergencia() {
             const dni = document.getElementById('dniPaciente').textContent;

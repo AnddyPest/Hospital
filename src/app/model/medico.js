@@ -20,7 +20,11 @@ const Medico = sequelize.define("Medico", {
     type: DataTypes.STRING,
     allowNull: false,
   },
-
+  matricula: {
+    type: DataTypes.STRING,
+    unique: true,
+    allowNull: false,
+  },
   telefono: {
     type: DataTypes.STRING,
     allowNull: false,

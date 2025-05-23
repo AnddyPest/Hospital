@@ -1,0 +1,221 @@
+extends ../templates/layout
+
+include ../templates/mixins.pug
+
+block content
+    div.container-fluid.pt-3
+        +header("Asignación de Cama", "/icons/bed.svg")
+        
+        div.card.bg-dark.text-white.mb-1
+            div.card-header.bg-primary
+                h5.mb-0 Internación de Paciente
+            
+            div.card-body
+                // Datos del paciente y atención
+                div.row.mb-1
+                    div.col-md-6
+                        h6.text-info Datos del Paciente
+                        div.table-responsive
+                            table.table.table-dark
+                                tbody
+                                    tr
+                                        th Nombre:
+                                        td #{paciente.nombre} #{paciente.apellido}
+                                    tr
+                                        th DNI:
+                                        td #{paciente.dni}
+                                    tr
+                                        th Sexo:
+                                        td #{paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}
+                                    tr
+                                        th Obra Social:
+                                        td #{paciente.obra_social || "No registrada"}
+                    
+                    div.col-md-6
+                        h6.text-info Datos de la Atención
+                        div.table-responsive
+                            table.table.table-dark
+                                tbody
+                                    tr
+                                        th Diagnóstico:
+                                        td #{atencion.diagnostico || "No especificado"}
+                                    tr
+                                        th Médico:
+                                        td #{turno.Medico ? turno.Medico.nombre + " " + turno.Medico.apellido : "No asignado"}
+                                    tr
+                                        th Fecha de Ingreso:
+                                        td
+                                            input.form-control.form-control-sm.bg-dark.text-white#fechaIngreso(type="date" name="fechaIngreso" value=fechaHoy form="formInternacion" required)
+                
+                // Formulario de asignación (excluyendo la fecha de ingreso)
+                div.form-container.mt-3(style="max-height: 300px; overflow-y: auto; overflow-x: hidden; padding-right: 5px;")
+                    form#formInternacion(action="/internacion/asignar" method="POST")
+                        input(type="hidden" name="atencion_id" value=atencion.id)
+                        input(type="hidden" name="paciente_id" value=paciente.id)
+                        input(type="hidden" name="sexo_paciente" id="sexoPaciente" value=sexoPaciente)
+                        
+                        // Los tres selectores en una sola fila (con ajustes para prevenir overflow)
+                        div.row.g-2.mb-2
+                            div.col-md-4.col-sm-12
+                                label.form-label Seleccione Ala:
+                                select.form-select.bg-dark.text-white#selectAla(required)
+                                    option(value="") Seleccione ala
+                                    each habitaciones, ala in habitacionesPorAla
+                                        option(value=ala) #{ala}
+            
+                            div.col-md-4.col-sm-12
+                                label.form-label Seleccione Habitación:
+                                select.form-select.bg-dark.text-white#selectHabitacion(name="habitacion_id" required disabled)
+                                    option(value="") Primero seleccione ala
+        
+                            div.col-md-4.col-sm-12
+                                label.form-label Seleccione Cama:
+                                select.form-select.bg-dark.text-white#selectCama(name="cama_id" required disabled)
+                                    option(value="") Primero seleccione habitación
+        
+                        div.row.mb-2
+                            div.col-md-12
+                                div.alert.alert-info.mt-2#infoCamas(style="display: none;")
+                                    i.fas.fa-info-circle.me-2
+                                    span#textoInfoCamas Información sobre camas disponibles
+        
+                        div.row.mb-2
+                            div.col-md-12
+                                label.form-label Observaciones:
+                                textarea.form-control.bg-dark.text-white#observaciones(name="observaciones" rows="2")
+        
+                        div.d-flex.justify-content-between.mt-3
+                            a.btn.btn-secondary(href=`/atencion/finalizar/${turno.id}`) Cancelar
+                            button.btn.btn-success(type="submit") Confirmar Internación
+
+    script.
+        document.addEventListener('DOMContentLoaded', function() {
+            // Variables
+            const selectAla = document.getElementById('selectAla');
+            const selectHabitacion = document.getElementById('selectHabitacion');
+            const selectCama = document.getElementById('selectCama');
+            const sexoPaciente = document.getElementById('sexoPaciente').value;
+            const infoCamas = document.getElementById('infoCamas');
+            const habitacionesGeneroMap = !{habitacionesGeneroMap};
+            
+            // Datos de habitaciones y camas desde el servidor
+            const habitacionesPorAla = !{JSON.stringify(habitacionesPorAla)};
+            const camasDisponibles = !{JSON.stringify(camasDisponibles)};
+            
+            // Cuando se selecciona un ala, actualizar las habitaciones
+            selectAla.addEventListener('change', function() {
+                const alaSeleccionada = this.value;
+                selectHabitacion.disabled = true;
+                selectHabitacion.innerHTML = '<option value="">Cargando habitaciones...</option>';
+                selectCama.disabled = true;
+                selectCama.innerHTML = '<option value="">Primero seleccione una habitación</option>';
+                
+                if (!alaSeleccionada) {
+                    selectHabitacion.innerHTML = '<option value="">Primero seleccione un ala</option>';
+                    infoCamas.style.display = 'none';
+                    return;
+                }
+                
+                // Mostrar habitaciones del ala seleccionada
+                const habitaciones = habitacionesPorAla[alaSeleccionada] || [];
+                
+                selectHabitacion.innerHTML = '';
+                
+                if (habitaciones.length === 0) {
+                    selectHabitacion.innerHTML = '<option value="">No hay habitaciones en esta ala</option>';
+                } else {
+                    selectHabitacion.innerHTML = '<option value="">Seleccione una habitación</option>';
+                    habitaciones.forEach(hab => {
+                        const option = document.createElement('option');
+                        option.value = hab.id;
+                        option.textContent = `Habitación ${hab.numero}`;
+                        // Verificar si hay pacientes de otro género
+                        const compatible = esHabitacionCompatible(hab.id, sexoPaciente);
+                        if (!compatible) {
+                            option.disabled = true;
+                            option.textContent += ' (Incompatible por género)';
+                        }
+                        selectHabitacion.appendChild(option);
+                    });
+                    selectHabitacion.disabled = false;
+                }
+                
+                infoCamas.style.display = 'block';
+                document.getElementById('textoInfoCamas').textContent = 
+                    'Las habitaciones con pacientes de otro género aparecen deshabilitadas.';
+            });
+            
+            // Cuando se selecciona una habitación, actualizar las camas
+            selectHabitacion.addEventListener('change', function() {
+                const habitacionId = this.value;
+                selectCama.disabled = true;
+                selectCama.innerHTML = '<option value="">Cargando camas...</option>';
+                
+                if (!habitacionId) {
+                    selectCama.innerHTML = '<option value="">Primero seleccione una habitación</option>';
+                    return;
+                }
+                
+                // Filtrar camas disponibles por habitación
+                const camasHabitacion = camasDisponibles.filter(cama => 
+                    cama.habitacion_Id.toString() === habitacionId
+                );
+                
+                selectCama.innerHTML = '';
+                
+                if (camasHabitacion.length === 0) {
+                    selectCama.innerHTML = '<option value="">No hay camas disponibles en esta habitación</option>';
+                } else {
+                    selectCama.innerHTML = '<option value="">Seleccione una cama</option>';
+                    camasHabitacion.forEach(cama => {
+                        const option = document.createElement('option');
+                        option.value = cama.id;
+                        option.textContent = `Cama ${cama.numeroCama}`;
+                        selectCama.appendChild(option);
+                    });
+                    selectCama.disabled = false;
+                }
+            });
+            
+            // Función para verificar si una habitación es compatible con el género del paciente
+            function esHabitacionCompatible(habitacionId, sexoPaciente) {
+                // Si la habitación está vacía, es compatible
+                if (!habitacionesGeneroMap[habitacionId]) {
+                    return true;
+                }
+                
+                // Verificar géneros presentes
+                const generosPresentesArray = Array.from(habitacionesGeneroMap[habitacionId]);
+                
+                // Verificar si hay algún paciente de género diferente
+                const hayGeneroOpuesto = generosPresentesArray.some(genero => genero !== sexoPaciente);
+                
+                // Si hay algún paciente del género opuesto, no es compatible
+                // Si todos son del mismo género que el paciente actual, es compatible
+                return !hayGeneroOpuesto;
+            }
+            
+            // Validar formulario antes de enviar
+            document.getElementById('formInternacion').addEventListener('submit', function(event) {
+                const habitacionId = selectHabitacion.value;
+                const camaId = selectCama.value;
+                
+                if (!habitacionId) {
+                    event.preventDefault();
+                    alert('Debe seleccionar una habitación para el paciente');
+                    return;
+                }
+                
+                if (!camaId) {
+                    event.preventDefault();
+                    alert('Debe seleccionar una cama para el paciente');
+                    return;
+                }
+                
+                // Verificar compatibilidad de género
+                if (!esHabitacionCompatible(habitacionId, sexoPaciente)) {
+                    event.preventDefault();
+                    alert('No se puede asignar al paciente a una habitación con personas del sexo opuesto');
+                }
+            });
+        });

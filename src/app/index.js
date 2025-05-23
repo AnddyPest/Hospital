@@ -16,6 +16,7 @@ const dataRouter = require("./router/dataRouter"); // Datos Router
 const habitacionRouter = require("./router/habitacionRouter"); // Habitaciones Router
 const urgenciasRouter = require("./router/urgenciasRouter"); // Urgencias Router
 const emergenciasRouter = require("./router/emergenciasRouter"); // Emergencias Router
+const internacionRouter = require("./router/internacionRouter"); // Internacion Router
 
 const atencionRouter = require("./router/atencionRouter"); // Atencion Router
 const path = require("path");
@@ -54,6 +55,7 @@ app.use("/datos", dataRouter);
 app.use("/habitacion", habitacionRouter);
 app.use("/urgencias", urgenciasRouter);
 app.use("/emergencias", emergenciasRouter);
+app.use("/internacion", internacionRouter);
 
 //rutas publicas
 app.use("/", router);

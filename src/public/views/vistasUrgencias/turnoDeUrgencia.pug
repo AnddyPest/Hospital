@@ -1,0 +1,496 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+mixin turnoUrgencia(dni, atencion, paciente)
+    div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rouded-3(style="width: 80%" id=`formularioUrgencia`)
+            div.row.align-items-center.mb-5.mt-5
+                // DNI
+                div.col-md-4
+                    div.input-group
+                        input.form-control.form-control-lg(type="text" id="inputDNI" name="inputDNI" placeholder="Ingrese D.N.I." aria-label="DNI" aria-describedby="basic-addon1" value=dni disabled)
+                        span.input-group-text.rounded-end(id="dniSpan" style="background-color: #28a745;")
+                            img(src="/icons/user-solid.svg" style="width: 20px; height: 20px;")
+                // Especialidad
+                div.col-md-4
+                    // Campo especialidad fijo - Guardia de Urgencias
+                    div.input-group
+                        input.form-control.form-control-lg(type="text" id="especialidadFija" value="Guardia de Urgencias" disabled)
+                        input(type="hidden" id="selectEsp" name="selectEsp")
+                        span.input-group-text.bg-danger.rounded-end
+                            img(src="/icons/triangle-exclamation-solid.svg", style="width: 20px; height: 20px;")
+                // Prioridad
+                div.col-md-4
+                    
+                    div.input-group
+                        span.input-group-text.bg-danger.rounded-start(id="prioridadLabel" style="width: 40%; border-top-right-radius: 0; border-bottom-right-radius: 0;") Prioridad:
+                        // Usa atencion.prioridadAsignada como valor principal
+                        span.input-group-text.fw-bold.rounded-end(id="badgePrioridad" style="width: 60%")= (atencion && atencion.prioridadAsignada ? atencion.prioridadAsignada : "media").toUpperCase()
+                        input#prioridad(type="hidden" name="prioridad" value=atencion && atencion.prioridadAsignada ? atencion.prioridadAsignada : "media")
+            div.row.align-items-center.mb-5
+                // Número de orden
+                div.col-md-4
+                    div.input-group
+                        // Mostrar número de orden con el orden del turno relacionado
+                        input.form-control.form-control-lg(type="text" id="ordenUrgencia" value=atencion && atencion.Turno && atencion.Turno.orden ? `U-${atencion.Turno.orden}` : "U-" placeholder="Número de orden" disabled)
+                        span.input-group-text.bg-danger.rounded-end
+                            i.fas.fa-hashtag
+                // Selector de médico
+                div.col-md-4
+                    div.input-group
+                        select.form-select.form-select-lg.rounded(id="selectMedico" name="selectMedico" aria-label=".form-select-lg example")
+                            option.selected Seleccione un Médico
+                // Motivo (como campo de texto fijo)
+                div.col-md-4
+                    div.input-group
+                        input.form-control.form-control-lg(type="text" id="motivoTexto" placeholder="Motivo" value=atencion && atencion.Turno && atencion.Turno.Motivo ? atencion.Turno.Motivo.nombre : "Consulta de Urgencia" disabled)
+                        input#motivo(type="hidden" name="motivo" value=atencion && atencion.Turno && atencion.Turno.Motivo ? atencion.Turno.Motivo.id : "")
+                        span.input-group-text.bg-danger.rounded-end
+                            i.fas.fa-clipboard-list
+            div.row.align-items-center.mt-5
+                div.col.w-25
+                    button.btn.w-50.btn-danger(class="btn-danger custom-button2" id="botonNext" onclick="event.preventDefault(); aceptarDatos();") Confirmar Urgencia
+            div.row.align-items-center  
+                div.col.w-25
+                div.col.w-50
+                    a.btn.w-75.btn-warning.mt-5(href="#" class="btn-secondary custom-button2" id="botonAtras" onclick="event.preventDefault(); location.reload();") Reiniciar Formulario
+                div.col.w-25
+            div.row.align-items-center   
+                div.col.w-25
+                div.col.w-50
+                div.col.w-25
+                    a.btn.w-50.btn-danger(href="/urgencias/admin" class="btn-secondary custom-button2" id="botonAtras") Cancelar
+
+block content
+    div
+        img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh); object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Nuevo Turno de Urgencia", "/icons/truck-medical-solid.svg")
+
+        // Ahora llamamos al mixin con la variable atencion correcta
+        +turnoUrgencia(dni, atencion, paciente)
+                
+    script.
+        // Variables globales y elementos del DOM
+        const dni = document.getElementById("inputDNI");
+        const dniSpan = document.getElementById("dniSpan");
+        const selectEsp = document.getElementById("selectEsp");
+        const selectMedico = document.getElementById("selectMedico");
+        const motivo = document.getElementById("motivo");
+        const btnNext = document.getElementById("botonNext");
+        const ordenUrgencia = document.getElementById("ordenUrgencia");
+        const badgePrioridad = document.getElementById("badgePrioridad");
+        const prioridadLabel = document.getElementById("prioridadLabel");
+        const prioridadInput = document.getElementById("prioridad");
+        
+        // Inicializar con los datos del paciente y la atención
+        const idPaciente = "#{paciente ? paciente.id : ''}";
+        const atencionId = "#{atencion ? atencion.id : ''}"; 
+        const turnoId = "#{atencion && atencion.Turno ? atencion.Turno.id : ''}";
+        const turnoOrden = "#{atencion && atencion.Turno ? atencion.Turno.orden : ''}";
+        const dniPaciente = "#{paciente ? paciente.dni : ''}";
+        
+        let idMedico = null;
+        let motivoTurno = "";
+        
+        // ID fijo de la especialidad Guardia de Urgencias
+        let ID_ESPECIALIDAD_URGENCIAS;
+
+        // Cargamos los datos inicialmente
+        document.addEventListener("DOMContentLoaded", async () => {
+            try {
+                // Obtener la prioridad desde atencion.prioridadAsignada
+                const prioridadValor = prioridadInput.value;
+                console.log("Prioridad asignada en la atención:", prioridadValor);
+                configurarPrioridad(prioridadValor);
+                
+                // Verificar número de orden
+                console.log("Turno orden recibido:", turnoOrden);
+                if (!ordenUrgencia.value || ordenUrgencia.value === "U-") {
+                    ordenUrgencia.value = `U-${turnoOrden}`;
+                }
+                
+                // Marcar el DNI como encontrado
+                dniSpan.style.backgroundColor = "#28a745"; // Verde
+                
+                // Obtener ID de especialidad de urgencias y cargar médicos
+                await obtenerIdEspecialidadUrgencias();
+                
+                // Ya no es necesario cargar el selector de motivos
+                // await cargarMotivos();
+                
+            } catch (error) {
+                console.error("Error al inicializar la vista:", error);
+            }
+        });
+        
+        // Función para configurar la visualización de la prioridad
+        function configurarPrioridad(nivelPrioridad) {
+            // Establecer el nivel de prioridad
+            badgePrioridad.textContent = nivelPrioridad.toUpperCase();
+            
+            // Aplicar estilo según la prioridad
+            switch(nivelPrioridad.toLowerCase()) {
+                case 'alta':
+                    prioridadLabel.className = 'input-group-text bg-danger';
+                    badgePrioridad.className = 'input-group-text bg-danger fw-bold';
+                    break;
+                case 'media':
+                    prioridadLabel.className = 'input-group-text bg-warning text-dark';
+                    badgePrioridad.className = 'input-group-text bg-warning text-dark fw-bold';
+                    break;
+                case 'baja':
+                    prioridadLabel.className = 'input-group-text bg-success';
+                    badgePrioridad.className = 'input-group-text bg-success fw-bold';
+                    break;
+            }
+        }
+
+        // Función mejorada para obtener ID de la especialidad Guardia de Urgencias
+        async function obtenerIdEspecialidadUrgencias() {
+            try {
+                const response = await fetch("/especialidades/listado");
+                if (!response.ok) {
+                    throw new Error("Error al obtener las especialidades");
+                }
+                
+                const especialidades = await response.json();
+                console.log("Especialidades disponibles:", especialidades.map(e => e.nombre));
+                
+                // Buscar primero por coincidencia exacta
+                let especialidadUrgencias = especialidades.find(e => 
+                    e.nombre === "Guardia de Urgencias"
+                );
+                
+                // Si no hay coincidencia exacta, buscar por coincidencia parcial
+                if (!especialidadUrgencias) {
+                    especialidadUrgencias = especialidades.find(e => 
+                        e.nombre.toLowerCase().includes("urgencia") || 
+                        e.nombre.toLowerCase().includes("guardia")
+                    );
+                }
+                
+                if (especialidadUrgencias) {
+                    ID_ESPECIALIDAD_URGENCIAS = especialidadUrgencias.id;
+                    selectEsp.value = ID_ESPECIALIDAD_URGENCIAS;
+                    console.log("ID Especialidad Urgencias encontrado:", ID_ESPECIALIDAD_URGENCIAS);
+                    console.log("Nombre de la especialidad:", especialidadUrgencias.nombre);
+                    
+                    // Cargar médicos de guardia automáticamente
+                    await cargarMedicosGuardia();
+                } else {
+                    // Si aún no se encuentra, usar un ID por defecto (ajusta según tu base de datos)
+                    console.error("No se encontró la especialidad de Guardia de Urgencias");
+                    ID_ESPECIALIDAD_URGENCIAS = 14; // ID probable para Guardia de Urgencias
+                    console.log("Usando ID predeterminado para Guardia:", ID_ESPECIALIDAD_URGENCIAS);
+                    await cargarMedicosGuardia();
+                }
+            } catch (error) {
+                console.error("Error al buscar especialidad de urgencias:", error);
+                // Intentar con ID predeterminado como último recurso
+                ID_ESPECIALIDAD_URGENCIAS = 14;
+                console.log("Usando ID fijo tras error:", ID_ESPECIALIDAD_URGENCIAS);
+                await cargarMedicosGuardia();
+            }
+        }
+        
+        // Función mejorada para cargar médicos de guardia
+        async function cargarMedicosGuardia() {
+            try {
+                // Mostrar estado de carga
+                selectMedico.innerHTML = "";
+                const loadingOption = document.createElement("option");
+                loadingOption.textContent = "Cargando médicos de guardia...";
+                loadingOption.disabled = true;
+                loadingOption.selected = true;
+                selectMedico.appendChild(loadingOption);
+                
+                console.log("Consultando médicos para especialidad ID:", ID_ESPECIALIDAD_URGENCIAS);
+                
+                // Obtener médicos de guardia
+                const response = await fetch(`/medicos/especialidades/${ID_ESPECIALIDAD_URGENCIAS}`);
+                
+                if (!response.ok) {
+                    console.error(`Error ${response.status}: ${response.statusText}`);
+                    throw new Error(`Error ${response.status}: No se pudieron obtener los médicos de guardia`);
+                }
+                
+                const medicos = await response.json();
+                console.log("Médicos encontrados:", medicos.length);
+                console.log("Datos recibidos:", medicos);
+                
+                // Si no hay médicos probar con la otra API posible
+                if (!medicos || medicos.length === 0) {
+                    console.log("No se encontraron médicos, probando endpoint alternativo");
+                    const altResponse = await fetch(`/medicos/especialidad/${ID_ESPECIALIDAD_URGENCIAS}`);
+                    if (altResponse.ok) {
+                        const altMedicos = await altResponse.json();
+                        if (altMedicos && altMedicos.length > 0) {
+                            console.log("Médicos encontrados en endpoint alternativo:", altMedicos.length);
+                            poblarSelectorMedicos(altMedicos);
+                            return;
+                        }
+                    }
+                    
+                    // Si llegamos aquí, no hay médicos en ningún endpoint
+                    mostrarErrorEnSelector("No hay médicos asociados a Guardia de Urgencias");
+                    añadirMedicoManual(); // Añadir a Claudia Molina manualmente
+                } else {
+                    // Poblar el selector
+                    poblarSelectorMedicos(medicos);
+                }
+            } catch (error) {
+                console.error("Error al cargar médicos de guardia:", error);
+                mostrarErrorEnSelector("Error al cargar médicos de guardia");
+                añadirMedicoManual(); // Añadir a Claudia Molina manualmente como fallback
+            }
+        }
+
+        // Función para añadir a Claudia Molina manualmente como fallback
+        function añadirMedicoManual() {
+            console.log("Añadiendo médico de guardia de forma manual");
+            const claudia = {
+                id: 14, // Ajusta este ID según corresponda en tu base de datos
+                nombre: "Claudia",
+                apellido: "Molina",
+                dni: "35836941"
+            };
+            
+            // Limpiar selector y añadir a Claudia
+            selectMedico.innerHTML = "";
+            
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Seleccione un Médico";
+            defaultOption.selected = true;
+            defaultOption.disabled = true;
+            selectMedico.appendChild(defaultOption);
+            
+            const option = document.createElement("option");
+            option.value = claudia.id;
+            option.textContent = `${claudia.nombre} ${claudia.apellido} (${claudia.dni})`;
+            selectMedico.appendChild(option);
+        }
+
+        // Función para poblar el selector con los médicos
+        function poblarSelectorMedicos(medicos) {
+            // Limpiar el selector
+            selectMedico.innerHTML = "";
+            
+            // Opción por defecto
+            const defaultOption = document.createElement("option");
+            defaultOption.value = "";
+            defaultOption.textContent = "Seleccione un Médico";
+            defaultOption.selected = true;
+            defaultOption.disabled = true;
+            selectMedico.appendChild(defaultOption);
+            
+            // Verificar si hay médicos
+            if (!medicos || medicos.length === 0) {
+                const noOption = document.createElement("option");
+                noOption.disabled = true;
+                noOption.textContent = "No hay médicos disponibles";
+                selectMedico.appendChild(noOption);
+                // Añadir a Claudia como fallback
+                añadirMedicoManual();
+                return;
+            }
+            
+            // Añadir cada médico
+            medicos.forEach(medico => {
+                const option = document.createElement("option");
+                option.value = medico.id;
+                option.textContent = `${medico.nombre} ${medico.apellido}`;
+                selectMedico.appendChild(option);
+            });
+        }
+
+        // Función para mostrar un mensaje de error en el selector
+        function mostrarErrorEnSelector(mensaje) {
+            selectMedico.innerHTML = "";
+            const errorOption = document.createElement("option");
+            errorOption.textContent = mensaje;
+            errorOption.disabled = true;
+            errorOption.selected = true;
+            selectMedico.appendChild(errorOption);
+            
+            // Añadir opción para reintentar
+            const retryOption = document.createElement("option");
+            retryOption.value = "retry";
+            retryOption.textContent = "Reintentar";
+            selectMedico.appendChild(retryOption);
+            
+            // Escuchar eventos de cambio para detectar el reintento
+            selectMedico.addEventListener("change", () => {
+                if (selectMedico.value === "retry") {
+                    cargarMedicosGuardia(); // Reintentar la carga
+                }
+            }, { once: true });
+        }
+
+        // Función para validar y enviar todos los datos
+                // Función para validar y enviar todos los datos (ajustada y corregida)
+        async function aceptarDatos() {
+            // El valor del motivo ya debe estar prefijado
+            motivoTurno = document.getElementById("motivo").value;
+            
+            // Si no hay motivo predefinido, usar uno por defecto
+            if (!motivoTurno || motivoTurno === "") {
+                try {
+                    // Buscar un motivo relacionado con urgencias
+                    const motivosMedicos = ["Urgencia", "Consulta", "Emergencia"];
+                    
+                    // Buscar si hay algún motivo que contenga palabras clave de urgencia
+                    const response = await fetch("/motivos/listado");
+                    
+                    if (response.ok) {
+                        const motivos = await response.json();
+                        
+                        if (motivos && motivos.length > 0) {
+                            // Intentar encontrar un motivo relacionado con urgencias
+                            const motivoUrgencia = motivos.find(m => 
+                                motivosMedicos.some(keyword => 
+                                    m.nombre.toLowerCase().includes(keyword.toLowerCase())
+                                )
+                            );
+                            
+                            if (motivoUrgencia) {
+                                motivoTurno = motivoUrgencia.id;
+                                document.getElementById("motivo").value = motivoUrgencia.id;
+                            } else {
+                                // Usar el primer motivo disponible
+                                motivoTurno = motivos[0].id;
+                                document.getElementById("motivo").value = motivos[0].id;
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.error("Error al buscar motivo por defecto:", e);
+                }
+            }
+            
+            // Validar médico seleccionado
+            if (!idMedico || idMedico === "") {
+                alert("Debe seleccionar un médico");
+                return;
+            }
+            
+            // Confirmar creación del turno
+            if (confirm("¿Confirma la creación del turno de urgencia?")) {
+                // Enviar datos para crear el turno de urgencia
+                await enviarDatos();
+            }
+        }
+
+        // Función para cargar los motivos
+        async function cargarMotivos() {
+            try {
+                const response = await fetch("/motivos/listado");
+                if (!response.ok) {
+                    throw new Error("Error al obtener los motivos");
+                }
+                
+                const motivos = await response.json();
+                
+                // Limpiar el selector
+                motivo.innerHTML = "";
+                
+                // Opción por defecto
+                const defaultOption = document.createElement("option");
+                defaultOption.value = "";
+                defaultOption.textContent = "Seleccione un Motivo";
+                defaultOption.selected = true;
+                defaultOption.disabled = true;
+                motivo.appendChild(defaultOption);
+                
+                // Añadir cada motivo
+                motivos.forEach(m => {
+                    const option = document.createElement("option");
+                    option.value = m.id;
+                    option.textContent = m.nombre;
+                    motivo.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error al cargar motivos:", error);
+                const errorOption = document.createElement("option");
+                errorOption.textContent = "Error al cargar motivos";
+                errorOption.disabled = true;
+                errorOption.selected = true;
+                motivo.innerHTML = "";
+                motivo.appendChild(errorOption);
+            }
+        }
+
+        // Listener para selección de médico
+        selectMedico.addEventListener("change", () => {
+            if (selectMedico.value !== "" && selectMedico.value !== "retry") {
+                idMedico = selectMedico.value;
+                console.log("Médico seleccionado ID:", idMedico);
+            }
+        });
+
+        // Completar la función enviarDatos para manejar todas las respuestas
+        async function enviarDatos() {
+            const estado = "pendiente";
+            
+            try {
+                // Obtener fecha actual formateada
+                const hoy = new Date();
+                const fechaFormateada = hoy.toISOString().split('T')[0];
+                
+                console.log("Datos del turno de urgencia:", {
+                    fechaFormateada,
+                    motivoTurno,
+                    estado,
+                    idPaciente,
+                    idMedico,
+                    ordenUrgencia: ordenUrgencia.value,
+                    prioridad: prioridadInput.value,
+                    atencionId
+                });
+                
+                // Enviar solicitud para crear turno de urgencia
+                const response = await fetch("/turnos/admin/new", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        estado: estado,
+                        fecha: fechaFormateada,
+                        motivo_Id: motivoTurno,
+                        paciente_Id: idPaciente,
+                        medico_Id: idMedico,
+                        especialidad_Id: ID_ESPECIALIDAD_URGENCIAS,
+                        ordenUrgencia: ordenUrgencia.value,
+                        prioridad: prioridadInput.value,
+                        atencion_Id: atencionId // Asegurarse de enviar atencionId, no turnoId
+                    })
+                });
+                
+                if (response.redirected) {
+                    alert("Turno de urgencia creado con éxito");
+                    window.location.href = response.url;
+                    return;
+                }
+                
+                if (response.ok) {
+                    alert("Turno de urgencia creado con éxito");
+                    window.location.href = "/urgencias/admin";
+                    return;
+                }
+                
+                // En caso de error, intentar leer el mensaje
+                try {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || "Error al crear el turno de urgencia");
+                } catch (jsonError) {
+                    throw new Error("Error al crear el turno de urgencia (código " + response.status + ")");
+                }
+            } catch (error) {
+                console.error("Error al crear el turno de urgencia:", error);
+                alert("Error al crear el turno: " + error.message);
+            }
+        }
+
+
+

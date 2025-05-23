@@ -121,6 +121,40 @@ const atencionController = {
       });
     }
   },
+  // este es similar al anterior pero se usa para atender urgencias
+  atencionUrgenciaView: async (req, res) => {
+    try {
+      const id = req.params.id;
+      const turno = await Turno.findByPk(id, {
+        include: [
+          {
+            model: Paciente,
+            attributes: ["nombre", "apellido", "dni", "obra_social"],
+          },
+          {
+            model: Medico,
+            required: false,
+          },
+          {
+            model: Enfermero,
+            required: false,
+          },
+        ],
+      });
+      res.render("vistasUrgencias/vistaAtenderUrgencia", {
+        title: "Finalizar Atención",
+        userType: req.session?.userType || "guest",
+        turno: turno,
+      });
+    } catch (error) {
+      console.error("Error al obtener el turno:", error);
+      res.status(500).render("error", {
+        message: "Error al procesar la atención del paciente",
+        error,
+      });
+    }
+  },
+
   // setear el estado de un turno a "ausente"
   ausente: async (req, res) => {
     try {
@@ -153,7 +187,13 @@ const atencionController = {
   // guardar los resultados de la atencion
   guardarAtencion: async (req, res) => {
     try {
-      const { diagnostico, observaciones, afiliado, matricula } = req.body;
+      const {
+        diagnostico,
+        observaciones,
+        afiliado,
+        matricula,
+        prioridadAsignada,
+      } = req.body;
       const turnoId = req.params.id;
 
       const existeAtencion = await Atencion.findOne({
@@ -162,7 +202,13 @@ const atencionController = {
       let atencion;
       if (existeAtencion) {
         atencion = await Atencion.update(
-          { diagnostico, observaciones, afiliado, matricula },
+          {
+            diagnostico,
+            observaciones,
+            afiliado,
+            matricula,
+            prioridadAsignada,
+          },
           {
             where: { turno_Id: turnoId },
           }
@@ -176,6 +222,7 @@ const atencionController = {
           observaciones,
           afiliado,
           matricula,
+          prioridadAsignada,
           turno_Id: turnoId,
         });
       }

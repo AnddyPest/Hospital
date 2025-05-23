@@ -1,0 +1,191 @@
+extends ../templates/layout
+
+include ../templates/mixins.pug
+
+block content
+    div.container-fluid.pt-3
+        +header("Gestión de Urgencias", "/icons/triangle-exclamation-solid.svg")
+        
+        div.card.mb-4
+            div.card-header.bg-danger.text-white
+                div.row.align-items-center
+                    div.col
+                        h5.mb-0 Turnos de Urgencia
+                    // Eliminado el botón de nueva urgencia
+            
+            div.card-body
+                // Filtros
+                div.row.mb-3
+                    div.col-md-4
+                        div.input-group
+                            span.input-group-text Filtrar por médico
+                            select.form-select#filtroMedico
+                                option(value="") Todos los médicos
+                                // Los médicos se cargarán dinámicamente
+                    
+                    div.col-md-3
+                        div.input-group
+                            span.input-group-text Prioridad
+                            select.form-select#filtroPrioridad
+                                option(value="") Todas
+                                option(value="alta") Alta
+                                option(value="media") Media
+                                option(value="baja") Baja
+                    
+                    div.col-md-3
+                        div.input-group
+                            span.input-group-text Búsqueda
+                            input.form-control#busquedaGeneral(type="text" placeholder="Buscar paciente...")
+                    
+                    div.col-md-2
+                        button.btn.btn-outline-secondary.w-100#resetFiltros
+                            i.fas.fa-sync-alt.me-1
+                            | Restablecer
+                
+                // Tabla de urgencias
+                div.table-responsive
+                    table.table.table-striped.table-hover#tablaTurnos
+                        thead
+                            tr
+                                th Orden
+                                th Paciente
+                                th DNI
+                                th Médico
+                                th Prioridad
+                                th Estado
+                                th Acciones
+                        tbody
+                            if turnos && turnos.length > 0
+                                each turno in turnos
+                                    tr(data-medico=(turno.Medico ? turno.Medico.apellido : "") || "", data-prioridad=turno.prioridad || "media")
+                                        td= turno.ordenUrgencia || "U-" + turno.orden
+                                        td= turno.Paciente ? turno.Paciente.nombre + " " + turno.Paciente.apellido : "Sin asignar"
+                                        td= turno.Paciente ? turno.Paciente.dni : ""
+                                        td= turno.Medico ? turno.Medico.nombre + " " + turno.Medico.apellido : "Sin asignar" 
+                                        td
+                                            - var prioridadClase = "bg-warning text-dark"
+                                            if turno.prioridad === "alta"
+                                                - prioridadClase = "bg-danger text-white"
+                                            else if turno.prioridad === "baja"
+                                                - prioridadClase = "bg-success text-white"
+                                            span.badge.rounded-pill(class=prioridadClase)= (turno.prioridad || "media").toUpperCase()
+                                        td
+                                            if turno.estado === "Atendido"
+                                                span.badge.bg-success Atendido
+                                            else if turno.estado === "En atención"
+                                                span.badge.bg-primary En atención
+                                            else if turno.estado === "Ausente"
+                                                span.badge.bg-secondary.text-white Ausente
+                                            else
+                                                span.badge.bg-secondary Pendiente
+                                        td.text-nowrap
+                                            // Simplificado a solo dos botones: Atender y Ausente
+                                            if turno.estado !== "Atendido" && turno.estado !== "Ausente"
+                                                a.btn.btn-sm.btn-primary.me-1(href=`/atencion/paciente/turno/${turno.id}` title="Atender")
+                                                    i.fas.fa-user-md
+                                                button.btn.btn-sm.btn-warning(onclick=`marcarAusente(${turno.id})` title="Marcar Ausente")
+                                                    i.fas.fa-user-slash
+                            else
+                                tr
+                                    td.text-center(colspan="7") No hay turnos de urgencia registrados
+        
+        // Modal de confirmación para marcar ausente
+        div.modal.fade#modalAusente(tabindex="-1" aria-labelledby="modalAusenteLabel" aria-hidden="true")
+            div.modal-dialog
+                div.modal-content
+                    div.modal-header.bg-warning
+                        h5.modal-title#modalAusenteLabel Confirmar paciente ausente
+                        button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
+                    div.modal-body
+                        p ¿Confirma que el paciente no se ha presentado a la consulta de urgencia?
+                    div.modal-footer
+                        button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancelar
+                        button.btn.btn-warning#btnConfirmarAusente(type="button") Confirmar ausente
+    
+    script.
+        // Variable para almacenar el ID del turno seleccionado para marcar ausente
+        let turnoSeleccionadoId;
+        
+        // Función para marcar un paciente como ausente
+        function marcarAusente(id) {
+            turnoSeleccionadoId = id;
+            const modal = new bootstrap.Modal(document.getElementById('modalAusente'));
+            modal.show();
+        }
+        
+        // Evento para confirmar la ausencia
+        document.getElementById('btnConfirmarAusente').addEventListener('click', async function() {
+            try {
+                const response = await fetch(`/turnos/marcarAusente/${turnoSeleccionadoId}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Cerrar el modal y recargar la página
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalAusente'));
+                    modal.hide();
+                    window.location.reload();
+                } else {
+                    alert('Error al marcar el paciente como ausente');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al procesar la solicitud');
+            }
+        });
+        
+        // Funcionalidad de filtrado (mantenida sin cambios)
+        document.addEventListener('DOMContentLoaded', function() {
+            // Cargar lista de médicos para el filtro
+            const medicos = new Set();
+            document.querySelectorAll('#tablaTurnos tbody tr').forEach(row => {
+                const medicoNombre = row.getAttribute('data-medico');
+                if (medicoNombre) {
+                    medicos.add(medicoNombre);
+                }
+            });
+            
+            const filtroMedico = document.getElementById('filtroMedico');
+            medicos.forEach(medico => {
+                const option = document.createElement('option');
+                option.value = medico;
+                option.textContent = medico;
+                filtroMedico.appendChild(option);
+            });
+            
+            // Función para aplicar filtros
+            function aplicarFiltros() {
+                const valorMedico = filtroMedico.value.toLowerCase();
+                const valorPrioridad = document.getElementById('filtroPrioridad').value.toLowerCase();
+                const valorBusqueda = document.getElementById('busquedaGeneral').value.toLowerCase();
+                
+                document.querySelectorAll('#tablaTurnos tbody tr').forEach(row => {
+                    const medico = row.getAttribute('data-medico').toLowerCase();
+                    const prioridad = row.getAttribute('data-prioridad').toLowerCase();
+                    const textoFila = row.textContent.toLowerCase();
+                    
+                    const coincideMedico = !valorMedico || medico.includes(valorMedico);
+                    const coincidePrioridad = !valorPrioridad || prioridad === valorPrioridad;
+                    const coincideBusqueda = !valorBusqueda || textoFila.includes(valorBusqueda);
+                    
+                    row.style.display = (coincideMedico && coincidePrioridad && coincideBusqueda) ? '' : 'none';
+                });
+            }
+            
+            // Escuchar eventos de filtrado
+            filtroMedico.addEventListener('change', aplicarFiltros);
+            document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
+            document.getElementById('busquedaGeneral').addEventListener('input', aplicarFiltros);
+            
+            // Botón para resetear filtros
+            document.getElementById('resetFiltros').addEventListener('click', function() {
+                filtroMedico.value = '';
+                document.getElementById('filtroPrioridad').value = '';
+                document.getElementById('busquedaGeneral').value = '';
+                aplicarFiltros();
+            });
+        });
+

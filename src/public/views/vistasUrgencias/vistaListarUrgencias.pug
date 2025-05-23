@@ -28,15 +28,16 @@ block content
                                 | Mostrar solo pendientes
 
                     if turnos && turnos.length > 0
+                        // Actualizado el encabezado y cuerpo de la tabla
                         table.table.table-hover.table-dark.align-middle#tablaTurnos
                             thead
                                 tr
                                     th # Orden
                                     th Fecha
+                                    th Hora
                                     th Paciente
                                     th DNI
                                     th Enfermero
-                                    // Columna de Área eliminada
                                     th Motivo
                                     th Estado
                                     th Acción
@@ -45,17 +46,23 @@ block content
                                     tr(class=turno.estado === 'pendiente' ? 'table-danger' : turno.estado === 'atendido' ? 'table-success' : '' data-estado=turno.estado)
                                         td.fw-bold #{turno.orden || 'N/A'}
                                         td #{new Date(turno.fecha).toLocaleDateString('es-ES')}
+                                        td
+                                            if turno.horaAtencion
+                                                span.badge.bg-info.text-dark #{turno.horaAtencion}
+                                            else if turno.hora
+                                                #{turno.hora}
+                                            else
+                                                span.text-secondary N/A
                                         td #{turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : 'Sin datos'}
                                         td #{turno.Paciente ? turno.Paciente.dni : 'Sin datos'}
                                         td #{turno.Enfermero ? `${turno.Enfermero.nombre} ${turno.Enfermero.apellido}` : 'Sin asignar'}
-                                        // Columna de Área eliminada
                                         td #{turno.Motivo ? turno.Motivo.nombre : 'Sin especificar'}
                                         td
                                             span(class=`badge ${turno.estado === 'pendiente' ? 'bg-danger' : turno.estado === 'atendido' ? 'bg-success' : turno.estado === 'en proceso' ? 'bg-warning' : 'bg-secondary'}`)
                                                 | #{turno.estado.toUpperCase()}
                                         td
                                             if turno.estado === 'pendiente'
-                                                a.btn.btn-danger.w-100(href=`/atencion/paciente/turno/${turno.id}`)
+                                                a.btn.btn-danger.w-100(href=`/atencion/urgencia/${turno.id}`)
                                                     i.fas.fa-hand-holding-medical.me-2
                                                     | Atender
                                             else

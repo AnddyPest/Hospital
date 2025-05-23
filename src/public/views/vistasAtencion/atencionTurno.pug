@@ -19,22 +19,25 @@ mixin historiaPaciente(paciente, turnos)
                                 th.col() Estado
                                 th.col() Acciones
                             tbody
-                                if turnos
+                                if turnos && turnos.length > 0
                                     each turno in turnos
-                                        tr
-                                            if turno.medico_Id
-                                                td #{turno.Medico.nombre} #{turno.Medico.apellido}
-                                            else if turno.enfermero_Id
-                                                td #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
-                                            td #{turno.fecha}
-                                            td #{turno.hora}
-                                            td #{turno.Motivo ? turno.Motivo.nombre : "Sin motivo"}
-                                            td #{turno.estado}
-                                            td
-                                                button#atencionBtn.btn.btn-success.me-1(onclick=`event.preventDefault(); atencion(${turno.id});`) Atender
-                                                button#ausenteBtn.btn.btn-danger.ms-1(onclick=`event.preventDefault(); ausente(${turno.id})`) Ausente
+                                        // Solo mostrar turnos que tengan un horario definido
+                                        if turno.hora && turno.hora !== null && turno.hora !== ''
+                                            tr
+                                                if turno.medico_Id
+                                                    td #{turno.Medico.nombre} #{turno.Medico.apellido}
+                                                else if turno.enfermero_Id
+                                                    td #{turno.Enfermero.nombre} #{turno.Enfermero.apellido}
+                                                td #{turno.fecha}
+                                                td #{turno.hora}
+                                                td #{turno.Motivo ? turno.Motivo.nombre : "Sin motivo"}
+                                                td #{turno.estado}
+                                                td
+                                                    button#atencionBtn.btn.btn-success.me-1(onclick=`event.preventDefault(); atencion(${turno.id});`) Atender
+                                                    button#ausenteBtn.btn.btn-danger.ms-1(onclick=`event.preventDefault(); ausente(${turno.id})`) Ausente
                                 else
-                                    h4 No hay turnos disponibles para este paciente
+                                    tr
+                                        td.text-center(colspan="6") No hay turnos disponibles para este paciente
                 div.justify-content-center
                     a.btn.btn-danger.mt-5.w-25(href="/atencion" class="custom-button2") Volver        
           
@@ -73,8 +76,7 @@ block content
                 });
             }
         }
-        
-        
-        
-        
-    
+
+
+
+

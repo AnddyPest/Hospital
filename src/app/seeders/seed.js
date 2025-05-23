@@ -16,6 +16,8 @@ module.exports = {
         { nombre: "Urología" },
         { nombre: "Endocrinología" },
         { nombre: "Psiquiatría" },
+        { nombre: "Guardia de Urgencias" },
+        { nombre: "Emergentología" },
       ],
       {}
     );
@@ -55,6 +57,7 @@ module.exports = {
           nombre: "Juan",
           apellido: "García",
           telefono: "555-1234",
+          matricula: "123456",
           especialidad_Id: 1,
         },
         {
@@ -62,6 +65,7 @@ module.exports = {
           nombre: "María",
           apellido: "López",
           telefono: "555-2345",
+          matricula: "234567",
           especialidad_Id: 1,
         },
         {
@@ -69,6 +73,7 @@ module.exports = {
           nombre: "Roberto",
           apellido: "Fernández",
           telefono: "555-3456",
+          matricula: "143676",
           especialidad_Id: 1,
         },
         {
@@ -76,6 +81,7 @@ module.exports = {
           nombre: "Ana",
           apellido: "Martínez",
           telefono: "555-4567",
+          matricula: "345678",
           especialidad_Id: 1,
         },
         {
@@ -83,6 +89,7 @@ module.exports = {
           nombre: "Carlos",
           apellido: "Rodríguez",
           telefono: "555-5678",
+          matricula: "151891",
           especialidad_Id: 2,
         },
         {
@@ -90,6 +97,7 @@ module.exports = {
           nombre: "Patricia",
           apellido: "González",
           telefono: "555-6789",
+          matricula: "456789",
           especialidad_Id: 3,
         },
         {
@@ -97,6 +105,7 @@ module.exports = {
           nombre: "Miguel",
           apellido: "Pérez",
           telefono: "555-7890",
+          matricula: "261902",
           especialidad_Id: 4,
         },
         {
@@ -104,21 +113,72 @@ module.exports = {
           nombre: "Laura",
           apellido: "Sánchez",
           telefono: "555-8901",
+          matricula: "567890",
           especialidad_Id: 5,
         },
         {
-          dni: 12345678,
+          dni: 32345678,
           nombre: "Sergio",
           apellido: "Díaz",
           telefono: "555-9012",
+          matricula: "654321",
           especialidad_Id: 6,
         },
         {
-          dni: 13579246,
+          dni: 33579246,
           nombre: "Sofía",
           apellido: "Torres",
           telefono: "555-0123",
+          matricula: "678901",
           especialidad_Id: 7,
+        },
+        {
+          dni: 34680135,
+          nombre: "Diego",
+          apellido: "Ramírez",
+          telefono: "555-1234",
+          matricula: "787012",
+          especialidad_Id: 8,
+        },
+        {
+          dni: 26914725,
+          nombre: "Valentina",
+          apellido: "Hernández",
+          telefono: "555-2345",
+          matricula: "189312",
+          especialidad_Id: 9,
+        },
+        {
+          dni: 34725836,
+          nombre: "Javier",
+          apellido: "Gutiérrez",
+          telefono: "555-3456",
+          matricula: "890123",
+          especialidad_Id: 10,
+        },
+        {
+          dni: 35836941,
+          nombre: "Claudia",
+          apellido: "Molina",
+          telefono: "555-4567",
+          matricula: "901234",
+          especialidad_Id: 11,
+        },
+        {
+          dni: 26947051,
+          nombre: "Fernando",
+          apellido: "Cruz",
+          telefono: "555-5678",
+          matricula: "012345",
+          especialidad_Id: 12,
+        },
+        {
+          dni: 39725131,
+          nombre: "Elena",
+          apellido: "Ortiz",
+          telefono: "555-6789",
+          matricula: "101234",
+          especialidad_Id: 12,
         },
       ],
       {}
@@ -290,6 +350,98 @@ module.exports = {
       ],
       {}
     );
+
+    // 7. Crear habitaciones
+    const habitaciones = [];
+
+    // Crear 10 habitaciones de ala común con 2 camas cada una
+    for (let i = 1; i <= 10; i++) {
+      habitaciones.push({
+        ala: "Comun",
+        numero: i,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // Crear 5 habitaciones de ala común con 3 camas cada una
+    for (let i = 11; i <= 15; i++) {
+      habitaciones.push({
+        ala: "Comun",
+        numero: i,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // Crear 10 habitaciones de terapia intermedia con 2 camas cada una
+    for (let i = 1; i <= 10; i++) {
+      habitaciones.push({
+        ala: "Terapia Intermedia",
+        numero: i,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // Crear 8 habitaciones de terapia intensiva con 1 cama cada una
+    for (let i = 1; i <= 8; i++) {
+      habitaciones.push({
+        ala: "Terapia Intensiva",
+        numero: i,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    // Crear 5 habitaciones de pre-quirúrgico con 2 camas cada una
+    for (let i = 1; i <= 5; i++) {
+      habitaciones.push({
+        ala: "Pre Quirurgico",
+        numero: i,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+      });
+    }
+
+    await queryInterface.bulkInsert("habitaciones", habitaciones, {});
+
+    // 8. Crear camas
+    const camas = [];
+    let camaId = 1;
+
+    // Obtener todas las habitaciones insertadas para asignar las camas
+    const habitacionesInsertadas = await queryInterface.sequelize.query(
+      "SELECT id, ala, numero FROM habitaciones ORDER BY id",
+      { type: queryInterface.sequelize.QueryTypes.SELECT }
+    );
+
+    // Asignar camas según el tipo de ala
+    habitacionesInsertadas.forEach((habitacion) => {
+      const { id, ala } = habitacion;
+
+      // Determinar cuántas camas crear según el ala
+      let numCamas = 2; // Por defecto, 2 camas
+
+      if (ala === "Comun" && habitacion.numero > 10) {
+        numCamas = 3; // Para las 5 habitaciones de ala común con 3 camas
+      } else if (ala === "Terapia Intensiva") {
+        numCamas = 1; // Para las habitaciones de terapia intensiva, solo 1 cama
+      }
+
+      // Crear las camas para esta habitación
+      for (let i = 1; i <= numCamas; i++) {
+        camas.push({
+          numeroCama: `${ala.substr(0, 1)}${habitacion.numero}-${i}`, // Ej: "C1-1" para Común, habitación 1, cama 1
+          estado: "Disponible",
+          habitacion_Id: id,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+      }
+    });
+
+    await queryInterface.bulkInsert("Camas", camas, {});
   },
 
   down: async (queryInterface, Sequelize) => {

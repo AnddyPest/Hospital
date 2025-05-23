@@ -5,6 +5,7 @@ const Enfermero = require("../model/enfermero");
 const Motivos = require("../model/motivos");
 const Especialidad = require("../model/especialidad");
 const Area = require("../model/area");
+const Atencion = require("../model/atencion");
 const sequelize = require("sequelize");
 const { Op } = require("sequelize");
 
@@ -31,6 +32,7 @@ const turnoController = {
   listarView: async (req, res) => {
     try {
       const turnos = await Turno.findAll({
+        where: { hora: { [Op.not]: null } }, // Solo turnos con hora asignada
         include: [
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
@@ -197,53 +199,6 @@ const turnoController = {
     }
   },
 
-  listarTurnosEnfermerosView: async (req, res) => {
-    try {
-      const turnos = await Turno.findAll({
-        where: {
-          enfermero_Id: { [Op.not]: null },
-        },
-        include: [
-          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
-          {
-            model: Enfermero,
-            attributes: ["id", "nombre", "apellido"],
-            include: [
-              {
-                model: Area,
-                as: "Area",
-                attributes: ["id", "nombre"],
-              },
-            ],
-          },
-          {
-            model: Motivos,
-            as: "Motivo",
-            attributes: ["id", "nombre"],
-          },
-        ],
-        order: [
-          ["fecha", "ASC"],
-          ["hora", "ASC"],
-        ],
-      });
-
-      res.render("vistasTurnos/listaTriages", {
-        title: "Turnos Enfermería",
-        turnos,
-        profesionalTypeOf: "Enfermero", // Indicamos el tipo explícitamente
-        userType: req.session?.userType || "guest",
-        context: "listar",
-      });
-    } catch (error) {
-      console.error("Error al listar turnos de enfermería:", error);
-      res.status(500).render("error", {
-        message: "Error al listar turnos de enfermería",
-        error,
-      });
-    }
-  },
-
   borrarTurnosMedicosView: async (req, res) => {
     try {
       // Obtener turnos médicos
@@ -336,132 +291,42 @@ const turnoController = {
     }
   },
 
-  // VISTAS PARA TRIAGES (ENFERMEROS)
-
-  listarTriagesView: async (req, res) => {
+  // Controlador CREAR TURNO DE URGENCA
+  turnoUrgenciaView: async (req, res) => {
+    const dni = req.params.dni;
+    const atencionId = req.params.atencionId;
     try {
-      const turnos = await Turno.findAll({
+      const paciente = await Paciente.findOne({
+        where: { dni },
+      });
+      const atencion = await Atencion.findByPk(atencionId, {
         include: [
-          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
-
           {
-            model: Enfermero,
-            attributes: ["id", "nombre", "apellido"],
+            model: Turno,
             include: [
               {
-                model: Area,
-                as: "Area",
-                attributes: ["id", "nombre"],
+                model: Paciente,
+                attributes: ["id", "nombre", "apellido", "dni"],
               },
+              { model: Motivos, as: "Motivo", attributes: ["id", "nombre"] },
             ],
           },
-          { model: Motivos, attributes: ["id", "nombre"] },
-        ],
-        order: [
-          ["fecha", "ASC"],
-          ["hora", "ASC"],
         ],
       });
 
-      res.render("vistasTurnos/listaTriages", {
-        title: "Triages",
-        turnos,
-        profesionalTypeOf: "Enfermero", // Añadir este parámetro
-        context: "listar", // Añadir este parámetro
+      // Error: no existe la variable turno, debería ser atencion.Turno
+      res.render("vistasUrgencias/turnoDeUrgencia", {
+        title: "Nueva Urgencia",
+        dni,
+        atencionId,
+        atencion: atencion, // Enviamos atencion en lugar de turno
+        paciente,
         userType: req.session?.userType || "guest",
       });
     } catch (error) {
-      console.error("Error al listar triages:", error);
+      console.error("Error en vista de nueva Urgencia:", error);
       res.status(500).render("error", {
-        message: "Error al listar triages",
-        error,
-      });
-    }
-  },
-
-  borrarTriagesView: async (req, res) => {
-    try {
-      // Obtener turnos de enfermería
-      const turnos = await Turno.findAll({
-        where: {
-          enfermero_Id: { [Op.not]: null }, // Solo turnos con enfermero asignado
-        },
-        include: [
-          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
-          {
-            model: Enfermero,
-            attributes: ["id", "nombre", "apellido"],
-            include: [
-              {
-                model: Area,
-                as: "Area",
-                attributes: ["id", "nombre"],
-              },
-            ],
-          },
-          { model: Motivos, attributes: ["id", "nombre"] },
-        ],
-        order: [
-          ["fecha", "ASC"],
-          ["hora", "ASC"],
-        ],
-      });
-
-      // Renderizar vista con los parámetros necesarios para el mixin
-      res.render("vistasTurnos/borrarTriages", {
-        title: "Borrar Turnos Enfermería",
-        turnos,
-        profesionalTypeOf: "Enfermero", // Crucial para el funcionamiento del mixin
-        context: "borrar", // Crucial para mostrar los botones de borrado
-        userType: req.session?.userType || "guest",
-      });
-    } catch (error) {
-      console.error("Error al cargar vista de borrado de triages:", error);
-      res.status(500).render("error", {
-        message: "Error al cargar vista de borrado de triages",
-        error,
-      });
-    }
-  },
-
-  editarTriagesView: async (req, res) => {
-    try {
-      const turnos = await Turno.findAll({
-        where: {
-          enfermero_Id: { [Op.not]: null }, // Solo turnos con enfermero asignado
-        },
-        include: [
-          { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
-          {
-            model: Enfermero,
-            attributes: ["id", "nombre", "apellido"],
-            include: [
-              {
-                model: Area,
-                as: "Area",
-                attributes: ["id", "nombre"],
-              },
-            ],
-          },
-          { model: Motivos, attributes: ["id", "nombre"] },
-        ],
-        order: [
-          ["fecha", "ASC"],
-          ["hora", "ASC"],
-        ],
-      });
-
-      res.render("vistasTurnos/editarTriages", {
-        title: "Editar Turnos Enfermería",
-        turnos,
-        profesionalTypeOf: "Enfermero", // Añadido para mantener consistencia
-        context: "editar", // Añadido para mantener consistencia
-        userType: req.session?.userType || "guest",
-      });
-    } catch (error) {
-      console.error("Error al cargar vista de edición de triages:", error);
-      res.status(500).render("error", {
-        message: "Error al cargar vista de edición de triages",
+        message: "Error al cargar la vista de nueva Urgencia",
         error,
       });
     }
@@ -534,6 +399,8 @@ const turnoController = {
         hora,
         motivo_Id,
         estado,
+        prioridad,
+        ordenUrgencia,
         paciente_Id,
         medico_Id,
         enfermero_Id,
@@ -573,6 +440,8 @@ const turnoController = {
         hora,
         motivo_Id,
         estado: estado || "Pendiente",
+        prioridad,
+        ordenUrgencia,
         paciente_Id,
         medico_Id,
         enfermero_Id,
@@ -946,28 +815,166 @@ const turnoController = {
     try {
       const turnos = await Turno.findAll({
         where: {
-          orden: { [Op.not]: null }, // Solo turnos con orden
+          ordenUrgencia: { [Op.not]: null }, // Los turnos de urgencia tienen un valor en ordenUrgencia
+          estado: { [Op.not]: "atendido" }, // Excluir turnos atendidos
+          estado: { [Op.not]: "Atendido" }, // Excluir turnos cancelados
+        },
+        include: [
+          {
+            model: Paciente,
+            attributes: ["id", "nombre", "apellido", "dni"],
+          },
+          {
+            model: Enfermero,
+            attributes: ["id", "nombre", "apellido"],
+            required: false, // No todos los turnos tienen enfermero asignado
+          },
+          {
+            model: Motivos,
+            attributes: ["id", "nombre"],
+          },
+          {
+            model: Medico,
+            required: false,
+            attributes: ["id", "nombre", "apellido"],
+          },
+        ],
+        order: [
+          // Ordenar primero por estado (pendientes primero)
+          [
+            sequelize.literal(
+              `CASE WHEN estado = 'pendiente' THEN 0 WHEN estado = 'en atención' THEN 1 ELSE 2 END`
+            ),
+            "ASC",
+          ],
+          // Luego por prioridad (alta, media, baja)
+          [
+            sequelize.literal(
+              `CASE WHEN prioridad = 'alta' THEN 0 WHEN prioridad = 'media' THEN 1 WHEN prioridad = 'baja' THEN 2 ELSE 3 END`
+            ),
+            "ASC",
+          ],
+          // Finalmente por fecha y hora, más reciente primero
+          ["fecha", "DESC"],
+          ["hora", "DESC"],
+        ],
+      });
+
+      res.render("vistasUrgencias/vistaTurnosUrgencias", {
+        title: "Listado de Urgencias",
+        turnos,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al listar urgencias:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la lista de urgencias",
+        error,
+      });
+    }
+  },
+  // actualizar la hora del turno
+  actualizarHoraTurno: async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { hora } = req.body;
+
+      // Actualizar la hora del turno
+      await Turno.update({ hora }, { where: { id } });
+
+      res.status(200).json({
+        success: true,
+        message: "Hora actualizada correctamente",
+      });
+    } catch (error) {
+      console.error("Error al actualizar la hora del turno:", error);
+      res.status(500).json({ error: "Error al actualizar la hora" });
+    }
+  },
+  // controlador para cargar los turnos que tienen un medico de Guardia De Urgencias
+  // hay que ordenarlos por PRIORIDAD "Alta, Media,Baja" y a su vez por numero de orden
+  atenderUrgenciaView: async (req, res) => {
+    try {
+      const turnos = await Turno.findAll({
+        where: {
+          ordenUrgencia: { [Op.not]: null }, // Solo turnos con orden
+          estado: "Pendiente",
         },
         include: [
           { model: Paciente, attributes: ["id", "nombre", "apellido", "dni"] },
           {
-            model: Enfermero,
-            attributes: ["id", "nombre", "apellido"],
+            model: Medico,
+            attributes: ["id", "nombre", "apellido", "matricula"],
             include: [
               {
-                model: Area,
-                as: "Area",
+                model: Especialidad,
+                as: "especialidad",
                 attributes: ["id", "nombre"],
               },
             ],
           },
           { model: Motivos, attributes: ["id", "nombre"] },
         ],
-        order: [["orden", "ASC"]],
+        order: [
+          ["prioridad", "ASC"],
+          ["orden", "ASC"],
+        ],
+      });
+
+      res.render("vistasUrgencias/atenderUrgencia", {
+        title: "Atender Urgencias",
+        turnos,
+        userType: req.session?.userType || "guest",
+      });
+    } catch (error) {
+      console.error("Error al cargar urgencias:", error);
+      res.status(500).render("error", {
+        message: "Error al cargar la lista de urgencias",
+        error,
+      });
+    }
+  },
+  listarTriagesView: async (req, res) => {
+    try {
+      // Esta consulta debe mostrar los triages, no los turnos con orden de urgencia
+      const turnos = await Turno.findAll({
+        where: {
+          // Filtrar los triages de urgencia (probablemente tienen otro indicador)
+          orden: { [Op.not]: null }, // O el campo que uses para identificar triages
+          // No filtrar por ordenUrgencia aquí, ya que estamos buscando triages
+        },
+        include: [
+          {
+            model: Paciente,
+            attributes: ["id", "nombre", "apellido", "dni"],
+          },
+          {
+            model: Enfermero, // Añadido el modelo Enfermero que aparece en la vista
+            attributes: ["id", "nombre", "apellido"],
+            required: false,
+          },
+          {
+            model: Motivos,
+            attributes: ["id", "nombre"],
+          },
+          // El médico podría no ser necesario en esta vista
+          {
+            model: Medico,
+            required: false,
+            attributes: ["id", "nombre", "apellido"],
+          },
+        ],
+        order: [
+          // Ordenar por fecha y hora, más reciente primero
+          ["fecha", "DESC"],
+          ["hora", "DESC"],
+          // Alternativamente por estado (pendientes primero)
+          ["estado", "ASC"],
+        ],
       });
 
       res.render("vistasUrgencias/vistaListarUrgencias", {
-        title: "Listar Urgencias",
+        title: "Listado de Urgencias",
         turnos,
         userType: req.session?.userType || "guest",
       });

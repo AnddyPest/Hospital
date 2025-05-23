@@ -23,6 +23,14 @@ const Turno = sequelize.define("Turno", {
     type: DataTypes.INTEGER,
     allowNull: true,
   },
+  ordenUrgencia: {
+    type: DataTypes.STRING,
+    allowNull: true,
+  },
+  prioridad: {
+    type: DataTypes.ENUM("alta", "media", "baja"),
+    allowNull: true,
+  },
   estado: {
     type: DataTypes.STRING,
     allowNull: false,

@@ -5,6 +5,7 @@ const atencionController = require("../controller/atencionController");
 router.get("/", atencionController.index); // Vista principal de historia clinica
 router.get("/paciente/:dni", atencionController.atencionView); // Vista de historia clinica por dni
 router.get("/paciente/turno/:id", atencionController.filanlizarView);
+router.get("/urgencia/:id", atencionController.atencionUrgenciaView); // Vista de urgencia
 
 //ruta para guardar la atencion
 router.post("/guardarConsulta/:id", atencionController.guardarAtencion);
