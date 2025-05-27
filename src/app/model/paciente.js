@@ -8,7 +8,7 @@ const Paciente = sequelize.define("Paciente", {
     autoIncrement: true,
   },
   dni: {
-    type: DataTypes.DOUBLE,
+    type: DataTypes.STRING,
     unique: true,
     allowNull: false,
   },
@@ -22,7 +22,7 @@ const Paciente = sequelize.define("Paciente", {
   },
   edad: {
     type: DataTypes.INTEGER,
-    allowNull: false,
+    allowNull: true,
   },
   sexo: {
     type: DataTypes.ENUM("M", "F"),
@@ -30,15 +30,19 @@ const Paciente = sequelize.define("Paciente", {
   },
   email: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   obra_social: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   telefono: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
+  },
+  internado: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
   },
 });
 

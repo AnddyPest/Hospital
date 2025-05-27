@@ -26,11 +26,11 @@ mixin atencionPaciente(turno)
                             div.row.mb-1
                                 div.col.mb-3.text-start
                                     label.fw-bold.me-2 Paciente:
-                                    span.text-light #{turno.Paciente.nombre} #{turno.Paciente.apellido}
+                                    span.text-light #{turno && turno.Paciente ? `${turno.Paciente.nombre} ${turno.Paciente.apellido}` : 'Paciente de Emergencia'}
                                 
                                 div.col.mb-3.text-start
                                     label.fw-bold.me-2 DNI:
-                                    span#dniPaciente.text-light #{turno.Paciente.dni}
+                                    span#dniPaciente.text-light #{turno && turno.Paciente ? turno.Paciente.dni : 'Sin Datos'}
                             hr.border-info.opacity-75.mt-1.mb-1    
                             div.d-flex.align-items-center
                                 div.mb-2
@@ -83,7 +83,7 @@ mixin atencionPaciente(turno)
                         button#intern.btn.btn-warning(onclick="event.preventDefault(); internar();" disabled) Internacion
                         button#derivation.btn.btn-light(onclick="event.preventDefault(); derivacion();" disabled) Derivacion
                         button#emergency.btn.btn-danger.me-5(onclick="event.preventDefault(); emergencia();" disabled) Emergencia
-                        a#cancel.btn.btn-secondary.mt-2(href=`/atencion/paciente/${turno.Paciente.dni}`) Cancelar
+                        a#cancel.btn.btn-secondary.mt-2(href=`/atencion/paciente/${turno && turno.Paciente ? turno.Paciente.dni : ''}`) Cancelar
 block content
    
 

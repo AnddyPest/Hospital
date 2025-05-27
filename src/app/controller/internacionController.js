@@ -31,6 +31,15 @@ const internacionController = {
 
       // Obtener el paciente y su sexo
       const paciente = atencion.Turno.Paciente;
+
+      // Verificar si el paciente ya está internado
+      if (paciente.internado) {
+        return res.status(400).render("error", {
+          message: "El paciente ya se encuentra internado",
+          error: { status: 400 },
+        });
+      }
+
       const sexoPaciente = paciente.sexo;
 
       // Obtener todas las habitaciones, agrupadas por ala
@@ -191,6 +200,12 @@ const internacionController = {
         fechaEgreso: null,
       });
 
+      // Actualizar el estado del paciente a internado
+      await Paciente.update(
+        { internado: true },
+        { where: { id: paciente_id } }
+      );
+
       // Actualizar observaciones en la atención si es necesario
       if (observaciones) {
         await Atencion.update(
@@ -348,6 +363,15 @@ const internacionController = {
           observaciones: observaciones || atencion.observaciones,
         });
       }
+
+      // Después de obtener el paciente desde la cama ocupada
+      const pacienteId = cama.paciente_Id;
+
+      // Actualizar estado del paciente
+      await Paciente.update(
+        { internado: false },
+        { where: { id: pacienteId } }
+      );
 
       res.redirect(
         "/internacion/lista?success=true&message=Paciente+dado+de+alta+exitosamente"

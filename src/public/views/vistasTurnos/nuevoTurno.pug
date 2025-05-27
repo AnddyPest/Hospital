@@ -511,7 +511,8 @@ block content
                 const response = await fetch("/turnos/admin/new", {
                     method: "POST",
                     headers: {
-                        "Content-Type": "application/json"
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
                     },
                     body: JSON.stringify({
                         estado: estado,
@@ -523,36 +524,38 @@ block content
                     })
                 });
                 
-                // Verificar si la respuesta es una redirección
-                if (response.redirected) {
-                    alert("Turno creado con éxito");
-                    window.location.href = response.url;
-                    return;
-                }
-                
                 // Verificar el tipo de contenido antes de intentar parsear JSON
                 const contentType = response.headers.get("content-type");
                 
                 if (contentType && contentType.includes("application/json")) {
-                    // La respuesta es JSON
                     const data = await response.json();
                     console.log(data);
+                    
+                    // VERIFICAR SI SUCCESS ES FALSE - ESTA ES LA PARTE IMPORTANTE
+                    if (!data.success) {
+                        throw new Error(data.error || "Error al crear el turno");
+                    }
+                    
+                    // Si llegamos aquí, la operación fue exitosa
                     alert("Turno creado con éxito");
+                    window.location.href = data.redirectUrl || "/turnos/admin";
                 } else {
-                    // La respuesta no es JSON, probablemente HTML
-                    if (response.ok) {
-                        alert("Turno creado con éxito");
-                        // Redirigir a turnos
-                        window.location.href = "/turnos/admin/seleccionar/turnos";
-                    } else {
+                    // Si no es JSON, podría ser un error
+                    if (!response.ok) {
                         const errorText = await response.text();
-                        console.error("Respuesta no JSON del servidor:", errorText);
+                        console.log("Respuesta no JSON del servidor:", errorText);
                         throw new Error(`Error del servidor: ${response.status}`);
+                    }
+                    
+                    // Si es redirección
+                    if (response.redirected) {
+                        alert("Turno creado con éxito");
+                        window.location.href = response.url;
                     }
                 }
             } catch (error) {
                 console.error("Error al enviar los datos:", error);
-                alert(`Error: ${error.message || "No se pudo crear el turno"}`);
+                alert(error.message); // Mostrar el mensaje de error al usuario
             }
         };
         async function cargarMotivos() {
@@ -590,5 +593,52 @@ block content
             window.location.href = "/pacientes/admin/new";
         }
         cargarMotivos();
+        async function enviarDatosTurno() {
+            try {  // Ahora con 8 espacios (nivel correcto dentro de script)
+                const response = await fetch("/turnos/crear", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json" // Indica que esperas JSON
+                    },
+                    body: JSON.stringify({
+                        fecha: fechaTurno,
+                        hora: horaTurno,
+                        motivo_Id: motivoSeleccionado,
+                        paciente_Id: idPaciente,
+                        medico_Id: idMedico,
+                        enfermero_Id: idEnfermero
+                        // Otros campos según sea necesario
+                    })
+                });
+                
+                if (!response.ok) {
+                    const contentType = response.headers.get("content-type");
+                    if (contentType && contentType.includes("application/json")) {
+                        // Si es JSON, extraer el mensaje de error correctamente
+                        const errorData = await response.json();
+                        throw new Error(errorData.error || "Error al crear el turno");
+                    } else {
+                        // Si es texto u otro formato
+                        const errorText = await response.text();
+                        throw new Error(errorText || "Error al crear el turno");
+                    }
+                }
+                
+                // Si la respuesta es exitosa
+                const data = await response.json();
+                
+                // Redirigir o mostrar mensaje de éxito
+                if (data.redirectUrl) {
+                    window.location.href = data.redirectUrl;
+                } else {
+                    alert("Turno creado correctamente");
+                    window.location.href = "/turnos/admin";
+                }
+            } catch (error) {
+                console.error("Error al enviar los datos:", error);
+                alert(error.message);
+            }
+        }
 
 

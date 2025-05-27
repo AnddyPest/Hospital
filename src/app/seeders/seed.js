@@ -232,7 +232,7 @@ module.exports = {
       "pacientes",
       [
         {
-          dni: 12345678,
+          dni: "12345678",
           nombre: "Daniel",
           apellido: "Moreno",
           edad: 43,
@@ -242,7 +242,7 @@ module.exports = {
           telefono: "555-1212",
         },
         {
-          dni: 23456789,
+          dni: "23456789",
           nombre: "Isabel",
           apellido: "Navarro",
           edad: 48,
@@ -252,7 +252,7 @@ module.exports = {
           telefono: "555-2323",
         },
         {
-          dni: 34567890,
+          dni: "34567890",
           nombre: "Pedro",
           apellido: "Ruiz",
           edad: 33,
@@ -262,7 +262,7 @@ module.exports = {
           telefono: "555-3434",
         },
         {
-          dni: 45678901,
+          dni: "45678901",
           nombre: "Alejandra",
           apellido: "Gil",
           edad: 35,
@@ -272,7 +272,7 @@ module.exports = {
           telefono: "555-4545",
         },
         {
-          dni: 56789012,
+          dni: "56789012",
           nombre: "Javier",
           apellido: "Serrano",
           edad: 28,
@@ -282,7 +282,7 @@ module.exports = {
           telefono: "555-5656",
         },
         {
-          dni: 67890123,
+          dni: "67890123",
           nombre: "Natalia",
           apellido: "Blanco",
           edad: 40,
@@ -292,7 +292,7 @@ module.exports = {
           telefono: "555-6767",
         },
         {
-          dni: 78901234,
+          dni: "78901234",
           nombre: "Ramón",
           apellido: "Herrera",
           edad: 53,
@@ -302,7 +302,7 @@ module.exports = {
           telefono: "555-7878",
         },
         {
-          dni: 89012345,
+          dni: "89012345",
           nombre: "Cristina",
           apellido: "Vega",
           edad: 31,
@@ -312,7 +312,7 @@ module.exports = {
           telefono: "555-8989",
         },
         {
-          dni: 90123456,
+          dni: "90123456",
           nombre: "Andrés",
           apellido: "Ramos",
           edad: 36,
@@ -322,7 +322,7 @@ module.exports = {
           telefono: "555-9090",
         },
         {
-          dni: 10234567,
+          dni: "10234567",
           nombre: "Mónica",
           apellido: "Flores",
           edad: 45,

@@ -1,0 +1,425 @@
+extends ../templates/layout.pug
+
+include ../templates/mixins.pug
+
+block content
+    div
+        img(src="/images/fachada.jpeg" class="d-block w-100" alt="Imagen 3" style="height: calc(83vh - 10vh); object-fit: cover; border-radius: 10px; opacity: 0.5;")
+        
+        +header("Emergencia", "/icons/triangle-exclamation-solid.svg")
+
+        div.position-absolute.top-50.start-50.translate-middle.text-center.mt-5.rounded-3(style="width: 80%" id="formularioNewTriage")
+            
+            // Radio buttons para seleccionar tipo de paciente
+            div.row.align-items-center.mb-3
+                div.col.w-25
+                    div.form-check.form-check-inline
+                        input.form-check-input#pacienteExistente(type="radio" name="tipoPaciente" value="existente" checked)
+                        label.form-check-label(for="pacienteExistente") Paciente Existente
+                    div.form-check.form-check-inline
+                        input.form-check-input#pacienteSinIdentificacion(type="radio" name="tipoPaciente" value="sinIdentificacion")
+                        label.form-check-label(for="pacienteSinIdentificacion") Paciente Sin Identificación
+
+            div.row.align-items-center.mb-5.mt-3
+                div.col.w-25
+                    div.input-group#seccionDNI
+                        input.form-control.form-control-lg(type="text" id="inputDNI" name="inputDNI" placeholder="Ingrese D.N.I." aria-label="DNI" aria-describedby="basic-addon1")
+                        span.input-group-text(id="dniSpan" style="background-color: #0d6efd;")
+                            img(src="/icons/user-solid.svg" style="width: 20px; height: 20px;")
+                    
+                    // Selector de sexo (oculto inicialmente)
+                    div#seccionSexo(style="display: none;")
+                        select#sexoPaciente.form-select.form-select-lg.w-100.h-100(name="sexoPaciente")
+                            option(value="" selected disabled) Seleccione sexo
+                            option(value="M") Masculino
+                            option(value="F") Femenino
+                            
+                div.col.w-25
+                    // Área fija - no seleccionable
+                    select.form-select.form-select-lg.h-100.bg-danger.text-white(disabled)
+                        option(selected) Emergentología
+                        
+                div.col.w-25
+                    select.form-select.form-select-lg.w-100.h-100(id="selectMedico" name="selectMedico")
+                        option(selected disabled) Seleccione un Médico
+                        each medico in medicos || []
+                            option(value=medico.id) #{medico.apellido}, #{medico.nombre}
+            
+            div.row.align-items-center.mb-5
+                div.col.w-25
+                    // Selector de motivos
+                    select#motivo.form-select.form-select-lg.w-100.h-100(name="motivo")
+                        option(selected disabled value="") Seleccione un Motivo
+                        each mot in motivos || []
+                            option(value=mot.id) #{mot.nombre}
+                            
+                div.col.w-25
+                    div.input-group.date(id="datepicker")
+                        input.form-control.form-control-lg(type="text" id="inputFecha" placeholder="Seleccione una fecha" value=fechaActual disabled)
+                        span.input-group-text
+                            img(src="/icons/calendar-days-solid.svg" style="width: 20px; height: 20px;")
+                            
+                div.col.w-25
+                   
+                
+            
+                
+                
+                        
+            div.row.align-items-center.mt-5
+                div.col.w-25
+                    button.btn.w-75.btn-danger(class="custom-button2" id="botonNext" onclick="event.preventDefault(); aceptarDatos();") Registrar Emergencia
+            div.row.align-items-center  
+                div.col.w-25
+                div.col.w-50
+                    a.btn.w-75.btn-warning.mt-5(href="#" class="btn-secondary custom-button2" id="botonReiniciar" onclick="event.preventDefault(); location.reload();") Reiniciar Formulario
+                div.col.w-25
+            div.row.align-items-center   
+                div.col.w-25
+                div.col.w-50
+                div.col.w-25
+                    a.btn.w-50.btn-dark(href="/emergencias" class="btn-secondary custom-button2" id="botonAtras") Atrás
+
+    script.
+        //variables globales y elementos del DOM
+        const dni = document.getElementById("inputDNI");
+        const dniSpan = document.getElementById("dniSpan");
+        const seccionDNI = document.getElementById("seccionDNI");
+        const seccionSexo = document.getElementById("seccionSexo");
+        const sexoPaciente = document.getElementById("sexoPaciente");
+        const selectMedico = document.getElementById("selectMedico");
+        const datePicker = document.getElementById("inputFecha");
+        const motivo = document.getElementById("motivo");
+        const btnNext = document.getElementById("botonNext");
+        const numeroOrden = #{siguienteOrden || 1}; // Valor predeterminado si siguienteOrden es undefined
+        
+        let idPaciente = ""; 
+        let idMedico = null;
+        let fechaEmergencia = "#{fechaActual}"; // La fecha actual ya viene del servidor
+        let motivoEmergencia = ""; 
+
+        // Controlar la visualización según tipo de paciente
+        document.querySelectorAll('input[name="tipoPaciente"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                if (this.value === 'existente') {
+                    seccionDNI.style.display = 'flex';
+                    seccionSexo.style.display = 'none';
+                } else if (this.value === 'sinIdentificacion') {
+                    seccionDNI.style.display = 'none';
+                    seccionSexo.style.display = 'block';
+                    idPaciente = ""; // Resetear ID de paciente
+                }
+            });
+        });
+
+        // Inicializar datepicker con la fecha actual
+        $(document).ready(function() {
+            $('#datepicker input').datepicker({
+                format: 'dd/mm/yyyy',
+                autoclose: true,
+                todayHighlight: true,
+                language: 'es',
+                startDate: new Date(),
+            });
+        });
+
+        //este metodo chequea que el dni exista y lo fija en el input
+        document.addEventListener("DOMContentLoaded", () => {
+            // Variables para control de debounce
+            let dniTimeout;
+            let lastCheckedDni = "";
+            
+            dni.addEventListener("input", async () => {
+                // Limita a solo números y máximo 8 dígitos
+                dni.value = dni.value.replace(/[^0-9]/g, "").slice(0, 8);
+                
+                // Controlar estados visuales iniciales
+                if (dni.value === "") {
+                    clearTimeout(dniTimeout);
+                    updateDniStatus("empty");
+                    return;
+                }
+                
+                if (dni.value.length < 7) {
+                    clearTimeout(dniTimeout);
+                    updateDniStatus("incomplete");
+                    return;
+                }
+                
+                // Evitar búsqueda duplicada del mismo DNI
+                if (dni.value === lastCheckedDni) return;
+                
+                // Cambiar a estado "buscando"
+                updateDniStatus("searching");
+                
+                // Implementar debounce para evitar muchas solicitudes seguidas
+                clearTimeout(dniTimeout);
+                dniTimeout = setTimeout(async () => {
+                    lastCheckedDni = dni.value;
+                    await checkPatientDni(dni.value);
+                }, 500);
+            });
+            
+            // Función para verificar DNI con el servidor
+            async function checkPatientDni(dniValue) {
+                try {
+                    const response = await fetch(`/pacientes/listado/${dniValue}`);
+                    
+                    if (response.ok) {
+                        // DNI existe, cambiar a verde y guardar ID
+                        const paciente = await response.json();
+                        idPaciente = paciente.id;
+                        updateDniStatus("found", paciente.nombre + " " + paciente.apellido);
+                        console.log("Paciente encontrado, ID:", idPaciente);
+                    } else if (response.status === 404) {
+                        // DNI no existe
+                        idPaciente = "";
+                        updateDniStatus("not-found");
+                    } else {
+                        // Otro tipo de error
+                        throw new Error(`Error de servidor: ${response.status}`);
+                    }
+                } catch (error) {
+                    console.error("Error al comprobar el DNI:", error);
+                    updateDniStatus("error");
+                }
+            }
+            
+            // Función para actualizar el estado visual del DNI
+            function updateDniStatus(status, patientName = "") {
+                dniSpan.removeEventListener("click", redirectANuevoPaciente);
+                dniSpan.style.cursor = "default"
+                switch (status) {
+                    case "empty":
+                        dniSpan.style.backgroundColor = "#0d6efd"; // Azul
+                        dniSpan.title = "Ingrese DNI del paciente";
+                        break;
+                    case "incomplete":
+                        dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                        dniSpan.title = "DNI incompleto";
+                        break;
+                    case "searching":
+                        dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                        dniSpan.title = "Buscando paciente...";
+                        break;
+                    case "found":
+                        dniSpan.style.backgroundColor = "#28a745"; // Verde
+                        dniSpan.title = `Paciente encontrado: ${patientName}`;
+                        break;
+                    case "not-found":
+                        dniSpan.style.backgroundColor = "#dc3545"; // Rojo
+                        dniSpan.title = "Paciente no encontrado. Haz clic para cargar sus datos";
+                        dniSpan.style.cursor = "pointer";
+                        dniSpan.addEventListener("click", redirectANuevoPaciente);
+                        break;
+                    case "error":
+                        dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                        dniSpan.title = "Error al verificar DNI";
+                        break;
+                }
+            }
+
+            // Evento para seleccionar médico
+            selectMedico.addEventListener("change", async () => {
+                if(selectMedico.value) {
+                    idMedico = selectMedico.value;
+                    console.log(`Médico seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
+                }
+            });
+
+            // Evento para seleccionar motivo (con comprobación de null)
+            if (motivo) {
+                motivo.addEventListener("change", async () => {
+                    if (motivo.value) {
+                        console.log(`Motivo seleccionado: ${motivo.options[motivo.selectedIndex].text}`);
+                        motivoEmergencia = motivo.value;
+                    }
+                });
+            }
+        });
+        
+        // Validar y enviar los datos
+        async function aceptarDatos() {
+            const tipoPaciente = document.querySelector('input[name="tipoPaciente"]:checked').value;
+            
+            // Verificar si motivo existe antes de acceder a su valor
+            if (motivo) {
+                motivoEmergencia = motivo.value;
+            }
+            
+            // Validaciones según tipo de paciente
+            if (tipoPaciente === 'existente') {
+                if (!idPaciente) {
+                    alert("Debe seleccionar un paciente existente válido");
+                    return;
+                }
+            } else if (tipoPaciente === 'sinIdentificacion') {
+                if (!sexoPaciente.value) {
+                    alert("Debe seleccionar el sexo del paciente");
+                    return;
+                }
+            }
+            
+            if (!idMedico) {
+                alert("Debe seleccionar un médico");
+                return;
+            }
+            
+            if (!motivoEmergencia) {
+                alert("Debe seleccionar un motivo");
+                return;
+            }
+            
+            let mensajeConfirmacion = "";
+            if (tipoPaciente === 'existente') {
+                mensajeConfirmacion = `Datos de la emergencia:\nPaciente: ${idPaciente}\nMédico: ${idMedico}\nFecha: ${fechaEmergencia}\nMotivo: ${motivoEmergencia}`;
+            } else {
+                mensajeConfirmacion = `Datos de la emergencia:\nPaciente: Sin Identificación\nSexo: ${sexoPaciente.value}\nMédico: ${idMedico}\nFecha: ${fechaEmergencia}\nMotivo: ${motivoEmergencia}`;
+            }
+            
+            if (confirm(mensajeConfirmacion + "\n\n¿Confirma el registro de la emergencia?")) {
+                enviarDatos(tipoPaciente);
+            }
+        }
+
+        async function enviarDatos(tipoPaciente) {
+            const estado = "Emergencia";
+            
+            try {
+                // Usa la fecha actual en lugar de intentar formatear
+                const fechaActual = new Date();
+                const fechaFormateada = `${fechaActual.getFullYear()}-${String(fechaActual.getMonth() + 1).padStart(2, '0')}-${String(fechaActual.getDate()).padStart(2, '0')}`;
+                
+                console.log("Fecha formateada correctamente:", fechaFormateada);
+                
+                // Si es paciente existente, primero intentamos obtener sus datos completos
+                let datosPaciente = {};
+                
+                if (tipoPaciente === 'existente' && idPaciente) {
+                    try {
+                        // Intentar obtener los datos completos del paciente
+                        const responsePaciente = await fetch(`/pacientes/datos/${idPaciente}`);
+                        if (responsePaciente.ok) {
+                            datosPaciente = await responsePaciente.json();
+                            console.log("Datos del paciente obtenidos:", datosPaciente);
+                        } else {
+                            console.warn("No se pudieron obtener datos completos del paciente");
+                        }
+                    } catch (error) {
+                        console.warn("Error al obtener datos del paciente:", error);
+                    }
+                }
+                
+                // Construir objeto de datos base
+                let datos = {
+                    fecha: fechaFormateada,
+                    motivo_Id: motivoEmergencia,
+                    estado,
+                    medico_Id: idMedico,
+                    esEmergencia: true
+                };
+                
+                // Añadir datos según tipo de paciente
+                if (tipoPaciente === 'existente') {
+                    datos.paciente_Id = idPaciente;
+                    
+                    // Si obtenemos el sexo del paciente, lo usamos, de lo contrario usamos un valor por defecto
+                    if (datosPaciente && datosPaciente.sexo) {
+                        datos.sexo = datosPaciente.sexo;
+                    } else {
+                        // Proveer un valor explícito para evitar el error de notNull violation
+                        datos.sexo = "M"; // Valor por defecto compatible con el ENUM("M", "F")
+                        
+                        // También intentamos enviar otros campos que podrían ser requeridos
+                        datos.nombre = "Existente";  // Estos valores serán ignorados para pacientes existentes
+                        datos.apellido = "Existente";
+                        datos.dni = "00000000";
+                        datos.edad = 0;
+                        datos.telefono = "0000000000";
+                        datos.email = "emergencia@hospital.com";
+                        datos.obra_social = "Sin Datos";
+                    }
+                } else if (tipoPaciente === 'sinIdentificacion') {
+                    // Asegurarse de que el sexo está establecido para pacientes sin identificación
+                    if (!sexoPaciente || !sexoPaciente.value) {
+                        throw new Error("Debe seleccionar el sexo del paciente sin identificación");
+                    }
+                    
+                    // Datos para paciente sin identificación
+                    datos.sexo = sexoPaciente.value; // Ya debería ser "M" o "F" con el selector modificado
+                    datos.edad = 0;
+                    datos.telefono = "0000000000";
+                    datos.email = "emergencia@hospital.com";
+                    datos.obra_social = "Sin Datos";
+                    datos.nombre = "EMERGENCIA";
+                    datos.apellido = `Emergencia ${numeroOrden}`;
+                    
+                    // Generar un DNI único para evitar duplicados
+                    const timestamp = new Date().getTime().toString().slice(-8);
+                    datos.dni = `E${timestamp}`; // Ej: E12345678 (único basado en timestamp)
+                }
+                
+                console.log("Datos de emergencia enviados:", datos);
+                
+                // Crear un objeto de emergencia separado para pacientes existentes vs nuevos
+                const responseEmergencia = await fetch("/emergencias/crear", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(datos)
+                });
+                
+                // Manejar errores de la petición
+                if (!responseEmergencia.ok) {
+                    let errorMsg = "Error al registrar la emergencia";
+                    
+                    try {
+                        const contentType = responseEmergencia.headers.get("content-type");
+                        if (contentType && contentType.includes("application/json")) {
+                            const errorData = await responseEmergencia.json();
+                            errorMsg = errorData.error || errorMsg;
+                        } else {
+                            errorMsg = await responseEmergencia.text() || errorMsg;
+                        }
+                    } catch (e) {
+                        console.error("Error al procesar respuesta de error:", e);
+                    }
+                    
+                    throw new Error(errorMsg);
+                }
+                
+                // Procesar respuesta exitosa
+                const data = await responseEmergencia.json();
+                
+                if (data.success) {
+                    alert("Emergencia registrada con éxito");
+                    
+                    // Extraer el ID del paciente de la respuesta o usar el existente
+                    const pacienteId = data.pacienteId;
+                    
+                    console.log("ID del paciente para redirección:", pacienteId);
+                    
+                    // Verificar explícitamente que tengamos un ID antes de redirigir
+                    if (pacienteId) {
+                        // Usar el ID explícitamente en la URL
+                        window.location.href = `/atencion/paciente/turno/${pacienteId}`;
+                    } else {
+                        console.error("No se recibió el ID del paciente en la respuesta");
+                        alert("No se pudo obtener el ID del paciente. Volviendo a la lista de emergencias.");
+                        window.location.href = "/emergencias";
+                    }
+                } else {
+                    throw new Error(data.error || "Error al registrar la emergencia");
+                }
+                
+            } catch (error) {
+                console.error("Error al enviar los datos:", error);
+                alert(`Error: ${error.message || "No se pudo registrar la emergencia"}`);
+            }
+        }
+
+        function redirectANuevoPaciente() {
+            window.location.href = "/pacientes/admin/new";
+        }

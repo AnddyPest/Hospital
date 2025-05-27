@@ -36,6 +36,10 @@ const Turno = sequelize.define("Turno", {
     allowNull: false,
     defaultValue: "pendiente",
   },
+  esEmergencia: {
+    type: DataTypes.BOOLEAN,
+    defaultValue: false,
+  },
 });
 
 Paciente.hasMany(Turno, { foreignKey: "paciente_Id" });

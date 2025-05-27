@@ -294,25 +294,5 @@ const pacienteController = {
     }
   },
 };
-Paciente.afterCreate(async (paciente) => {
-  try {
-    // Importar el modelo HistoriaClinica
-    const HistoriaClinica = require("../model/historiaClinica");
-
-    // Crear una historia clínica automáticamente para el nuevo paciente
-    await HistoriaClinica.create({
-      paciente_Id: paciente.id,
-      fecha: new Date(), // Fecha actual
-      resultado: "Historia clínica inicial",
-      // Otros campos requeridos con valores predeterminados
-    });
-
-    console.log(
-      `Historia clínica creada automáticamente para paciente ID: ${paciente.id}`
-    );
-  } catch (error) {
-    console.error("Error al crear historia clínica automática:", error);
-  }
-});
 
 module.exports = pacienteController;
