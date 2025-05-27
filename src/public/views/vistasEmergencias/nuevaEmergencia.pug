@@ -82,35 +82,134 @@ block content
 
     script.
         let idPaciente = null;
-
-        // Buscar paciente por DNI cuando se pierde el foco del input
-        document.getElementById('inputDNI').addEventListener('blur', async function() {
-            const dni = this.value.trim();
-            if (!dni) return;
+        const dniSpan = document.getElementById('dniSpan');
+        const dni = document.getElementById('inputDNI');
+        
+        // Función para comprobar el DNI del paciente
+        async function checkPatientDni(dniValue) {
             try {
-            const res = await fetch(`/pacientes/listado/${dni}`);
-            if (res.ok) {
-                const paciente = await res.json();
-                idPaciente = paciente.id;
-                document.getElementById('dniSpan').style.backgroundColor = "#28a745"; // verde
-            } else {
-                idPaciente = null;
-                document.getElementById('dniSpan').style.backgroundColor = "#dc3545"; // rojo
+                const response = await fetch(`/pacientes/listado/${dniValue}`);
+                
+                if (response.ok) {
+                    // DNI existe, cambiar a verde y guardar ID
+                    const paciente = await response.json();
+                    idPaciente = paciente.id;
+                    updateDniStatus("found", paciente.nombre + " " + paciente.apellido);
+                    console.log("Paciente encontrado, ID:", idPaciente);
+                } else if (response.status === 404) {
+                    // DNI no existe
+                    idPaciente = "";
+                    updateDniStatus("not-found");
+                } else {
+                    // Otro tipo de error
+                    throw new Error(`Error de servidor: ${response.status}`);
+                }
+            } catch (error) {
+                console.error("Error al comprobar el DNI:", error);
+                updateDniStatus("error");
             }
-            } catch (e) {
-            idPaciente = null;
-            document.getElementById('dniSpan').style.backgroundColor = "#dc3545";
+        }
+        
+        // Función para actualizar el estado visual del DNI
+        function updateDniStatus(status, patientName = "") {
+            dniSpan.removeEventListener("click", redirectANuevoPaciente);
+            dniSpan.style.cursor = "default"
+            switch (status) {
+                case "empty":
+                    dniSpan.style.backgroundColor = "#0d6efd"; // Azul
+                    dniSpan.title = "Ingrese DNI del paciente";
+                    break;
+                case "incomplete":
+                    dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                    dniSpan.title = "DNI incompleto";
+                    break;
+                case "searching":
+                    dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                    dniSpan.title = "Buscando paciente...";
+                    break;
+                case "found":
+                    dniSpan.style.backgroundColor = "#28a745"; // Verde
+                    dniSpan.title = `Paciente encontrado: ${patientName}`;
+                    break;
+                case "not-found":
+                    dniSpan.style.backgroundColor = "#dc3545"; // Rojo
+                    dniSpan.title = "Paciente no encontrado. Haz clic para cargar sus datos";
+                    dniSpan.style.cursor = "pointer";
+                    dniSpan.addEventListener("click", redirectANuevoPaciente);
+                    break;
+                case "error":
+                    dniSpan.style.backgroundColor = "#ffc107"; // Amarillo
+                    dniSpan.title = "Error al verificar DNI";
+                    break;
             }
-        });
+        }
+        
+        // Función para redirigir a la página de nuevo paciente
+        function redirectANuevoPaciente() {
+            const dniValue = dni.value.trim();
+            if (dniValue) {
+                window.location.href = `/pacientes/admin/new`;
+            }
+        }
 
-        // Mostrar/ocultar selector de sexo según tipo de paciente
+        // Inicializar estado del DNI
+        updateDniStatus("empty");
+        
+        // Implementación del sistema de validación con debounce
+        document.addEventListener("DOMContentLoaded", () => {
+            // Variables para control de debounce
+            let dniTimeout;
+            let lastCheckedDni = "";
+            
+            dni.addEventListener("input", async () => {
+                // Limita a solo números y máximo 8 dígitos
+                dni.value = dni.value.replace(/[^0-9]/g, "").slice(0, 8);
+                
+                // Controlar estados visuales iniciales
+                if (dni.value === "") {
+                    clearTimeout(dniTimeout);
+                    updateDniStatus("empty");
+                    return;
+                }
+                
+                if (dni.value.length < 7) {
+                    clearTimeout(dniTimeout);
+                    updateDniStatus("incomplete");
+                    return;
+                }
+                
+                // Evitar búsqueda duplicada del mismo DNI
+                if (dni.value === lastCheckedDni) return;
+                
+                // Cambiar a estado "buscando"
+                updateDniStatus("searching");
+                
+                // Implementar debounce para evitar muchas solicitudes seguidas
+                clearTimeout(dniTimeout);
+                dniTimeout = setTimeout(async () => {
+                    lastCheckedDni = dni.value;
+                    await checkPatientDni(dni.value);
+                }, 2500); // Cambiado a 2.5 segundos como solicitaste
+            });
+        });
+        
+        // Eliminar los eventos antiguos ya que ahora usamos el nuevo sistema
+        // dni.removeEventListener('blur');
+        // dni.removeEventListener('input');
+
+        // Mostrar/ocultar campos según tipo de paciente
         document.querySelectorAll('input[name="tipoPaciente"]').forEach(radio => {
             radio.addEventListener('change', function() {
-            if (this.value === 'sinIdentificacion') {
-                document.getElementById('seccionSexo').style.display = '';
-            } else {
-                document.getElementById('seccionSexo').style.display = 'none';
-            }
+                const seccionDNI = document.getElementById('seccionDNI');
+                const seccionSexo = document.getElementById('seccionSexo');
+                
+                if (this.value === 'sinIdentificacion') {
+                    seccionDNI.style.display = 'none'; // Ocultar DNI
+                    seccionSexo.style.display = 'block'; // Mostrar selector de sexo
+                } else {
+                    seccionDNI.style.display = 'block'; // Mostrar DNI
+                    seccionSexo.style.display = 'none'; // Ocultar selector de sexo
+                }
             });
         });
 
