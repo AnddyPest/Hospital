@@ -1,5 +1,3 @@
-version: "3.8"
-
 services:
   app:
     build: .
@@ -17,8 +15,8 @@ services:
   db:
     image: mysql:8.0
     environment:
-      - MYSQL_ROOT_PASSWORD=
       - MYSQL_DATABASE=hospital_db
+      - MYSQL_ALLOW_EMPTY_PASSWORD=true
     ports:
       - "3306:3306"
     volumes:

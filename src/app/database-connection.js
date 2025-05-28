@@ -4,10 +4,18 @@ const mysql2 = require("mysql2/promise"); //importamos asi para poder usar async
 // estos son los datos de la base de datos, no estoy seguro de que sea correcto
 // colocarlos aqui por temas de seguridad, pero para poder desarrollar la app
 // los pongo aca, mas adelante veremos para hacer la app mas segura
-const databaseName = "hospital_db";
-const userName = "root";
-const password = "";
-const host = "localhost";
+
+//PARAMERTROS DE CONEXION A LA BASE DE DATOS EN LOCALHOST
+//const databaseName = "hospital_db";
+//const userName = "root";
+//const password = "";
+//const host = "localhost";
+
+// PARAMETROS DE CONEXION A LA BASE DE DATOS EN DOCKER
+const databaseName = process.env.DB_NAME || "hospital_db";
+const userName = process.env.DB_USER || "root";
+const password = process.env.DB_PASSWORD || "";
+const host = process.env.DB_HOST || "db"; // <--- debe ser "db" para Docker
 
 // aseguramos que la bd existe, si no existe la creamos
 async function asegurarBdExiste() {
