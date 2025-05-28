@@ -43,6 +43,8 @@ const medicoController = {
         title: "Listar Médicos",
         medicos,
         userType: req.session?.userType || "guest",
+        success: req.query.success,
+        message: req.query.message,
       });
     } catch (error) {
       console.error("Error al listar médicos:", error);
@@ -203,7 +205,7 @@ const medicoController = {
       });
 
       res.redirect(
-        "/medicos/admin?success=true&message=Médico+creado+correctamente"
+        "/medicos/listar?success=true&message=Médico+creado+correctamente"
       );
     } catch (error) {
       console.error("Error al crear el medico:", error);
@@ -230,7 +232,7 @@ const medicoController = {
 
       if (updated) {
         res.redirect(
-          "/medicos/admin?success=true&message=Médico+actualizado+correctamente"
+          "/medicos/listar?success=true&message=Médico+actualizado+correctamente"
         );
       } else {
         res.status(404).render("error", {

@@ -59,6 +59,14 @@ block content
                 div.col.w-25
                     a.btn.w-50.btn-dark(href="/urgencias/admin" class="btn-secondary custom-button2" id="botonAtras") Atrás
 
+    // Toast container for triage information
+    div.position-fixed.top-50.start-50.translate-middle(style="z-index: 1080")
+        div#liveToast.toast(role="alert" aria-live="assertive" aria-atomic="true")
+            div.toast-header.bg-danger.text-white
+                strong.me-auto Información del Triage
+                button.btn-close.btn-close-white(type="button" data-bs-dismiss="toast" aria-label="Close")
+            div.toast-body.bg-light.fs-5
+
     script.
         //variables globales y elementos del DOM
         const dni = document.getElementById("inputDNI");
@@ -187,7 +195,7 @@ block content
             selectEnfermero.addEventListener("change", async () => {
                 if(selectEnfermero.value) {
                     idEnfermero = selectEnfermero.value;
-                    alert(`Enfermero seleccionado: ${selectEnfermero.options[selectEnfermero.selectedIndex].text}`);
+                    
                 } else {
                     alert("Seleccione un enfermero");
                 }
@@ -199,7 +207,7 @@ block content
             motivo.addEventListener("change", async () => {
                 const motivoSeleccionado = motivo.value;
                 if (motivoSeleccionado) {
-                    alert(`Motivo seleccionado: ${motivo.options[motivo.selectedIndex].text}`);
+                    
                     motivoTurno = motivo.value;
                 } else {
                     alert("Seleccione un Motivo");
@@ -216,8 +224,27 @@ block content
                 return;
             }
             
-            alert(`Datos del triage:\nPaciente: ${idPaciente}\nEnfermero: ${idEnfermero}\nFecha: ${fechaTurno}\nMotivo: ${motivoTurno}\nOrden: ${numeroOrden}`);
-            enviarDatos();
+            const toastEl = document.getElementById('liveToast');
+            const toastBody = toastEl.querySelector('.toast-body');
+            toastBody.innerHTML = `
+                <div class="text-start">
+                    <strong>Datos del triage:</strong><br>
+                    <ul class="list-group list-group-flush mt-2">
+                        <li class="list-group-item bg-light">Paciente ID: ${idPaciente}</li>
+                        <li class="list-group-item bg-light">Enfermero ID: ${idEnfermero}</li>
+                        <li class="list-group-item bg-light">Fecha: ${fechaTurno}</li>
+                        <li class="list-group-item bg-light">Motivo ID: ${motivoTurno}</li>
+                        <li class="list-group-item bg-light">Orden: ${numeroOrden}</li>
+                    </ul>
+                </div>
+            `;
+            const bsToast = new bootstrap.Toast(toastEl, { autohide: false });
+            bsToast.show();
+
+            // delay
+            setTimeout(() => {
+                enviarDatos();
+            }, 2000);
         }
 
         async function enviarDatos() {
@@ -252,7 +279,7 @@ block content
                 
                 // Verificar si la respuesta es una redirección
                 if (response.redirected) {
-                    alert("Triage registrado con éxito");
+                    
                     window.location.href = response.url;
                     return;
                 }
@@ -272,6 +299,19 @@ block content
                 console.error("Error al enviar los datos:", error);
                 alert(`Error: ${error.message || "No se pudo registrar el triage"}`);
             }
+        }
+
+        function mostrarToast(titulo, mensaje) {
+            const toastEl = document.getElementById('liveToast');
+            const toastBody = toastEl.querySelector('.toast-body');
+            
+            // Establecer título y mensaje
+            toastEl.querySelector('.toast-header strong').textContent = titulo;
+            toastBody.innerHTML = mensaje;
+            
+            // Mostrar el toast
+            const toast = new bootstrap.Toast(toastEl);
+            toast.show();
         }
 
         function redirectANuevoPaciente() {

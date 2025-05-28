@@ -448,7 +448,7 @@ const turnoController = {
       });
 
       res.redirect(
-        "/turnos/admin?success=true&message=Turno+creado+correctamente"
+        "/turnos/listar/medicos?success=true&message=Turno+creado+correctamente"
       );
     } catch (error) {
       console.error("Error al crear el turno:", error);
@@ -768,7 +768,7 @@ const turnoController = {
       });
 
       res.redirect(
-        "/urgencias/admin?success=true&message=Triage+creado+correctamente"
+        "/turnos/listar/urgencias?success=true&message=Triage+creado+correctamente"
       );
     } catch (error) {
       console.error("Error al crear el triage:", error);

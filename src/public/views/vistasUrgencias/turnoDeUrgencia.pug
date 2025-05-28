@@ -68,7 +68,15 @@ block content
 
         // Ahora llamamos al mixin con la variable atencion correcta
         +turnoUrgencia(dni, atencion, paciente)
-                
+        
+        // toastboot prueba 2
+        div.position-fixed.top-50.start-50.translate-middle(style="z-index: 1080")
+            div#liveToast.toast(role="alert" aria-live="assertive" aria-atomic="true")
+                div.toast-header.bg-danger.text-white
+                    strong.me-auto Información de Urgencia
+                    button.btn-close.btn-close-white(type="button" data-bs-dismiss="toast" aria-label="Close")
+                div.toast-body.bg-light.fs-5
+
     script.
         // Variables globales y elementos del DOM
         const dni = document.getElementById("inputDNI");
@@ -328,7 +336,7 @@ block content
         }
 
         // Función para validar y enviar todos los datos
-                // Función para validar y enviar todos los datos (ajustada y corregida)
+                
         async function aceptarDatos() {
             // El valor del motivo ya debe estar prefijado
             motivoTurno = document.getElementById("motivo").value;
@@ -370,15 +378,30 @@ block content
             
             // Validar médico seleccionado
             if (!idMedico || idMedico === "") {
-                alert("Debe seleccionar un médico");
+                mostrarToast("Debe seleccionar un médico", "error");
                 return;
             }
             
-            // Confirmar creación del turno
-            if (confirm("¿Confirma la creación del turno de urgencia?")) {
-                // Enviar datos para crear el turno de urgencia
-                await enviarDatos();
-            }
+            // Mostrar confirmación en el toast
+            const toastEl = document.getElementById('liveToast');
+            const toastBody = toastEl.querySelector('.toast-body');
+            toastBody.innerHTML = `
+                <div class="text-start">
+                    <strong>Confirmar creación del turno de urgencia:</strong><br>
+                    <ul class="list-group list-group-flush mt-2">
+                        <li class="list-group-item bg-light">Paciente ID: ${idPaciente}</li>
+                        <li class="list-group-item bg-light">Médico ID: ${idMedico}</li>
+                        <li class="list-group-item bg-light">Prioridad: ${prioridadInput.value.toUpperCase()}</li>
+                        <li class="list-group-item bg-light">Orden: ${ordenUrgencia.value}</li>
+                    </ul>
+                    <div class="d-flex justify-content-end mt-3">
+                        <button class="btn btn-secondary me-2" onclick="document.getElementById('liveToast').querySelector('.btn-close').click()">Cancelar</button>
+                        <button class="btn btn-danger" onclick="enviarDatos()">Confirmar</button>
+                    </div>
+                </div>
+            `;
+            const bsToast = new bootstrap.Toast(toastEl, { autohide: false });
+            bsToast.show();
         }
 
         // Función para cargar los motivos
@@ -467,15 +490,14 @@ block content
                     })
                 });
                 
-                if (response.redirected) {
-                    alert("Turno de urgencia creado con éxito");
-                    window.location.href = response.url;
-                    return;
-                }
-                
-                if (response.ok) {
-                    alert("Turno de urgencia creado con éxito");
-                    window.location.href = "/urgencias/admin";
+                if (response.redirected || response.ok) {
+                    // Mostrar mensaje de éxito con toast en lugar de alert
+                    mostrarToast("Turno de urgencia creado con éxito", "success", false, 3000);
+                    
+                    // Redirigir a la página de atender urgencias después de un retraso
+                    setTimeout(() => {
+                        window.location.href = "/turnos/atender/urgencias";
+                    }, 3000);
                     return;
                 }
                 
@@ -488,8 +510,46 @@ block content
                 }
             } catch (error) {
                 console.error("Error al crear el turno de urgencia:", error);
-                alert("Error al crear el turno: " + error.message);
+                // Mostrar error con toast en lugar de alert
+                mostrarToast("Error al crear el turno: " + error.message, "error");
             }
+        }
+
+        // Añadir esta función después de las declaraciones de variables
+        function mostrarToast(mensaje, tipo = 'info', autoCerrar = true, delay = 5000) {
+            const toastEl = document.getElementById('liveToast');
+            const toastHeader = toastEl.querySelector('.toast-header');
+            const toastBody = toastEl.querySelector('.toast-body');
+            
+            // Configurar color según tipo
+            if (tipo === 'success') {
+                toastHeader.className = 'toast-header bg-success text-white';
+                toastBody.innerHTML = `
+                    <div class="alert alert-success mb-0">
+                        <strong>¡Éxito!</strong> ${mensaje}
+                    </div>
+                `;
+            } else if (tipo === 'error') {
+                toastHeader.className = 'toast-header bg-danger text-white';
+                toastBody.innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <strong>Error:</strong> ${mensaje}
+                    </div>
+                `;
+            } else {
+                toastHeader.className = 'toast-header bg-info text-white';
+                toastBody.innerHTML = `
+                    <div class="alert alert-info mb-0">
+                        ${mensaje}
+                    </div>
+                `;
+            }
+            
+            // Mostrar el toast
+            const bsToast = new bootstrap.Toast(toastEl, { autohide: autoCerrar, delay: delay });
+            bsToast.show();
+            
+            return bsToast; // Devuelve el objeto toast por si se necesita control adicional
         }
 
 

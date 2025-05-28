@@ -339,7 +339,7 @@ block content
             } else {
                 idMedico = selectMedico.value;
                 console.log(idMedico);
-                alert(`Médico seleccionado: ${selectMedico.options[selectMedico.selectedIndex].text}`);
+                
             }
         };
 
@@ -366,7 +366,7 @@ block content
                 const partesFecha = fecha.split("/");
                 const fechaFormateada = `${partesFecha[2]}-${partesFecha[1]}-${partesFecha[0]}`;
                 
-                alert(`Fecha seleccionada: ${fecha}`);
+                //eliminado el alert del orto
                 fechaTurno = fecha;
                 
                 console.log("Médico ID:", idMedico);
@@ -455,7 +455,7 @@ block content
             if (motivoSeleccionado === "Seleccione un Motivo") {
                 alert("Seleccione un Motivo");
             } else {
-                alert(`Motivo seleccionado: ${motivoSeleccionado}`);
+                
                 motivoTurno = motivo.value;
             }
         };
@@ -471,19 +471,38 @@ block content
             if (hora === "Seleccione un horario") {
                 alert("Seleccione un horario");
             } else {
-                alert(`Horario seleccionado: ${hora}`);
+                
                 horaTurno = hora;
             }
         };
 
         async function aceptarDatos() {
-            
             motivoTurno = motivo.value;
             
             if (idPaciente === "" || !idMedico || fechaTurno === "" || horaTurno === "" || motivoTurno === "") {
-                alert("Complete todos los campos");
+                // Mostrar mensaje de error en el toast
+                const toastEl = document.getElementById('liveToast');
+                const toastBody = toastEl.querySelector('.toast-body');
+                toastBody.textContent = "Complete todos los campos";
+                // inicializacion del toast
+                const bsToast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+                bsToast.show();
             } else {
-                alert(`Datos seleccionados: ${idPaciente} ${idMedico} ${fechaTurno} ${horaTurno} ${motivoTurno}`);
+                // Mostrar datos seleccionados en el toast
+                const toastEl = document.getElementById('liveToast');
+                const toastBody = toastEl.querySelector('.toast-body');
+                toastBody.innerHTML = `
+                    <strong>Datos seleccionados:</strong><br>
+                    Paciente ID: ${idPaciente}<br>
+                    Médico ID: ${idMedico}<br>
+                    Fecha: ${fechaTurno}<br>
+                    Hora: ${horaTurno}<br>
+                    Motivo: ${motivoTurno}
+                `;
+                // toast inicializado
+                const bsToast = new bootstrap.Toast(toastEl, { autohide: true, delay: 3000 });
+                bsToast.show();
+                
                 //aca llamamos al metodo para enviar los datos al servidor
                 enviarDatos();
             }
@@ -531,14 +550,27 @@ block content
                     const data = await response.json();
                     console.log(data);
                     
-                    // VERIFICAR SI SUCCESS ES FALSE - ESTA ES LA PARTE IMPORTANTE
+                    // VERIFICAR SI SUCCESS ES FALSE
                     if (!data.success) {
                         throw new Error(data.error || "Error al crear el turno");
                     }
                     
-                    // Si llegamos aquí, la operación fue exitosa
-                    alert("Turno creado con éxito");
-                    window.location.href = data.redirectUrl || "/turnos/admin";
+                    // NUEVO: Mostrar mensaje de éxito en el toast y retrasar la redirección
+                    const toastEl = document.getElementById('liveToast');
+                    const toastBody = toastEl.querySelector('.toast-body');
+                    toastBody.innerHTML = `
+                        <div class="alert alert-success mb-0">
+                            <strong>¡Éxito!</strong> Turno creado correctamente.
+                            <br>Redirigiendo en 3 segundos...
+                        </div>
+                    `;
+                    const bsToast = new bootstrap.Toast(toastEl, { autohide: false });
+                    bsToast.show();
+                    
+                    // Esperar 3 segundos antes de redirigir
+                    setTimeout(() => {
+                        window.location.href = data.redirectUrl || "/turnos/admin";
+                    }, 3000);
                 } else {
                     // Si no es JSON, podría ser un error
                     if (!response.ok) {
@@ -547,15 +579,38 @@ block content
                         throw new Error(`Error del servidor: ${response.status}`);
                     }
                     
-                    // Si es redirección
+                    // Si es redirección, mostrar mensaje y retrasar
                     if (response.redirected) {
-                        alert("Turno creado con éxito");
-                        window.location.href = response.url;
+                        const toastEl = document.getElementById('liveToast');
+                        const toastBody = toastEl.querySelector('.toast-body');
+                        toastBody.innerHTML = `
+                            <div class="alert alert-success mb-0">
+                                <strong>¡Éxito!</strong> Turno creado correctamente.
+                                <br>Redirigiendo en 3 segundos...
+                            </div>
+                        `;
+                        const bsToast = new bootstrap.Toast(toastEl, { autohide: false });
+                        bsToast.show();
+                        
+                        // Esperar 3 segundos antes de redirigir
+                        setTimeout(() => {
+                            window.location.href = response.url;
+                        }, 3000);
                     }
                 }
             } catch (error) {
                 console.error("Error al enviar los datos:", error);
-                alert(error.message); // Mostrar el mensaje de error al usuario
+                
+                // Mostrar error en el toast en lugar de alert
+                const toastEl = document.getElementById('liveToast');
+                const toastBody = toastEl.querySelector('.toast-body');
+                toastBody.innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <strong>Error:</strong> ${error.message}
+                    </div>
+                `;
+                const bsToast = new bootstrap.Toast(toastEl, { autohide: true, delay: 5000 });
+                bsToast.show();
             }
         };
         async function cargarMotivos() {
@@ -640,5 +695,14 @@ block content
                 alert(error.message);
             }
         }
+    
+    // mensaje de tipo toast prueba
+    
+    div.position-fixed.top-50.start-50.translate-middle(style="z-index: 1080")
+        div#liveToast.toast(role="alert" aria-live="assertive" aria-atomic="true")
+            div.toast-header.bg-primary.text-white
+                strong.me-auto Información del Turno
+                button.btn-close.btn-close-white(type="button" data-bs-dismiss="toast" aria-label="Close")
+            div.toast-body.bg-light.fs-5
 
 

@@ -30,6 +30,8 @@ router.delete("/borrar/:id", turnoController.borrarTurno);
 router.get("/urgencias/triage", turnoController.urgenciaView); // ok
 router.get("/listar/urgencias", turnoController.listarTriagesView);
 router.get("/atender/urgencias", turnoController.listarUrgenciasView);
+// crear triage
+router.post("/urgencias/triage/crear", turnoController.crearTriage); //ok
 
 router.post(
   "/atencion/actualizarHora/:id",
@@ -39,9 +41,6 @@ router.get(
   "/urgencias/paciente/:dni/atencion/:atencionId",
   turnoController.turnoUrgenciaView
 );
-
-// crear triage
-router.post("/urgencias/triage/crear", turnoController.crearTriage); //ok
 
 //ruta para interconsultas
 router.get(

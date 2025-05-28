@@ -31,6 +31,8 @@ const pacienteController = {
         title: "Listar Pacientes",
         pacientes,
         userType: req.session?.userType || "guest",
+        success: req.query.success,
+        message: req.query.message,
       });
     } catch (error) {
       console.error("Error al listar pacientes:", error);
@@ -173,7 +175,7 @@ const pacienteController = {
       });
 
       res.redirect(
-        "/pacientes/admin?success=true&message=Paciente+creado+correctamente"
+        "/pacientes/listar?success=true&message=Paciente+creado+correctamente"
       );
     } catch (error) {
       console.error("Error al crear el paciente:", error);

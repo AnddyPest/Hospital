@@ -41,6 +41,8 @@ const enfermeroController = {
         title: "Listar Enfermeros",
         enfermeros,
         userType: req.session?.userType || "guest",
+        success: req.query.success,
+        message: req.query.message,
       });
     } catch (error) {
       console.error("Error al listar enfermeros:", error);
@@ -215,7 +217,7 @@ const enfermeroController = {
       });
 
       res.redirect(
-        "/enfermeros/admin?success=true&message=Enfermero+creado+correctamente"
+        "/enfermeros/listar?success=true&message=Enfermero+creado+correctamente"
       );
     } catch (error) {
       console.error("Error al crear el enfermero:", error);

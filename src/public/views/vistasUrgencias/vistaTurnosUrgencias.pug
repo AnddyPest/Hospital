@@ -90,81 +90,147 @@ block content
                                     td.text-center(colspan="7") No hay turnos de urgencia registrados
         
         // Modal de confirmación para marcar ausente
-        div.modal.fade#modalAusente(tabindex="-1" aria-labelledby="modalAusenteLabel" aria-hidden="true")
-            div.modal-dialog
-                div.modal-content
-                    div.modal-header.bg-warning
-                        h5.modal-title#modalAusenteLabel Confirmar paciente ausente
-                        button.btn-close(type="button" data-bs-dismiss="modal" aria-label="Close")
-                    div.modal-body
-                        p ¿Confirma que el paciente no se ha presentado a la consulta de urgencia?
-                    div.modal-footer
-                        button.btn.btn-secondary(type="button" data-bs-dismiss="modal") Cancelar
-                        button.btn.btn-warning#btnConfirmarAusente(type="button") Confirmar ausente
+        div#modalSimple.position-fixed.top-0.start-0.w-100.h-100.d-none(style="background-color: rgba(0,0,0,0.5); z-index: 2000;")
+            div.position-absolute.top-50.start-50.translate-middle.bg-white.p-4.rounded.shadow(style="min-width: 300px; z-index: 2001;")
+                h5.mb-3 Confirmar paciente ausente
+                p ¿Confirma que el paciente no se ha presentado a la consulta de urgencia?
+                div.d-flex.justify-content-end.mt-3.gap-2
+                    button.btn.btn-secondary#btnCancelarSimple Cancelar
+                    button.btn.btn-warning#btnConfirmarSimple Confirmar ausente
+    
+    style.
+        /* Fix for modal appearing behind backdrop */
+        .modal {
+            z-index: 1050 !important;
+        }
+        .modal-backdrop {
+            z-index: 1040 !important;
+        }
+        .modal-dialog {
+            z-index: 1051 !important;
+            margin-top: 20vh;
+        }
+        /* Make buttons more clickable */
+        .modal-footer .btn {
+            position: relative;
+            z-index: 1052 !important;
+            pointer-events: auto !important;
+        }
+        /* Ensure modals are visible */
+        .modal.show {
+            display: block !important;
+        }
     
     script.
-        // Variable para almacenar el ID del turno seleccionado para marcar ausente
-        let turnoSeleccionadoId;
+        // Variables globales
+        let turnoSeleccionadoId = null;
         
-        // Función para marcar un paciente como ausente
+        // Función para mostrar el modal simple
         function marcarAusente(id) {
+            console.log("Marcando ausente turno ID:", id);
             turnoSeleccionadoId = id;
-            const modal = new bootstrap.Modal(document.getElementById('modalAusente'));
-            modal.show();
+            
+            // Mostrar el modal simple
+            document.getElementById('modalSimple').classList.remove('d-none');
         }
         
-        // Evento para confirmar la ausencia
-        document.getElementById('btnConfirmarAusente').addEventListener('click', async function() {
-            try {
-                const response = await fetch(`/turnos/marcarAusente/${turnoSeleccionadoId}`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (response.ok) {
-                    // Cerrar el modal y recargar la página
-                    const modal = bootstrap.Modal.getInstance(document.getElementById('modalAusente'));
-                    modal.hide();
-                    window.location.reload();
-                } else {
-                    alert('Error al marcar el paciente como ausente');
+        // Cuando el DOM esté cargado
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log("DOM cargado, configurando eventos");
+            
+            // Configurar botones del modal simple
+            document.getElementById('btnCancelarSimple').addEventListener('click', function() {
+                document.getElementById('modalSimple').classList.add('d-none');
+            });
+            
+            document.getElementById('btnConfirmarSimple').addEventListener('click', function() {
+                if (turnoSeleccionadoId) {
+                    confirmarAusencia(turnoSeleccionadoId);
                 }
-            } catch (error) {
-                console.error('Error:', error);
-                alert('Error al procesar la solicitud');
-            }
+            });
+            
+            // Configurar filtros
+            setupFiltros();
         });
         
-        // Funcionalidad de filtrado (mantenida sin cambios)
-        document.addEventListener('DOMContentLoaded', function() {
-            // Cargar lista de médicos para el filtro
+        // Manejar la confirmación de ausencia
+        async function confirmarAusencia(id) {
+            try {
+                console.log("Confirmando ausencia para turno:", id);
+                
+                // Modificado para usar el endpoint de edición con método PUT
+                const response = await fetch(`/turnos/editar/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        estado: "Ausente"
+                    })
+                });
+                
+                // Ocultar modal simple
+                document.getElementById('modalSimple').classList.add('d-none');
+                
+                if (response.ok) {
+                    mostrarAlerta('success', 'Paciente marcado como ausente correctamente');
+                    
+                    // Recargar después de un momento
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 2000);
+                } else {
+                    throw new Error("Error del servidor: " + response.status);
+                }
+            } catch (error) {
+                console.error("Error:", error);
+                mostrarAlerta('danger', 'No se pudo marcar al paciente como ausente');
+            }
+        }
+        
+        // Mostrar alertas
+        function mostrarAlerta(tipo, mensaje) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${tipo} alert-dismissible fade show`;
+            alertDiv.setAttribute('role', 'alert');
+            alertDiv.innerHTML = `
+                <strong>${tipo === 'success' ? '¡Éxito!' : 'Error:'}</strong> ${mensaje}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            const tablaContainer = document.querySelector('.table-responsive');
+            tablaContainer.parentNode.insertBefore(alertDiv, tablaContainer);
+        }
+        
+        // Función para configurar filtros
+        function setupFiltros() {
+            // Cargar médicos
             const medicos = new Set();
             document.querySelectorAll('#tablaTurnos tbody tr').forEach(row => {
                 const medicoNombre = row.getAttribute('data-medico');
-                if (medicoNombre) {
-                    medicos.add(medicoNombre);
+                if (medicoNombre) medicos.add(medicoNombre);
+            });
+            
+            // Poblar selector de médicos
+            const filtroMedico = document.getElementById('filtroMedico');
+            medicos.forEach(medico => {
+                if (medico) {
+                    const option = document.createElement('option');
+                    option.value = medico;
+                    option.textContent = medico;
+                    filtroMedico.appendChild(option);
                 }
             });
             
-            const filtroMedico = document.getElementById('filtroMedico');
-            medicos.forEach(medico => {
-                const option = document.createElement('option');
-                option.value = medico;
-                option.textContent = medico;
-                filtroMedico.appendChild(option);
-            });
-            
-            // Función para aplicar filtros
+            // Función de filtrado
             function aplicarFiltros() {
                 const valorMedico = filtroMedico.value.toLowerCase();
                 const valorPrioridad = document.getElementById('filtroPrioridad').value.toLowerCase();
                 const valorBusqueda = document.getElementById('busquedaGeneral').value.toLowerCase();
                 
                 document.querySelectorAll('#tablaTurnos tbody tr').forEach(row => {
-                    const medico = row.getAttribute('data-medico').toLowerCase();
-                    const prioridad = row.getAttribute('data-prioridad').toLowerCase();
+                    const medico = (row.getAttribute('data-medico') || "").toLowerCase();
+                    const prioridad = (row.getAttribute('data-prioridad') || "").toLowerCase();
                     const textoFila = row.textContent.toLowerCase();
                     
                     const coincideMedico = !valorMedico || medico.includes(valorMedico);
@@ -175,17 +241,17 @@ block content
                 });
             }
             
-            // Escuchar eventos de filtrado
+            // Eventos de filtrado
             filtroMedico.addEventListener('change', aplicarFiltros);
             document.getElementById('filtroPrioridad').addEventListener('change', aplicarFiltros);
             document.getElementById('busquedaGeneral').addEventListener('input', aplicarFiltros);
             
-            // Botón para resetear filtros
+            // Reset filtros
             document.getElementById('resetFiltros').addEventListener('click', function() {
                 filtroMedico.value = '';
                 document.getElementById('filtroPrioridad').value = '';
                 document.getElementById('busquedaGeneral').value = '';
                 aplicarFiltros();
             });
-        });
+        }
 

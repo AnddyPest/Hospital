@@ -12,6 +12,12 @@ mixin inputGroup(id, placeholder, btnFiltrarText, btnLimpiarText, btnVolverText)
 
 mixin tablaGeneralEntidades(contexto)
   div#tablaGeneralEntidades.position-absolute.top-50.start-50.translate-middle.text-center.mt-5(style="width: 80%")
+    // Success alert message
+    if success === 'true' && message
+      div.alert.alert-success.alert-dismissible.fade.show(role="alert")
+        = message
+        button.btn-close(type="button", data-bs-dismiss="alert", aria-label="Close")
+    
     //- Tabla con datos
     div.table-container(style="max-height: 300px; overflow-y: auto; border: 1px solid #ddd; border-radius: 10px;")    
       table.table.table-hover.table-dark.table-bordered.border-info.table-striped

@@ -193,9 +193,7 @@ block content
             });
         });
         
-        // Eliminar los eventos antiguos ya que ahora usamos el nuevo sistema
-        // dni.removeEventListener('blur');
-        // dni.removeEventListener('input');
+       
 
         // Mostrar/ocultar campos según tipo de paciente
         document.querySelectorAll('input[name="tipoPaciente"]').forEach(radio => {
@@ -217,8 +215,7 @@ block content
             const tipoPaciente = document.querySelector('input[name="tipoPaciente"]:checked').value;
             const motivo_Id = document.getElementById('motivo').value;
             const medico_Id = document.getElementById('selectMedico').value;
-            const descripcion = ""; // Puedes agregar un campo de descripción si lo necesitas
-
+            const descripcion = ""; 
             if (!motivo_Id || !medico_Id) {
             alert("Debe seleccionar un motivo y un médico.");
             return;
