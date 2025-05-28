@@ -6,26 +6,32 @@ const Paciente = require("./paciente"); // Importar el modelo Paciente
 const Administrativo = require("./administrativo"); // Importar el modelo Administrativo
 const Maestranza = require("./maestranza"); // Importar el modelo Maestranza
 
-const User = sequelize.define("User", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const User = sequelize.define(
+  "User",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    email: {
+      type: DataTypes.STRING,
+      unique: true,
+      allowNull: false,
+    },
+    password: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+    superAdmin: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
-  email: {
-    type: DataTypes.STRING,
-    unique: true,
-    allowNull: false,
-  },
-  password: {
-    type: DataTypes.STRING,
-    allowNull: false,
-  },
-  superAdmin: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 Medico.hasOne(User, { foreignKey: "medico_Id" });
 User.belongsTo(Medico, { foreignKey: "medico_Id" });

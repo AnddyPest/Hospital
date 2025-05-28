@@ -24,7 +24,7 @@ const Habitacion = sequelize.define(
       allowNull: false,
     },
   },
-  { tableName: "habitaciones", timestamps: true }
+  { tableName: "habitaciones", timestamps: false }
 );
 
 Habitacion.hasMany(Camas, { foreignKey: "habitacion_Id" });

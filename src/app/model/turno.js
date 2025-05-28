@@ -5,42 +5,48 @@ const Medico = require("./medico"); // Importar el modelo Medico
 const Enfermero = require("./enfermero"); // Importar el modelo Enfermero
 const Atencion = require("./atencion"); // Importar el modelo Atencion
 
-const Turno = sequelize.define("Turno", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Turno = sequelize.define(
+  "Turno",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    fecha: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    hora: {
+      type: DataTypes.TIME,
+      allowNull: true,
+    },
+    orden: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    ordenUrgencia: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    prioridad: {
+      type: DataTypes.ENUM("alta", "media", "baja"),
+      allowNull: true,
+    },
+    estado: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      defaultValue: "pendiente",
+    },
+    esEmergencia: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
-  fecha: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-  },
-  hora: {
-    type: DataTypes.TIME,
-    allowNull: true,
-  },
-  orden: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-  },
-  ordenUrgencia: {
-    type: DataTypes.STRING,
-    allowNull: true,
-  },
-  prioridad: {
-    type: DataTypes.ENUM("alta", "media", "baja"),
-    allowNull: true,
-  },
-  estado: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    defaultValue: "pendiente",
-  },
-  esEmergencia: {
-    type: DataTypes.BOOLEAN,
-    defaultValue: false,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 Paciente.hasMany(Turno, { foreignKey: "paciente_Id" });
 Turno.belongsTo(Paciente, { foreignKey: "paciente_Id" });

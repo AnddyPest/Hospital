@@ -4,18 +4,24 @@ const Enfermero = require("./enfermero"); // Importar el modelo Enfermero
 const Maestranza = require("./maestranza"); // Importar el modelo Maestranza
 const Administrativo = require("./administrativo"); // Importar el modelo Administrativo
 
-const Area = sequelize.define("Area", {
-  id: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true,
+const Area = sequelize.define(
+  "Area",
+  {
+    id: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nombre: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
   },
-  nombre: {
-    type: DataTypes.STRING,
-    allowNull: false,
-    unique: true,
-  },
-});
+  {
+    timestamps: false,
+  }
+);
 
 Area.hasMany(Enfermero, { foreignKey: "area_Id" });
 Enfermero.belongsTo(Area, { foreignKey: "area_Id" });

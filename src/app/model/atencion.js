@@ -48,7 +48,7 @@ const Atencion = sequelize.define(
       unique: true,
     },
   },
-  { tableName: "atencion", timestamps: true }
+  { tableName: "atencion", timestamps: false }
 );
 
 module.exports = Atencion;
