@@ -17,8 +17,20 @@ const userName = process.env.DB_USER || "root";
 const password = process.env.DB_PASSWORD || "";
 const host = process.env.DB_HOST || "db"; // <--- debe ser "db" para Docker
 
+// Detectar si estamos en Railway
+const isRailway =
+  !!process.env.RAILWAY_STATIC_URL ||
+  process.env.DB_HOST === "mysql.railway.internal";
+
 // aseguramos que la bd existe, si no existe la creamos
 async function asegurarBdExiste() {
+  // Si estamos en Railway, NO intentamos crear la base de datos (Railway ya la crea)
+  if (isRailway) {
+    console.log(
+      "Entorno Railway detectado: se asume que la base de datos ya existe."
+    );
+    return;
+  }
   try {
     // conexion standard a mysql sin especificar la bd... si especificaramos la bd
     // tendriamos un error de conexion, entonces debemos conectarnos asi para poder
