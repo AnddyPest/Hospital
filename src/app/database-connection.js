@@ -14,7 +14,7 @@ const mysql2 = require("mysql2/promise"); //importamos asi para poder usar async
 const databaseName = process.env.DB_NAME || "hospital_db";
 const userName = process.env.DB_USER || "root";
 //const password = process.env.DB_PASSWORD || "";
-const password = process.env.DB_PASSWORD || "VhLWBTGxofqJGbhfBfVIapDrfliikqWp"; // <--- PARA RAILWAY
+const password = process.env.DB_PASSWORD || "uqixVKyXXruzrQsmPWiZQRWEeGNtsriv"; // <--- PARA RAILWAY
 const host = process.env.DB_HOST || "mysql.railway.internal"; // <--- PARA RAILWAY
 //const host = process.env.DB_HOST || "db"; // <--- debe ser "db" para Docker
 
