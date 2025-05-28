@@ -11,7 +11,8 @@ const mysql2 = require("mysql2/promise"); //importamos asi para poder usar async
 //const host = "localhost";
 
 // PARAMETROS DE CONEXION A LA BASE DE DATOS EN DOCKER
-const databaseName = process.env.DB_NAME || "hospital_db";
+const databaseName = process.env.DB_NAME || "railway"; // <--- PARA RAILWAY
+//const databaseName = process.env.DB_NAME || "hospital_db"; // <--- PARA LOCALHOST
 const userName = process.env.DB_USER || "root";
 //const password = process.env.DB_PASSWORD || "";
 const password = process.env.DB_PASSWORD || "uqixVKyXXruzrQsmPWiZQRWEeGNtsriv"; // <--- PARA RAILWAY
