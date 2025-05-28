@@ -3,8 +3,7 @@ const mysql2 = require("mysql2/promise"); //importamos asi para poder usar async
 
 // estos son los datos de la base de datos, no estoy seguro de que sea correcto
 // colocarlos aqui por temas de seguridad, pero para poder desarrollar la app
-// los pongo aca, mas adelante veremos para hacer la app mas segura
-
+// los pongo aca
 //PARAMERTROS DE CONEXION A LA BASE DE DATOS EN LOCALHOST
 //const databaseName = "hospital_db";
 //const userName = "root";
