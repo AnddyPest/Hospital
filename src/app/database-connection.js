@@ -5,34 +5,33 @@ const mysql2 = require("mysql2/promise"); //importamos asi para poder usar async
 // colocarlos aqui por temas de seguridad, pero para poder desarrollar la app
 // los pongo aca
 //PARAMERTROS DE CONEXION A LA BASE DE DATOS EN LOCALHOST
-//const databaseName = "hospital_db";
-//const userName = "root";
-//const password = "";
-//const host = "localhost";
+const databaseName = "hospital_db";
+const userName = "root";
+const password = "";
+const host = "localhost";
 
 // PARAMETROS DE CONEXION A LA BASE DE DATOS EN DOCKER
-const databaseName = process.env.DB_NAME || "railway"; // <--- PARA RAILWAY
-//const databaseName = process.env.DB_NAME || "hospital_db"; // <--- PARA LOCALHOST
-const userName = process.env.DB_USER || "root";
+//const databaseName = process.env.DB_NAME || "hospital_db";
+//const userName = process.env.DB_USER || "root";
 //const password = process.env.DB_PASSWORD || "";
-const password = process.env.DB_PASSWORD || "KLvGlIbiGnhwAtsKSiefXfrieufAoTTQ"; // <--- PARA RAILWAY
-const host = process.env.DB_HOST || "mysql.railway.internal"; // <--- PARA RAILWAY
+//const password = process.env.DB_PASSWORD || "VhLWBTGxofqJGbhfBfVIapDrfliikqWp"; // <--- PARA RAILWAY
+//const host = process.env.DB_HOST || "mysql.railway.internal"; // <--- PARA RAILWAY
 //const host = process.env.DB_HOST || "db"; // <--- debe ser "db" para Docker
 
 // Detectar si estamos en Railway
-const isRailway =
+/*const isRailway =
   !!process.env.RAILWAY_STATIC_URL ||
   process.env.DB_HOST === "mysql.railway.internal";
-
+*/
 // aseguramos que la bd existe, si no existe la creamos
 async function asegurarBdExiste() {
   // Si estamos en Railway, NO intentamos crear la base de datos (Railway ya la crea)
-  if (isRailway) {
+  /*if (isRailway) {
     console.log(
       "Entorno Railway detectado: se asume que la base de datos ya existe."
     );
     return;
-  }
+  }*/
   try {
     // conexion standard a mysql sin especificar la bd... si especificaramos la bd
     // tendriamos un error de conexion, entonces debemos conectarnos asi para poder
